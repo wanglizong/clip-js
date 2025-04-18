@@ -5,15 +5,19 @@ import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { useEffect, useRef, useState } from "react";
 import FileUploader from "./components/FileUploader";
 
+interface VideoFile {
+  file: File;
+  startTime: number;
+  endTime: number;
+}
+
 export default function Home() {
   const [loaded, setLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const ffmpegRef = useRef(new FFmpeg());
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const messageRef = useRef<HTMLParagraphElement | null>(null);
-  const [start, setStart] = useState(0);
-  const [end, setEnd] = useState(5);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<VideoFile[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const load = async () => {
@@ -39,37 +43,6 @@ export default function Home() {
     load();
   }, []);
 
-  const trim = async () => {
-    if (!previewUrl || end <= start) return;
-
-    const ffmpeg = ffmpegRef.current;
-    const response = await fetch(previewUrl);
-    const blob = await response.blob();
-
-    await ffmpeg.writeFile("input.mp4", await fetchFile(blob));
-    const duration = end - start;
-
-    await ffmpeg.exec([
-      "-i", "input.mp4",
-      "-ss", start.toString(),
-      "-t", duration.toString(),
-      "-c", "copy",
-      "output.mp4"
-    ]);
-
-    try {
-      const data = (await ffmpeg.readFile("output.mp4")) as any;
-      if (videoRef.current)
-        videoRef.current.src = URL.createObjectURL(
-          new Blob([data.buffer], { type: "video/mp4" })
-        );
-    } catch (e) {
-      console.error("Trimming failed:", e);
-      if (messageRef.current)
-        messageRef.current.innerText = `Trimming failed: ${e}`;
-    }
-  };
-
   return loaded ? (
     <div className="fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]">
       <FileUploader
@@ -80,40 +53,12 @@ export default function Home() {
       />
 
       {previewUrl && (
-        <>
-          <div className="space-x-2 mt-4">
-            <label>Start (s)</label>
-            <input
-              type="number"
-              value={start}
-              min={0}
-              onChange={(e) => setStart(Number(e.target.value))}
-              className="border p-1 w-20"
-            />
-            <label>End (s)</label>
-            <input
-              type="number"
-              value={end}
-              min={start}
-              onChange={(e) => setEnd(Number(e.target.value))}
-              className="border p-1 w-20"
-            />
-          </div>
-
-          <video
-            ref={videoRef}
-            src={previewUrl}
-            controls
-            className="mt-4"
-          ></video>
-
-          <button
-            onClick={trim}
-            className="bg-green-500 hover:bg-green-700 text-white py-3 px-6 rounded mt-4 block"
-          >
-            Trim
-          </button>
-        </>
+        <video
+          ref={videoRef}
+          src={previewUrl}
+          controls
+          className="mt-4"
+        ></video>
       )}
       <p ref={messageRef}></p>
     </div>

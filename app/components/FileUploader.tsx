@@ -4,18 +4,24 @@ import { useState } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 
+interface VideoFile {
+    file: File;
+    startTime: number;
+    endTime: number;
+}
+
 interface FileUploaderProps {
-    onFilesChange: (files: File[]) => void;
-    selectedFiles: File[];
+    onFilesChange: (files: VideoFile[]) => void;
+    selectedFiles: VideoFile[];
     onPreviewChange: (url: string | null) => void;
     ffmpeg: FFmpeg;
 }
 
 export default function FileUploader({ onFilesChange, selectedFiles, onPreviewChange, ffmpeg }: FileUploaderProps) {
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<VideoFile[]>([]);
     const [isMerging, setIsMerging] = useState(false);
 
-    const mergeVideos = async (videoFiles: File[]) => {
+    const mergeVideos = async (videoFiles: VideoFile[]) => {
         if (videoFiles.length === 0) {
             onPreviewChange(null);
             return;
@@ -23,23 +29,52 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
         setIsMerging(true);
         try {
+            // Sort files by start time
+            const sortedFiles = [...videoFiles].sort((a, b) => a.startTime - b.startTime);
+
+            // Clear any existing files in FFmpeg's virtual filesystem
+            try {
+                await ffmpeg.deleteFile('output.mp4');
+                for (let i = 0; i < sortedFiles.length; i++) {
+                    await ffmpeg.deleteFile(`input${i}.mp4`);
+                }
+                await ffmpeg.deleteFile('filelist.txt');
+            } catch (error) {
+                // Ignore errors from deleting non-existent files
+            }
+
             // Write all files to FFmpeg's virtual filesystem
-            for (let i = 0; i < videoFiles.length; i++) {
-                await ffmpeg.writeFile(
-                    `input${i}.mp4`,
-                    await fetchFile(videoFiles[i])
-                );
+            for (let i = 0; i < sortedFiles.length; i++) {
+                const fileData = await fetchFile(sortedFiles[i].file);
+                await ffmpeg.writeFile(`input${i}.mp4`, fileData);
             }
 
             // Create a file list for concatenation
-            const fileList = videoFiles.map((_, i) => `file 'input${i}.mp4'`).join('\n');
+            const fileList = sortedFiles.map((_, i) => `file 'input${i}.mp4'`).join('\n');
             await ffmpeg.writeFile('filelist.txt', fileList);
 
-            // Execute FFmpeg command to concatenate videos
+            // First, trim each video to its specified duration
+            for (let i = 0; i < sortedFiles.length; i++) {
+                const file = sortedFiles[i];
+                const duration = file.endTime - file.startTime;
+
+                await ffmpeg.exec([
+                    '-i', `input${i}.mp4`,
+                    '-ss', file.startTime.toString(),
+                    '-t', duration.toString(),
+                    '-c', 'copy',
+                    `trimmed${i}.mp4`
+                ]);
+            }
+
+            // Then concatenate the trimmed videos
+            const trimmedFileList = sortedFiles.map((_, i) => `file 'trimmed${i}.mp4'`).join('\n');
+            await ffmpeg.writeFile('trimmedlist.txt', trimmedFileList);
+
             await ffmpeg.exec([
                 '-f', 'concat',
                 '-safe', '0',
-                '-i', 'filelist.txt',
+                '-i', 'trimmedlist.txt',
                 '-c', 'copy',
                 'output.mp4'
             ]);
@@ -49,6 +84,16 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
             const blob = new Blob([data as Uint8Array], { type: 'video/mp4' });
             const url = URL.createObjectURL(blob);
             onPreviewChange(url);
+
+            // Clean up temporary files
+            try {
+                for (let i = 0; i < sortedFiles.length; i++) {
+                    await ffmpeg.deleteFile(`trimmed${i}.mp4`);
+                }
+                await ffmpeg.deleteFile('trimmedlist.txt');
+            } catch (error) {
+                console.warn('Error cleaning up temporary files:', error);
+            }
         } catch (error) {
             console.error('Error merging videos:', error);
             onPreviewChange(null);
@@ -59,7 +104,14 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = Array.from(e.target.files || []);
-        const updatedFiles = [...files, ...newFiles];
+        const updatedFiles = [
+            ...files,
+            ...newFiles.map(file => ({
+                file,
+                startTime: 0,
+                endTime: 5 // Default 5 seconds
+            }))
+        ];
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
         await mergeVideos(updatedFiles);
@@ -67,6 +119,18 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
     const removeFile = async (index: number) => {
         const updatedFiles = files.filter((_, i) => i !== index);
+        setFiles(updatedFiles);
+        onFilesChange(updatedFiles);
+        await mergeVideos(updatedFiles);
+    };
+
+    const updateFileTiming = async (index: number, startTime: number, endTime: number) => {
+        const updatedFiles = [...files];
+        updatedFiles[index] = {
+            ...updatedFiles[index],
+            startTime,
+            endTime
+        };
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
         await mergeVideos(updatedFiles);
@@ -106,16 +170,40 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 )}
             </div>
 
-            <div className="space-y-2">
-                {files.map((file, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                        <span className="flex-1">{file.name}</span>
-                        <button
-                            onClick={() => removeFile(index)}
-                            className="text-red-500 hover:text-red-700"
-                        >
-                            Remove
-                        </button>
+            <div className="space-y-4">
+                {files.map((videoFile, index) => (
+                    <div key={index} className="border p-4 rounded space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="flex-1">{videoFile.file.name}</span>
+                            <button
+                                onClick={() => removeFile(index)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                                Remove
+                            </button>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                            <div>
+                                <label className="block text-sm">Start (s)</label>
+                                <input
+                                    type="number"
+                                    value={videoFile.startTime}
+                                    min={0}
+                                    onChange={(e) => updateFileTiming(index, Number(e.target.value), videoFile.endTime)}
+                                    className="border p-1 w-20"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm">End (s)</label>
+                                <input
+                                    type="number"
+                                    value={videoFile.endTime}
+                                    min={videoFile.startTime}
+                                    onChange={(e) => updateFileTiming(index, videoFile.startTime, Number(e.target.value))}
+                                    className="border p-1 w-20"
+                                />
+                            </div>
+                        </div>
                     </div>
                 ))}
             </div>
