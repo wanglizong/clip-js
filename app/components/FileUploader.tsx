@@ -15,6 +15,15 @@ export interface VideoFile {
     playbackSpeed: number;  // Playback speed of the video
 }
 
+export interface SoundFile {
+    file: File;
+    startTime: number;  // Start time within the source audio file
+    endTime: number;    // End time within the source audio file
+    positionStart: number;  // When to start playing in the timeline
+    positionEnd: number;    // When to stop playing in the timeline
+    volume: number;
+}
+
 interface FileUploaderProps {
     onFilesChange: (files: VideoFile[]) => void;
     selectedFiles: VideoFile[];

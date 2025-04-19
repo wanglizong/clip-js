@@ -1,15 +1,22 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { VideoFile } from './FileUploader';
+import { VideoFile, SoundFile } from './FileUploader';
+import CanvasSoundPreview from './CanvasSoundPreview';
 
 interface CanvasVideoPreviewProps {
     videoFiles: VideoFile[];
+    soundFiles?: SoundFile[];
     width?: number;
     height?: number;
 }
 
-export default function CanvasVideoPreview({ videoFiles, width = 640, height = 360 }: CanvasVideoPreviewProps) {
+export default function CanvasVideoPreview({
+    videoFiles,
+    soundFiles = [],
+    width = 640,
+    height = 360
+}: CanvasVideoPreviewProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
     const videoElementsRef = useRef<HTMLVideoElement[]>([]);
@@ -302,6 +309,12 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
                 style={{ width: '100%', height: 'auto' }}
                 className="border border-gray-300 rounded"
             />
+            <CanvasSoundPreview
+                soundFiles={soundFiles}
+                currentTime={currentTime}
+                isPlaying={isPlaying}
+                isMuted={isMuted}
+            />
             <div className="absolute bottom-2 right-2 flex space-x-2">
                 <button
                     onClick={toggleMute}
@@ -327,6 +340,27 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
                     >
                         Video {index + 1}: {playbackSpeeds[index]}x
                     </button>
+                ))}
+            </div>
+
+            {/* Sound volume controls */}
+            <div className="absolute top-2 left-2 flex flex-col space-y-2">
+                {soundFiles.map((soundFile, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                        <span className="text-white">Sound {index + 1}:</span>
+                        <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.1"
+                            value={soundFile.volume}
+                            onChange={(e) => {
+                                const newVolume = parseFloat(e.target.value);
+                                soundFiles[index].volume = newVolume;
+                            }}
+                            className="w-24"
+                        />
+                    </div>
                 ))}
             </div>
 
