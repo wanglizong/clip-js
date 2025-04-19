@@ -1,0 +1,270 @@
+"use client";
+
+import { useEffect, useRef, useState } from 'react';
+import { VideoFile } from './FileUploader';
+
+interface CanvasVideoPreviewProps {
+    videoFiles: VideoFile[];
+    width?: number;
+    height?: number;
+}
+
+export default function CanvasVideoPreview({ videoFiles, width = 640, height = 360 }: CanvasVideoPreviewProps) {
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+    const videoElementsRef = useRef<HTMLVideoElement[]>([]);
+    const animationFrameRef = useRef<number | null>(null);
+    const startTimeRef = useRef<number>(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const timelineRef = useRef<HTMLDivElement>(null);
+
+    // Calculate total duration
+    useEffect(() => {
+        if (videoFiles.length === 0) return;
+        const maxEndTime = Math.max(...videoFiles.map(v => v.positionEnd));
+        setDuration(maxEndTime);
+    }, [videoFiles]);
+
+    // Format time helper
+    const formatTime = (seconds: number) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
+    // Handle timeline click
+    const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!timelineRef.current) return;
+
+        const rect = timelineRef.current.getBoundingClientRect();
+        const clickPosition = e.clientX - rect.left;
+        const percentage = clickPosition / rect.width;
+        const newTime = percentage * duration;
+
+        // Update all videos
+        videoFiles.forEach((videoFile, index) => {
+            const video = videoElementsRef.current[index];
+            if (!video) return;
+
+            if (newTime >= videoFile.positionStart && newTime <= videoFile.positionEnd) {
+                const videoTime = videoFile.startTime + (newTime - videoFile.positionStart);
+                video.currentTime = videoTime;
+                if (isPlaying) {
+                    video.play().catch(console.error);
+                }
+            } else {
+                video.pause();
+                if (newTime < videoFile.positionStart) {
+                    video.currentTime = videoFile.startTime;
+                }
+            }
+        });
+
+        startTimeRef.current = performance.now() - (newTime * 1000);
+        setCurrentTime(newTime);
+    };
+
+    // Initialize canvas
+    const initCanvas = () => {
+        const canvas = canvasRef.current;
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+            console.error('Canvas context not supported');
+            return;
+        }
+
+        ctxRef.current = ctx;
+        canvas.width = width;
+        canvas.height = height;
+    };
+
+    // Create video elements
+    const setupVideos = () => {
+        // Clear existing videos
+        videoElementsRef.current.forEach(video => {
+            video.pause();
+            video.src = '';
+        });
+        videoElementsRef.current = [];
+
+        // Create new video elements
+        videoFiles.forEach((videoFile, index) => {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(videoFile.file);
+            video.loop = true;
+            video.muted = isMuted;
+            video.playsInline = true;
+            video.preload = 'auto';
+
+            videoElementsRef.current.push(video);
+
+            video.addEventListener('loadedmetadata', () => {
+                video.currentTime = videoFile.startTime;
+                video.play().catch(console.error);
+            });
+        });
+    };
+
+    // Draw frame
+    const drawFrame = (timestamp: number) => {
+        const ctx = ctxRef.current;
+        if (!ctx) return;
+
+        if (!startTimeRef.current) {
+            startTimeRef.current = timestamp;
+        }
+
+        const currentTimeSeconds = (timestamp - startTimeRef.current) / 1000;
+        setCurrentTime(currentTimeSeconds);
+
+        // Clear canvas
+        ctx.fillStyle = 'black';
+        ctx.fillRect(0, 0, width, height);
+
+        let allVideosEnded = true;
+
+        // Draw each video that should be visible at current time
+        videoFiles.forEach((videoFile, index) => {
+            const video = videoElementsRef.current[index];
+            if (!video) return;
+
+            if (currentTimeSeconds >= videoFile.positionStart && currentTimeSeconds <= videoFile.positionEnd) {
+                console.log('videoFile', videoFile);
+                if (video.readyState >= video.HAVE_CURRENT_DATA) {
+                    // Calculate video position and size
+                    const videoAspect = video.videoWidth / video.videoHeight;
+                    const canvasAspect = width / height;
+
+                    let drawWidth = width;
+                    let drawHeight = height;
+                    let offsetX = 0;
+                    let offsetY = 0;
+
+                    if (videoAspect > canvasAspect) {
+                        // Video is wider than canvas
+                        drawHeight = width / videoAspect;
+                        offsetY = (height - drawHeight) / 2;
+                    } else {
+                        // Video is taller than canvas
+                        drawWidth = height * videoAspect;
+                        offsetX = (width - drawWidth) / 2;
+                    }
+
+                    // Draw video frame
+                    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+                }
+                allVideosEnded = false;
+            } else if (currentTimeSeconds > videoFile.positionEnd) {
+                // If we're past the end time, pause the video
+                video.pause();
+            }
+        });
+
+        // Stop everything if all videos have ended
+        if (allVideosEnded && isPlaying) {
+            setIsPlaying(false);
+            videoElementsRef.current.forEach(video => {
+                video.pause();
+                video.currentTime = video.duration; // Ensure video is at the end
+            });
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+            return;
+        }
+
+        animationFrameRef.current = requestAnimationFrame(drawFrame);
+    };
+
+    // Toggle play/pause
+    const togglePlay = () => {
+        if (!isPlaying) {
+            // Reset to start time and play
+            startTimeRef.current = 0;
+            videoFiles.forEach((videoFile, index) => {
+                const video = videoElementsRef.current[index];
+                if (video) {
+                    video.currentTime = videoFile.startTime;
+                    video.play().catch(console.error);
+                }
+            });
+        } else {
+            // Pause all videos
+            videoElementsRef.current.forEach(video => video.pause());
+        }
+        setIsPlaying(!isPlaying);
+    };
+
+    // Toggle mute
+    const toggleMute = () => {
+        setIsMuted(!isMuted);
+        videoElementsRef.current.forEach(video => {
+            video.muted = !isMuted;
+        });
+    };
+
+    useEffect(() => {
+        initCanvas();
+        setupVideos();
+        animationFrameRef.current = requestAnimationFrame(drawFrame);
+
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+            videoElementsRef.current.forEach(video => {
+                video.pause();
+                URL.revokeObjectURL(video.src);
+            });
+        };
+    }, [videoFiles, isMuted]);
+
+    return (
+        <div className="relative">
+            <canvas
+                ref={canvasRef}
+                width={width}
+                height={height}
+                style={{ width: '100%', height: 'auto' }}
+                className="border border-gray-300 rounded"
+            />
+            <div className="absolute bottom-2 right-2 flex space-x-2">
+                <button
+                    onClick={toggleMute}
+                    className="bg-gray-500 hover:bg-gray-700 text-white py-1 px-3 rounded"
+                >
+                    {isMuted ? '🔇' : '🔊'}
+                </button>
+                <button
+                    onClick={togglePlay}
+                    className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
+                >
+                    {isPlaying ? '⏸️' : '▶️'}
+                </button>
+            </div>
+
+            {/* Timeline */}
+            <div className="mt-2">
+                <div
+                    ref={timelineRef}
+                    className="relative h-2 bg-gray-300 rounded-full cursor-pointer"
+                    onClick={handleTimelineClick}
+                >
+                    <div
+                        className="absolute h-full bg-blue-500 rounded-full"
+                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                    />
+                </div>
+                <div className="flex justify-between text-sm text-gray-600 mt-1">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                </div>
+            </div>
+        </div>
+    );
+} 
