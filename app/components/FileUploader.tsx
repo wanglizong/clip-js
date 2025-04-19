@@ -3,11 +3,15 @@
 import { useState } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
+import CanvasVideoPreview from "./CanvasVideoPreview";
 
-interface VideoFile {
+export interface VideoFile {
     file: File;
-    startTime: number;
-    endTime: number;
+    startTime: number;  // Start time within the source video
+    endTime: number;    // End time within the source video
+    positionStart: number;  // Start position in the final video
+    positionEnd: number;    // End position in the final video
+    includeInMerge: boolean;
 }
 
 interface FileUploaderProps {
@@ -29,14 +33,15 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
         setIsMerging(true);
         try {
-            // Sort files by start time
-            const sortedFiles = [...videoFiles].sort((a, b) => a.startTime - b.startTime);
+            // Sort files by position start time
+            const sortedFiles = [...videoFiles].sort((a, b) => a.positionStart - b.positionStart);
 
             // Clear any existing files in FFmpeg's virtual filesystem
             try {
                 await ffmpeg.deleteFile('output.mp4');
                 for (let i = 0; i < sortedFiles.length; i++) {
                     await ffmpeg.deleteFile(`input${i}.mp4`);
+                    await ffmpeg.deleteFile(`trimmed${i}.mp4`);
                 }
                 await ffmpeg.deleteFile('filelist.txt');
             } catch (error) {
@@ -49,15 +54,12 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 await ffmpeg.writeFile(`input${i}.mp4`, fileData);
             }
 
-            // Create a file list for concatenation
-            const fileList = sortedFiles.map((_, i) => `file 'input${i}.mp4'`).join('\n');
-            await ffmpeg.writeFile('filelist.txt', fileList);
-
             // First, trim each video to its specified duration
             for (let i = 0; i < sortedFiles.length; i++) {
                 const file = sortedFiles[i];
                 const duration = file.endTime - file.startTime;
 
+                // Trim video with copy codec for speed
                 await ffmpeg.exec([
                     '-i', `input${i}.mp4`,
                     '-ss', file.startTime.toString(),
@@ -67,14 +69,15 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 ]);
             }
 
-            // Then concatenate the trimmed videos
+            // Create a file list for concatenation
             const trimmedFileList = sortedFiles.map((_, i) => `file 'trimmed${i}.mp4'`).join('\n');
-            await ffmpeg.writeFile('trimmedlist.txt', trimmedFileList);
+            await ffmpeg.writeFile('filelist.txt', new TextEncoder().encode(trimmedFileList));
 
+            // Concatenate the trimmed videos with copy codec
             await ffmpeg.exec([
                 '-f', 'concat',
                 '-safe', '0',
-                '-i', 'trimmedlist.txt',
+                '-i', 'filelist.txt',
                 '-c', 'copy',
                 'output.mp4'
             ]);
@@ -88,9 +91,10 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
             // Clean up temporary files
             try {
                 for (let i = 0; i < sortedFiles.length; i++) {
+                    await ffmpeg.deleteFile(`input${i}.mp4`);
                     await ffmpeg.deleteFile(`trimmed${i}.mp4`);
                 }
-                await ffmpeg.deleteFile('trimmedlist.txt');
+                await ffmpeg.deleteFile('filelist.txt');
             } catch (error) {
                 console.warn('Error cleaning up temporary files:', error);
             }
@@ -106,22 +110,26 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
         const newFiles = Array.from(e.target.files || []);
         const updatedFiles = [
             ...files,
-            ...newFiles.map(file => ({
-                file,
-                startTime: 0,
-                endTime: 5 // Default 5 seconds
-            }))
+            ...newFiles.map((file, index) => {
+                const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
+                return {
+                    file,
+                    startTime: 0,
+                    endTime: 5, // Default 5 seconds
+                    positionStart: lastEnd, // Start after the last video
+                    positionEnd: lastEnd + 5, // Default 5 seconds duration
+                    includeInMerge: true
+                };
+            })
         ];
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
-        await mergeVideos(updatedFiles);
     };
 
     const removeFile = async (index: number) => {
         const updatedFiles = files.filter((_, i) => i !== index);
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
-        await mergeVideos(updatedFiles);
     };
 
     const updateFileTiming = async (index: number, startTime: number, endTime: number) => {
@@ -133,7 +141,16 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
         };
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
-        await mergeVideos(updatedFiles);
+    };
+
+    const toggleFileMerge = async (index: number) => {
+        const updatedFiles = [...files];
+        updatedFiles[index] = {
+            ...updatedFiles[index],
+            includeInMerge: !updatedFiles[index].includeInMerge
+        };
+        setFiles(updatedFiles);
+        onFilesChange(updatedFiles);
     };
 
     return (
@@ -153,6 +170,13 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 >
                     Add Files
                 </label>
+                <button
+                    onClick={() => mergeVideos(files.filter(f => f.includeInMerge))}
+                    className="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded"
+                    disabled={isMerging}
+                >
+                    {isMerging ? 'Merging...' : 'Merge Videos'}
+                </button>
                 {isMerging && (
                     <span className="animate-spin">
                         <svg
@@ -170,11 +194,38 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 )}
             </div>
 
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <h3 className="text-lg font-semibold mb-2">Canvas Preview</h3>
+                    {files.length > 0 && (
+                        <CanvasVideoPreview videoFiles={files.filter(f => f.includeInMerge)} />
+                    )}
+                </div>
+                <div>
+                    <h3 className="text-lg font-semibold mb-2">Merged Result</h3>
+                    {selectedFiles.length > 0 && (
+                        <video
+                            src={selectedFiles[0].file.name}
+                            controls
+                            className="w-full"
+                        />
+                    )}
+                </div>
+            </div>
+
             <div className="space-y-4">
                 {files.map((videoFile, index) => (
                     <div key={index} className="border p-4 rounded space-y-2">
                         <div className="flex items-center justify-between">
-                            <span className="flex-1">{videoFile.file.name}</span>
+                            <div className="flex items-center space-x-2">
+                                <input
+                                    type="checkbox"
+                                    checked={videoFile.includeInMerge}
+                                    onChange={() => toggleFileMerge(index)}
+                                    className="h-4 w-4"
+                                />
+                                <span className="flex-1">{videoFile.file.name}</span>
+                            </div>
                             <button
                                 onClick={() => removeFile(index)}
                                 className="text-red-500 hover:text-red-700"
@@ -182,28 +233,77 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                                 Remove
                             </button>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <div>
-                                <label className="block text-sm">Start (s)</label>
-                                <input
-                                    type="number"
-                                    value={videoFile.startTime}
-                                    min={0}
-                                    onChange={(e) => updateFileTiming(index, Number(e.target.value), videoFile.endTime)}
-                                    className="border p-1 w-20"
-                                />
+                        {videoFile.includeInMerge && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <h4 className="font-semibold">Source Video</h4>
+                                    <div className="flex items-center space-x-4">
+                                        <div>
+                                            <label className="block text-sm">Start (s)</label>
+                                            <input
+                                                type="number"
+                                                value={videoFile.startTime}
+                                                min={0}
+                                                onChange={(e) => updateFileTiming(index, Number(e.target.value), videoFile.endTime)}
+                                                className="border p-1 w-20"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm">End (s)</label>
+                                            <input
+                                                type="number"
+                                                value={videoFile.endTime}
+                                                min={videoFile.startTime}
+                                                onChange={(e) => updateFileTiming(index, videoFile.startTime, Number(e.target.value))}
+                                                className="border p-1 w-20"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <h4 className="font-semibold">Final Position</h4>
+                                    <div className="flex items-center space-x-4">
+                                        <div>
+                                            <label className="block text-sm">Start (s)</label>
+                                            <input
+                                                type="number"
+                                                value={videoFile.positionStart}
+                                                min={0}
+                                                onChange={(e) => {
+                                                    const updatedFiles = [...files];
+                                                    updatedFiles[index] = {
+                                                        ...updatedFiles[index],
+                                                        positionStart: Number(e.target.value),
+                                                        positionEnd: Number(e.target.value) + (videoFile.positionEnd - videoFile.positionStart)
+                                                    };
+                                                    setFiles(updatedFiles);
+                                                    onFilesChange(updatedFiles);
+                                                }}
+                                                className="border p-1 w-20"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm">End (s)</label>
+                                            <input
+                                                type="number"
+                                                value={videoFile.positionEnd}
+                                                min={videoFile.positionStart}
+                                                onChange={(e) => {
+                                                    const updatedFiles = [...files];
+                                                    updatedFiles[index] = {
+                                                        ...updatedFiles[index],
+                                                        positionEnd: Number(e.target.value)
+                                                    };
+                                                    setFiles(updatedFiles);
+                                                    onFilesChange(updatedFiles);
+                                                }}
+                                                className="border p-1 w-20"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <label className="block text-sm">End (s)</label>
-                                <input
-                                    type="number"
-                                    value={videoFile.endTime}
-                                    min={videoFile.startTime}
-                                    onChange={(e) => updateFileTiming(index, videoFile.startTime, Number(e.target.value))}
-                                    className="border p-1 w-20"
-                                />
-                            </div>
-                        </div>
+                        )}
                     </div>
                 ))}
             </div>
