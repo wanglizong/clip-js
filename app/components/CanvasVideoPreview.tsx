@@ -128,14 +128,27 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
 
         let allVideosEnded = true;
 
-        // Draw each video that should be visible at current time
+        // Find the current active video
+        const activeVideoIndex = videoFiles.findIndex(videoFile =>
+            currentTimeSeconds >= videoFile.positionStart &&
+            currentTimeSeconds <= videoFile.positionEnd
+        );
+
+        // Handle all videos
         videoFiles.forEach((videoFile, index) => {
             const video = videoElementsRef.current[index];
             if (!video) return;
 
-            if (currentTimeSeconds >= videoFile.positionStart && currentTimeSeconds <= videoFile.positionEnd) {
-                console.log('videoFile', videoFile);
+            if (index === activeVideoIndex) {
+                // This is the current active video
                 if (video.readyState >= video.HAVE_CURRENT_DATA) {
+                    if (video.paused) {
+                        // Start playing at the correct time
+                        const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
+                        video.currentTime = videoTime;
+                        video.play().catch(console.error);
+                    }
+
                     // Calculate video position and size
                     const videoAspect = video.videoWidth / video.videoHeight;
                     const canvasAspect = width / height;
@@ -146,11 +159,9 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
                     let offsetY = 0;
 
                     if (videoAspect > canvasAspect) {
-                        // Video is wider than canvas
                         drawHeight = width / videoAspect;
                         offsetY = (height - drawHeight) / 2;
                     } else {
-                        // Video is taller than canvas
                         drawWidth = height * videoAspect;
                         offsetX = (width - drawWidth) / 2;
                     }
@@ -159,8 +170,8 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
                     ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
                 }
                 allVideosEnded = false;
-            } else if (currentTimeSeconds > videoFile.positionEnd) {
-                // If we're past the end time, pause the video
+            } else {
+                // Not the active video - make sure it's paused
                 video.pause();
             }
         });
@@ -170,7 +181,7 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
             setIsPlaying(false);
             videoElementsRef.current.forEach(video => {
                 video.pause();
-                video.currentTime = video.duration; // Ensure video is at the end
+                video.currentTime = video.duration;
             });
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
