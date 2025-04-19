@@ -12,6 +12,7 @@ export interface VideoFile {
     positionStart: number;  // Start position in the final video
     positionEnd: number;    // End position in the final video
     includeInMerge: boolean;
+    playbackSpeed: number;  // Playback speed of the video
 }
 
 interface FileUploaderProps {
@@ -118,7 +119,8 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                     endTime: 5, // Default 5 seconds
                     positionStart: lastEnd, // Start after the last video
                     positionEnd: lastEnd + 5, // Default 5 seconds duration
-                    includeInMerge: true
+                    includeInMerge: true,
+                    playbackSpeed: 1 // Default playback speed
                 };
             })
         ];
@@ -152,6 +154,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
     };
+
 
     return (
         <div className="space-y-4">
@@ -198,7 +201,9 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 <div>
                     <h3 className="text-lg font-semibold mb-2">Canvas Preview</h3>
                     {files.length > 0 && (
-                        <CanvasVideoPreview videoFiles={files.filter(f => f.includeInMerge)} />
+                        <CanvasVideoPreview
+                            videoFiles={files.filter(f => f.includeInMerge)}
+                        />
                     )}
                 </div>
                 <div>

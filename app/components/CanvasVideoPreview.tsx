@@ -19,6 +19,7 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
     const [isMuted, setIsMuted] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
+    const [playbackSpeeds, setPlaybackSpeeds] = useState<number[]>([]);
     const timelineRef = useRef<HTMLDivElement>(null);
 
     // Calculate total duration
@@ -26,6 +27,11 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
         if (videoFiles.length === 0) return;
         const maxEndTime = Math.max(...videoFiles.map(v => v.positionEnd));
         setDuration(maxEndTime);
+    }, [videoFiles]);
+
+    // Initialize playback speeds when videoFiles change
+    useEffect(() => {
+        setPlaybackSpeeds(videoFiles.map(() => 1));
     }, [videoFiles]);
 
     // Format time helper
@@ -200,26 +206,10 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
             }
         });
 
-        // Stop everything if all videos have ended
-        // if (allVideosEnded) {
-        //     setIsPlaying(false);
-        //     videoElementsRef.current.forEach(video => {
-        //         video.pause();
-        //         video.currentTime = video.duration;
-        //     });
-        //     if (animationFrameRef.current) {
-        //         cancelAnimationFrame(animationFrameRef.current);
-        //         animationFrameRef.current = null;
-        //     }
-        //     setCurrentTime(duration);
-        //     return;
-        // }
-
         animationFrameRef.current = requestAnimationFrame(drawFrame);
     };
 
     useEffect(() => {
-        console.log('currentTime updated to:', currentTime);
     }, [currentTime]);
 
     // Toggle play/pause
@@ -266,6 +256,26 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
         });
     };
 
+    // Toggle playback speed for a specific video
+    const togglePlaybackSpeed = (index: number) => {
+        const speeds = [1, 1.5, 2, 0.5];
+        const currentSpeed = playbackSpeeds[index];
+        const currentIndex = speeds.indexOf(currentSpeed);
+        const nextIndex = (currentIndex + 1) % speeds.length;
+        const newSpeed = speeds[nextIndex];
+
+        setPlaybackSpeeds(prev => {
+            const newSpeeds = [...prev];
+            newSpeeds[index] = newSpeed;
+            return newSpeeds;
+        });
+
+        const video = videoElementsRef.current[index];
+        if (video) {
+            video.playbackRate = newSpeed;
+        }
+    };
+
     useEffect(() => {
         initCanvas();
         setupVideos();
@@ -305,6 +315,19 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
                 >
                     {isPlaying ? '⏸️' : '▶️'}
                 </button>
+            </div>
+
+            {/* Video speed controls */}
+            <div className="absolute bottom-2 left-2 flex flex-col space-y-2">
+                {videoFiles.map((videoFile, index) => (
+                    <button
+                        key={index}
+                        onClick={() => togglePlaybackSpeed(index)}
+                        className="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded"
+                    >
+                        Video {index + 1}: {playbackSpeeds[index]}x
+                    </button>
+                ))}
             </div>
 
             {/* Timeline */}
