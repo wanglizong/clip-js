@@ -105,7 +105,7 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
 
             video.addEventListener('loadedmetadata', () => {
                 video.currentTime = videoFile.startTime;
-                video.play().catch(console.error);
+                // video.play().catch(console.error);
             });
         });
     };
@@ -118,8 +118,23 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
         if (!startTimeRef.current) {
             startTimeRef.current = timestamp;
         }
-
         const currentTimeSeconds = (timestamp - startTimeRef.current) / 1000;
+
+        // Stop if we've reached the end
+        if (currentTimeSeconds >= duration) {
+            setIsPlaying(false);
+            setCurrentTime(duration);
+            videoElementsRef.current.forEach(video => {
+                video.pause();
+                video.currentTime = video.duration;
+            });
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
+            return;
+        }
+
         setCurrentTime(currentTimeSeconds);
 
         // Clear canvas
@@ -127,86 +142,118 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
         ctx.fillRect(0, 0, width, height);
 
         let allVideosEnded = true;
-
-        // Find the current active video
-        const activeVideoIndex = videoFiles.findIndex(videoFile =>
-            currentTimeSeconds >= videoFile.positionStart &&
-            currentTimeSeconds <= videoFile.positionEnd
-        );
+        let firstActiveVideoIndex = -1;
 
         // Handle all videos
         videoFiles.forEach((videoFile, index) => {
             const video = videoElementsRef.current[index];
             if (!video) return;
 
-            if (index === activeVideoIndex) {
-                // This is the current active video
+            // Check if current time is within this video's time range
+            const isActive = currentTimeSeconds >= videoFile.positionStart &&
+                currentTimeSeconds <= videoFile.positionEnd;
+
+            if (isActive) {
+                // This video should be playing
                 if (video.readyState >= video.HAVE_CURRENT_DATA) {
                     if (video.paused) {
                         // Start playing at the correct time
                         const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
                         video.currentTime = videoTime;
+                        video.muted = isMuted;
                         video.play().catch(console.error);
                     }
 
-                    // Calculate video position and size
-                    const videoAspect = video.videoWidth / video.videoHeight;
-                    const canvasAspect = width / height;
+                    // Only draw the first active video
+                    if (firstActiveVideoIndex === -1) {
+                        firstActiveVideoIndex = index;
 
-                    let drawWidth = width;
-                    let drawHeight = height;
-                    let offsetX = 0;
-                    let offsetY = 0;
+                        // Calculate video position and size
+                        const videoAspect = video.videoWidth / video.videoHeight;
+                        const canvasAspect = width / height;
 
-                    if (videoAspect > canvasAspect) {
-                        drawHeight = width / videoAspect;
-                        offsetY = (height - drawHeight) / 2;
-                    } else {
-                        drawWidth = height * videoAspect;
-                        offsetX = (width - drawWidth) / 2;
+                        let drawWidth = width;
+                        let drawHeight = height;
+                        let offsetX = 0;
+                        let offsetY = 0;
+
+                        if (videoAspect > canvasAspect) {
+                            drawHeight = width / videoAspect;
+                            offsetY = (height - drawHeight) / 2;
+                        } else {
+                            drawWidth = height * videoAspect;
+                            offsetX = (width - drawWidth) / 2;
+                        }
+
+                        // Draw video frame
+                        ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
                     }
-
-                    // Draw video frame
-                    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
                 }
                 allVideosEnded = false;
             } else {
-                // Not the active video - make sure it's paused
+                // Not active - make sure it's paused
                 video.pause();
+                // Reset to start position if we're before this video's start time
+                if (currentTimeSeconds < videoFile.positionStart) {
+                    video.currentTime = videoFile.startTime;
+                }
             }
         });
 
         // Stop everything if all videos have ended
-        if (allVideosEnded && isPlaying) {
-            setIsPlaying(false);
-            videoElementsRef.current.forEach(video => {
-                video.pause();
-                video.currentTime = video.duration;
-            });
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-            return;
-        }
+        // if (allVideosEnded) {
+        //     setIsPlaying(false);
+        //     videoElementsRef.current.forEach(video => {
+        //         video.pause();
+        //         video.currentTime = video.duration;
+        //     });
+        //     if (animationFrameRef.current) {
+        //         cancelAnimationFrame(animationFrameRef.current);
+        //         animationFrameRef.current = null;
+        //     }
+        //     setCurrentTime(duration);
+        //     return;
+        // }
 
         animationFrameRef.current = requestAnimationFrame(drawFrame);
     };
 
+    useEffect(() => {
+        console.log('currentTime updated to:', currentTime);
+    }, [currentTime]);
+
     // Toggle play/pause
     const togglePlay = () => {
         if (!isPlaying) {
-            // Reset to start time and play
-            startTimeRef.current = 0;
-            videoFiles.forEach((videoFile, index) => {
-                const video = videoElementsRef.current[index];
-                if (video) {
-                    video.currentTime = videoFile.startTime;
-                    video.play().catch(console.error);
-                }
-            });
+            // If we're at the end, reset to start
+            if (currentTime >= duration) {
+                const newTime = 0;
+                setCurrentTime(newTime);
+                startTimeRef.current = performance.now();
+                // Reset all videos to their start positions
+                videoFiles.forEach((videoFile, index) => {
+                    const video = videoElementsRef.current[index];
+                    if (video) {
+                        video.currentTime = videoFile.startTime;
+                    }
+                });
+            } else {
+                // Otherwise, continue from current position
+                startTimeRef.current = performance.now() - (currentTime * 1000);
+            }
+
+            // Start the animation frame
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+            animationFrameRef.current = requestAnimationFrame(drawFrame);
         } else {
-            // Pause all videos
-            videoElementsRef.current.forEach(video => video.pause());
+            // Pause all videos and stop animation
+            if (animationFrameRef.current) {
+                videoElementsRef.current.forEach(video => video.pause());
+                cancelAnimationFrame(animationFrameRef.current);
+                animationFrameRef.current = null;
+            }
         }
         setIsPlaying(!isPlaying);
     };
@@ -222,6 +269,7 @@ export default function CanvasVideoPreview({ videoFiles, width = 640, height = 3
     useEffect(() => {
         initCanvas();
         setupVideos();
+
         animationFrameRef.current = requestAnimationFrame(drawFrame);
 
         return () => {
