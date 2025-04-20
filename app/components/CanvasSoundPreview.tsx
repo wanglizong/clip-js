@@ -1,21 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { SoundFile } from './FileUploader';
+import { useAppSelector, useAppDispatch } from '../store';
+import { setCurrentTime, setIsPlaying, setIsMuted } from '../store/slices/soundSlice';
 
-interface CanvasSoundPreviewProps {
-    soundFiles: SoundFile[];
-    currentTime: number;
-    isPlaying: boolean;
-    isMuted: boolean;
-}
+export default function CanvasSoundPreview() {
+    const dispatch = useAppDispatch();
+    const { soundFiles, currentTime, isPlaying, isMuted } = useAppSelector((state) => state.sound);
 
-export default function CanvasSoundPreview({
-    soundFiles,
-    currentTime,
-    isPlaying,
-    isMuted
-}: CanvasSoundPreviewProps) {
     const audioElementsRef = useRef<HTMLAudioElement[]>([]);
     const audioContextRef = useRef<AudioContext | null>(null);
     const gainNodesRef = useRef<GainNode[]>([]);

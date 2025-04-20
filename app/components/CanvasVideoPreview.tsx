@@ -1,8 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { VideoFile, SoundFile } from './FileUploader';
 import CanvasSoundPreview from './CanvasSoundPreview';
+import { useAppSelector, useAppDispatch } from '../store';
+import { setCurrentTime, setIsPlaying, setIsMuted, setPlaybackSpeed } from '../store/slices/videoSlice';
 
 interface CanvasVideoPreviewProps {
     videoFiles: VideoFile[];
@@ -17,29 +19,15 @@ export default function CanvasVideoPreview({
     width = 640,
     height = 360
 }: CanvasVideoPreviewProps) {
+    const dispatch = useAppDispatch();
+    const { currentTime, isPlaying, isMuted, duration, playbackSpeeds } = useAppSelector((state) => state.video);
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
     const videoElementsRef = useRef<HTMLVideoElement[]>([]);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [isMuted, setIsMuted] = useState(false);
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [playbackSpeeds, setPlaybackSpeeds] = useState<number[]>([]);
     const timelineRef = useRef<HTMLDivElement>(null);
-
-    // Calculate total duration
-    useEffect(() => {
-        if (videoFiles.length === 0) return;
-        const maxEndTime = Math.max(...videoFiles.map(v => v.positionEnd));
-        setDuration(maxEndTime);
-    }, [videoFiles]);
-
-    // Initialize playback speeds when videoFiles change
-    useEffect(() => {
-        setPlaybackSpeeds(videoFiles.map(() => 1));
-    }, [videoFiles]);
 
     // Format time helper
     const formatTime = (seconds: number) => {
@@ -77,7 +65,7 @@ export default function CanvasVideoPreview({
         });
 
         startTimeRef.current = performance.now() - (newTime * 1000);
-        setCurrentTime(newTime);
+        dispatch(setCurrentTime(newTime));
     };
 
     // Initialize canvas
@@ -113,12 +101,12 @@ export default function CanvasVideoPreview({
             video.muted = isMuted;
             video.playsInline = true;
             video.preload = 'auto';
+            video.playbackRate = playbackSpeeds[index] || 1;
 
             videoElementsRef.current.push(video);
 
             video.addEventListener('loadedmetadata', () => {
                 video.currentTime = videoFile.startTime;
-                // video.play().catch(console.error);
             });
         });
     };
@@ -135,8 +123,8 @@ export default function CanvasVideoPreview({
 
         // Stop if we've reached the end
         if (currentTimeSeconds >= duration) {
-            setIsPlaying(false);
-            setCurrentTime(duration);
+            dispatch(setIsPlaying(false));
+            dispatch(setCurrentTime(duration));
             videoElementsRef.current.forEach(video => {
                 video.pause();
                 video.currentTime = video.duration;
@@ -148,7 +136,7 @@ export default function CanvasVideoPreview({
             return;
         }
 
-        setCurrentTime(currentTimeSeconds);
+        dispatch(setCurrentTime(currentTimeSeconds));
 
         // Clear canvas
         ctx.fillStyle = 'black';
@@ -216,16 +204,13 @@ export default function CanvasVideoPreview({
         animationFrameRef.current = requestAnimationFrame(drawFrame);
     };
 
-    useEffect(() => {
-    }, [currentTime]);
-
     // Toggle play/pause
     const togglePlay = () => {
         if (!isPlaying) {
             // If we're at the end, reset to start
             if (currentTime >= duration) {
                 const newTime = 0;
-                setCurrentTime(newTime);
+                dispatch(setCurrentTime(newTime));
                 startTimeRef.current = performance.now();
                 // Reset all videos to their start positions
                 videoFiles.forEach((videoFile, index) => {
@@ -252,12 +237,12 @@ export default function CanvasVideoPreview({
                 animationFrameRef.current = null;
             }
         }
-        setIsPlaying(!isPlaying);
+        dispatch(setIsPlaying(!isPlaying));
     };
 
     // Toggle mute
     const toggleMute = () => {
-        setIsMuted(!isMuted);
+        dispatch(setIsMuted(!isMuted));
         videoElementsRef.current.forEach(video => {
             video.muted = !isMuted;
         });
@@ -270,12 +255,8 @@ export default function CanvasVideoPreview({
         const currentIndex = speeds.indexOf(currentSpeed);
         const nextIndex = (currentIndex + 1) % speeds.length;
         const newSpeed = speeds[nextIndex];
-
-        setPlaybackSpeeds(prev => {
-            const newSpeeds = [...prev];
-            newSpeeds[index] = newSpeed;
-            return newSpeeds;
-        });
+        dispatch(setPlaybackSpeed({ index, speed: newSpeed }));
+        console.log(playbackSpeeds);
 
         const video = videoElementsRef.current[index];
         if (video) {
@@ -298,7 +279,7 @@ export default function CanvasVideoPreview({
                 URL.revokeObjectURL(video.src);
             });
         };
-    }, [videoFiles, isMuted]);
+    }, [videoFiles, isMuted, playbackSpeeds]);
 
     return (
         <div className="relative">
@@ -309,12 +290,7 @@ export default function CanvasVideoPreview({
                 style={{ width: '100%', height: 'auto' }}
                 className="border border-gray-300 rounded"
             />
-            <CanvasSoundPreview
-                soundFiles={soundFiles}
-                currentTime={currentTime}
-                isPlaying={isPlaying}
-                isMuted={isMuted}
-            />
+            <CanvasSoundPreview />
             <div className="absolute bottom-2 right-2 flex space-x-2">
                 <button
                     onClick={toggleMute}

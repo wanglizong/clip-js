@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile } from "@ffmpeg/util";
 import CanvasVideoPreview from "./CanvasVideoPreview";
+import { useAppDispatch } from "../store";
+import { setVideoFiles } from "../store/slices/videoSlice";
 
 export interface VideoFile {
     file: File;
@@ -32,8 +34,14 @@ interface FileUploaderProps {
 }
 
 export default function FileUploader({ onFilesChange, selectedFiles, onPreviewChange, ffmpeg }: FileUploaderProps) {
+    const dispatch = useAppDispatch();
     const [files, setFiles] = useState<VideoFile[]>([]);
     const [isMerging, setIsMerging] = useState(false);
+
+    // Update Redux state when files change
+    useEffect(() => {
+        dispatch(setVideoFiles(files.filter(f => f.includeInMerge)));
+    }, [files, dispatch]);
 
     const mergeVideos = async (videoFiles: VideoFile[]) => {
         if (videoFiles.length === 0) {
@@ -163,7 +171,6 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
     };
-
 
     return (
         <div className="space-y-4">
