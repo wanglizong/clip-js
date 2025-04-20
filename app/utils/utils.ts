@@ -1,4 +1,4 @@
-import { MediaType } from "../types/types";
+import { MediaType } from "../types";
 export const categorizeFile = (mimeType: string): MediaType => {
 
     if (mimeType.startsWith('video/')) return 'video';

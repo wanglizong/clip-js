@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { VideoFile } from '../../components/FileUploader';
+import { MediaFile as VideoFile } from '../../types';
 
 interface VideoState {
     videoFiles: VideoFile[];
@@ -41,6 +41,7 @@ const videoSlice = createSlice({
         setIsMuted: (state, action: PayloadAction<boolean>) => {
             state.isMuted = action.payload;
         },
+        // TODO: we use other array for playbacks not each file attribute cause dispatching videoFiles (when changing playback speed) while its playing is causing a bug
         setPlaybackSpeed: (state, action: PayloadAction<{ index: number; speed: number }>) => {
             const { index, speed } = action.payload;
             state.playbackSpeeds[index] = speed;
