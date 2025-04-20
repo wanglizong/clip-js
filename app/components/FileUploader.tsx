@@ -39,7 +39,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                     positionEnd: lastEnd + 30, // Default 5 seconds duration
                     includeInMerge: true,
                     playbackSpeed: 1, // Default playback speed
-                    volume: 100,
+                    volume: 1,
                     type: categorizeFile(file.file.type),
                     zIndex: 0,
                 });
@@ -155,7 +155,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                     positionEnd: lastEnd + 30, // Default 5 seconds duration
                     includeInMerge: true,
                     playbackSpeed: 1,// Default playback speed
-                    volume: 100,
+                    volume: 1,
                     type: categorizeFile(file.type),
                     zIndex: 0,
                 });

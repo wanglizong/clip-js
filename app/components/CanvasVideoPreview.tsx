@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { MediaFile as VideoFile } from '../types';
 import { useAppSelector, useAppDispatch } from '../store';
 import { setCurrentTime, setIsPlaying, setIsMuted, setPlaybackSpeed, setVideoFiles } from '../store/slices/videoSlice';
+import { formatTime } from '../utils/utils';
 
 interface CanvasVideoPreviewProps {
     videoFiles: VideoFile[];
@@ -22,17 +23,15 @@ export default function CanvasVideoPreview({
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
     const videoElementsRef = useRef<HTMLVideoElement[]>([]);
+    const audioElementsRef = useRef<HTMLAudioElement[]>([]);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
     const timelineRef = useRef<HTMLDivElement>(null);
     const isFirstRun = useRef(true);
 
-    // Format time helper
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = Math.floor(seconds % 60);
-        return `${mins}:${secs.toString().padStart(2, '0')}`;
-    };
+    // Create mappings for video and audio elements
+    const videoIndexMap = useRef<number[]>([]);
+    const audioIndexMap = useRef<number[]>([]);
 
     // Handle timeline click
     const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -43,25 +42,43 @@ export default function CanvasVideoPreview({
         const percentage = clickPosition / rect.width;
         const newTime = percentage * duration;
 
-        // Update all videos
-        videoFiles.forEach((videoFile, index) => {
-            const video = videoElementsRef.current[index];
+        videoIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const video = videoElementsRef.current[elementIndex];
+            // // Update all videos
             if (!video) return;
 
-            if (newTime >= videoFile.positionStart && newTime <= videoFile.positionEnd) {
-                const videoTime = videoFile.startTime + (newTime - videoFile.positionStart);
+            if (newTime >= mediaFile.positionStart && newTime <= mediaFile.positionEnd) {
+                const videoTime = mediaFile.startTime + (newTime - mediaFile.positionStart);
                 video.currentTime = videoTime;
             } else {
                 video.pause();
-                if (newTime < videoFile.positionStart) {
-                    video.currentTime = videoFile.startTime;
+                if (newTime < mediaFile.positionStart) {
+                    video.currentTime = mediaFile.startTime;
                 }
             }
-        });
+        })
 
+
+        audioIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const audio = audioElementsRef.current[elementIndex];
+            if (!audio) return;
+
+            if (newTime >= mediaFile.positionStart && newTime <= mediaFile.positionEnd) {
+                audio.currentTime = mediaFile.startTime + (newTime - mediaFile.positionStart);
+            }
+            else {
+                audio.pause();
+                if (newTime < mediaFile.positionStart) {
+                    audio.currentTime = mediaFile.startTime;
+                }
+            }
+        })
         startTimeRef.current = performance.now() - (newTime * 1000);
         dispatch(setCurrentTime(newTime));
-    };
+    }
+
 
     useEffect(() => {
         dispatch(setVideoFiles(passedVideoFiles));
@@ -85,31 +102,53 @@ export default function CanvasVideoPreview({
 
     // Create video elements
     const setupVideos = () => {
-        // Clear existing videos
+        // Clear existing videos and audio
         videoElementsRef.current.forEach(video => {
             video.pause();
             video.src = '';
         });
-        videoElementsRef.current = [];
-
-        // Create new video elements
-        videoFiles.forEach((videoFile, index) => {
-            console.log("index is", index, videoFile)
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(videoFile.file);
-            video.loop = true;
-            video.muted = isMuted;
-            video.playsInline = true;
-            video.preload = 'auto';
-            video.playbackRate = playbackSpeeds[index] || 1;
-
-            videoElementsRef.current.push(video);
-
-            video.addEventListener('loadedmetadata', () => {
-                video.currentTime = videoFile.startTime;
-            });
+        audioElementsRef.current.forEach(audio => {
+            audio.pause();
+            audio.src = '';
         });
+        videoElementsRef.current = [];
+        audioElementsRef.current = [];
+        videoIndexMap.current = [];
+        audioIndexMap.current = [];
 
+        // Create new video and audio elements
+        videoFiles.forEach((mediaFile, index) => {
+            if (mediaFile.type === 'video') {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(mediaFile.file);
+                video.loop = true;
+                video.muted = isMuted;
+                video.playsInline = true;
+                video.preload = 'auto';
+                video.playbackRate = playbackSpeeds[index] || 1;
+                video.volume = mediaFile.volume;
+                videoElementsRef.current.push(video);
+                videoIndexMap.current.push(index);
+
+                video.addEventListener('loadedmetadata', () => {
+                    video.currentTime = mediaFile.startTime;
+                });
+            } else if (mediaFile.type === 'audio') {
+                const audio = document.createElement('audio');
+                audio.src = URL.createObjectURL(mediaFile.file);
+                audio.loop = true;
+                audio.muted = isMuted;
+                audio.preload = 'auto';
+                audio.volume = mediaFile.volume;
+                audio.playbackRate = playbackSpeeds[index] || 1;
+                audioElementsRef.current.push(audio);
+                audioIndexMap.current.push(index);
+
+                audio.addEventListener('loadedmetadata', () => {
+                    audio.currentTime = mediaFile.startTime;
+                });
+            }
+        });
     };
 
     // Draw frame
@@ -130,6 +169,10 @@ export default function CanvasVideoPreview({
                 video.pause();
                 video.currentTime = video.duration;
             });
+            audioElementsRef.current.forEach(audio => {
+                audio.pause();
+                audio.currentTime = audio.duration;
+            });
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
                 animationFrameRef.current = null;
@@ -143,67 +186,73 @@ export default function CanvasVideoPreview({
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, width, height);
 
-        let firstActiveVideoIndex = -1;
-
-        // Handle all videos
-        videoFiles.forEach((videoFile, index) => {
-
-            const video = videoElementsRef.current[index];
+        // Handle video elements
+        videoIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const video = videoElementsRef.current[elementIndex];
             if (!video) return;
 
-            // Check if current time is within this video's time range
-            const isActive = currentTimeSeconds >= videoFile.positionStart &&
-                currentTimeSeconds <= videoFile.positionEnd;
+            const isActive = currentTimeSeconds >= mediaFile.positionStart &&
+                currentTimeSeconds <= mediaFile.positionEnd;
 
             if (isActive) {
-                // This video should be playing
                 if (video.readyState >= video.HAVE_CURRENT_DATA) {
                     if (video.paused) {
-                        // Start playing at the correct time
-                        const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
+                        const videoTime = mediaFile.startTime + (currentTimeSeconds - mediaFile.positionStart);
                         video.currentTime = videoTime;
                         video.muted = isMuted;
                         video.play().catch(console.error);
                     }
 
-                    // Only draw the first active video
-                    if (firstActiveVideoIndex === -1) {
-                        firstActiveVideoIndex = index;
+                    // Calculate video position and size
+                    const videoAspect = video.videoWidth / video.videoHeight;
+                    const canvasAspect = width / height;
 
-                        // Calculate video position and size
-                        const videoAspect = video.videoWidth / video.videoHeight;
-                        const canvasAspect = width / height;
+                    let drawWidth = width;
+                    let drawHeight = height;
+                    let offsetX = 0;
+                    let offsetY = 0;
 
-                        let drawWidth = width;
-                        let drawHeight = height;
-                        let offsetX = 0;
-                        let offsetY = 0;
-
-                        if (videoAspect > canvasAspect) {
-                            drawHeight = width / videoAspect;
-                            offsetY = (height - drawHeight) / 2;
-                        } else {
-                            drawWidth = height * videoAspect;
-                            offsetX = (width - drawWidth) / 2;
-                        }
-
-                        // Draw video frame
-                        ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
-
-                        // TODO: Add text overlay
-                        // ctx.fillStyle = 'white'; // Text color
-                        // ctx.font = 'bold 32px Arial'; // Font style and size
-                        // ctx.textAlign = 'center'; // Text alignment
-
-                        // ctx.fillText(' Text Overlay', width / 2, height / 2);
-
+                    if (videoAspect > canvasAspect) {
+                        drawHeight = width / videoAspect;
+                        offsetY = (height - drawHeight) / 2;
+                    } else {
+                        drawWidth = height * videoAspect;
+                        offsetX = (width - drawWidth) / 2;
                     }
+
+                    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
                 }
             } else {
                 video.pause();
-                // Reset to start position if we're before this video's start time
-                if (currentTimeSeconds < videoFile.positionStart) {
-                    video.currentTime = videoFile.startTime;
+                if (currentTimeSeconds < mediaFile.positionStart) {
+                    video.currentTime = mediaFile.startTime;
+                }
+            }
+        });
+
+        // Handle audio elements
+        audioIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const audio = audioElementsRef.current[elementIndex];
+            if (!audio) return;
+
+            const isActive = currentTimeSeconds >= mediaFile.positionStart &&
+                currentTimeSeconds <= mediaFile.positionEnd;
+
+            if (isActive) {
+                if (audio.readyState >= audio.HAVE_CURRENT_DATA) {
+                    if (audio.paused) {
+                        const audioTime = mediaFile.startTime + (currentTimeSeconds - mediaFile.positionStart);
+                        audio.currentTime = audioTime;
+                        audio.muted = isMuted;
+                        audio.play().catch(console.error);
+                    }
+                }
+            } else {
+                audio.pause();
+                if (currentTimeSeconds < mediaFile.positionStart) {
+                    audio.currentTime = mediaFile.startTime;
                 }
             }
         });
@@ -221,13 +270,6 @@ export default function CanvasVideoPreview({
                 const newTime = 0;
                 dispatch(setCurrentTime(newTime));
                 startTimeRef.current = performance.now();
-                // Reset all videos to their start positions
-                videoFiles.forEach((videoFile, index) => {
-                    const video = videoElementsRef.current[index];
-                    if (video) {
-                        video.currentTime = videoFile.startTime;
-                    }
-                });
             } else {
                 // Otherwise, continue from current position
                 startTimeRef.current = performance.now() - (currentTime * 1000);
@@ -238,10 +280,12 @@ export default function CanvasVideoPreview({
                 cancelAnimationFrame(animationFrameRef.current);
             }
             animationFrameRef.current = requestAnimationFrame(drawFrame);
+
         } else {
             // Pause all videos and stop animation
             if (animationFrameRef.current) {
                 videoElementsRef.current.forEach(video => video.pause());
+                audioElementsRef.current.forEach(audio => audio.pause());
                 cancelAnimationFrame(animationFrameRef.current);
                 animationFrameRef.current = null;
             }
@@ -254,6 +298,9 @@ export default function CanvasVideoPreview({
         dispatch(setIsMuted(!isMuted));
         videoElementsRef.current.forEach(video => {
             video.muted = !isMuted;
+        });
+        audioElementsRef.current.forEach(audio => {
+            audio.muted = !isMuted;
         });
     };
 
@@ -270,6 +317,10 @@ export default function CanvasVideoPreview({
         if (video) {
             video.playbackRate = newSpeed;
         }
+        const audio = audioElementsRef.current[index];
+        if (audio) {
+            audio.playbackRate = newSpeed;
+        }
     };
 
     useEffect(() => {
@@ -284,6 +335,10 @@ export default function CanvasVideoPreview({
             videoElementsRef.current.forEach(video => {
                 video.pause();
                 URL.revokeObjectURL(video.src);
+            });
+            audioElementsRef.current.forEach(audio => {
+                audio.pause();
+                URL.revokeObjectURL(audio.src);
             });
             dispatch(setIsPlaying(false));
         };
