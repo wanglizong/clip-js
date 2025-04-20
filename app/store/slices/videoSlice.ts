@@ -41,7 +41,7 @@ const videoSlice = createSlice({
         setIsMuted: (state, action: PayloadAction<boolean>) => {
             state.isMuted = action.payload;
         },
-        // TODO: we use other array for playbacks not each file attribute cause dispatching videoFiles (when changing playback speed) while its playing is causing a bug
+        // TODO: we use other array for playbacks not each file attribute cause dispatching videoFiles (when changing playback speed attribute) while its playing is causing a bug
         setPlaybackSpeed: (state, action: PayloadAction<{ index: number; speed: number }>) => {
             const { index, speed } = action.payload;
             state.playbackSpeeds[index] = speed;

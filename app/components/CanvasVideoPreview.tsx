@@ -29,62 +29,31 @@ export default function CanvasVideoPreview({
     const timelineRef = useRef<HTMLDivElement>(null);
     const isFirstRun = useRef(true);
 
-    // Create mappings for video and audio elements
     const videoIndexMap = useRef<number[]>([]);
     const audioIndexMap = useRef<number[]>([]);
 
-    // Handle timeline click
-    const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (!timelineRef.current) return;
-
-        const rect = timelineRef.current.getBoundingClientRect();
-        const clickPosition = e.clientX - rect.left;
-        const percentage = clickPosition / rect.width;
-        const newTime = percentage * duration;
-
-        videoIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
-            const video = videoElementsRef.current[elementIndex];
-            // // Update all videos
-            if (!video) return;
-
-            if (newTime >= mediaFile.positionStart && newTime <= mediaFile.positionEnd) {
-                const videoTime = mediaFile.startTime + (newTime - mediaFile.positionStart);
-                video.currentTime = videoTime;
-            } else {
-                video.pause();
-                if (newTime < mediaFile.positionStart) {
-                    video.currentTime = mediaFile.startTime;
-                }
-            }
-        })
-
-
-        audioIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
-            const audio = audioElementsRef.current[elementIndex];
-            if (!audio) return;
-
-            if (newTime >= mediaFile.positionStart && newTime <= mediaFile.positionEnd) {
-                audio.currentTime = mediaFile.startTime + (newTime - mediaFile.positionStart);
-            }
-            else {
-                audio.pause();
-                if (newTime < mediaFile.positionStart) {
-                    audio.currentTime = mediaFile.startTime;
-                }
-            }
-        })
-        startTimeRef.current = performance.now() - (newTime * 1000);
-        dispatch(setCurrentTime(newTime));
-    }
-
-
+    // Initialize the canvas and setup the videos
     useEffect(() => {
-        dispatch(setVideoFiles(passedVideoFiles));
-    }, [dispatch, passedVideoFiles]);
+        initCanvas();
+        setupVideos();
+        animationFrameRef.current = requestAnimationFrame(drawFrame);
 
-    // Initialize canvas
+        return () => {
+            if (animationFrameRef.current) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+            videoElementsRef.current.forEach(video => {
+                video.pause();
+                URL.revokeObjectURL(video.src);
+            });
+            audioElementsRef.current.forEach(audio => {
+                audio.pause();
+                URL.revokeObjectURL(audio.src);
+            });
+            dispatch(setIsPlaying(false));
+        };
+    }, [videoFiles]);
+
     const initCanvas = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -100,7 +69,7 @@ export default function CanvasVideoPreview({
         canvas.height = height;
     };
 
-    // Create video elements
+    // Create new video and audio elements
     const setupVideos = () => {
         // Clear existing videos and audio
         videoElementsRef.current.forEach(video => {
@@ -116,7 +85,6 @@ export default function CanvasVideoPreview({
         videoIndexMap.current = [];
         audioIndexMap.current = [];
 
-        // Create new video and audio elements
         videoFiles.forEach((mediaFile, index) => {
             if (mediaFile.type === 'video') {
                 const video = document.createElement('video');
@@ -262,6 +230,57 @@ export default function CanvasVideoPreview({
         }
     };
 
+    const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!timelineRef.current) return;
+
+        const rect = timelineRef.current.getBoundingClientRect();
+        const clickPosition = e.clientX - rect.left;
+        const percentage = clickPosition / rect.width;
+        const newTime = percentage * duration;
+
+        // Update all videos
+        videoIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const video = videoElementsRef.current[elementIndex];
+            if (!video) return;
+
+            if (newTime >= mediaFile.positionStart && newTime <= mediaFile.positionEnd) {
+                const videoTime = mediaFile.startTime + (newTime - mediaFile.positionStart);
+                video.currentTime = videoTime;
+            } else {
+                video.pause();
+                if (newTime < mediaFile.positionStart) {
+                    video.currentTime = mediaFile.startTime;
+                }
+            }
+        })
+
+        // Update all audios
+        audioIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const audio = audioElementsRef.current[elementIndex];
+            if (!audio) return;
+
+            if (newTime >= mediaFile.positionStart && newTime <= mediaFile.positionEnd) {
+                audio.currentTime = mediaFile.startTime + (newTime - mediaFile.positionStart);
+            }
+            else {
+                audio.pause();
+                if (newTime < mediaFile.positionStart) {
+                    audio.currentTime = mediaFile.startTime;
+                }
+            }
+        })
+        startTimeRef.current = performance.now() - (newTime * 1000);
+        dispatch(setCurrentTime(newTime));
+    }
+
+
+    useEffect(() => {
+        dispatch(setVideoFiles(passedVideoFiles));
+    }, [dispatch, passedVideoFiles]);
+
+    // Toggle Buttons
     const togglePlay = () => {
         isFirstRun.current = false;
         if (!isPlaying) {
@@ -274,15 +293,13 @@ export default function CanvasVideoPreview({
                 // Otherwise, continue from current position
                 startTimeRef.current = performance.now() - (currentTime * 1000);
             }
-
             // Start the animation frame
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
             }
             animationFrameRef.current = requestAnimationFrame(drawFrame);
-
         } else {
-            // Pause all videos and stop animation
+            // Pause all media and stop animation
             if (animationFrameRef.current) {
                 videoElementsRef.current.forEach(video => video.pause());
                 audioElementsRef.current.forEach(audio => audio.pause());
@@ -292,8 +309,6 @@ export default function CanvasVideoPreview({
         }
         dispatch(setIsPlaying(!isPlaying));
     };
-
-    // Toggle mute
     const toggleMute = () => {
         dispatch(setIsMuted(!isMuted));
         videoElementsRef.current.forEach(video => {
@@ -303,8 +318,6 @@ export default function CanvasVideoPreview({
             audio.muted = !isMuted;
         });
     };
-
-    // Toggle playback speed for a specific video
     const togglePlaybackSpeed = (index: number) => {
         const speeds = [1, 1.5, 2, 0.5];
         const currentSpeed = playbackSpeeds[index];
@@ -323,26 +336,6 @@ export default function CanvasVideoPreview({
         }
     };
 
-    useEffect(() => {
-        initCanvas();
-        setupVideos();
-        animationFrameRef.current = requestAnimationFrame(drawFrame);
-
-        return () => {
-            if (animationFrameRef.current) {
-                cancelAnimationFrame(animationFrameRef.current);
-            }
-            videoElementsRef.current.forEach(video => {
-                video.pause();
-                URL.revokeObjectURL(video.src);
-            });
-            audioElementsRef.current.forEach(audio => {
-                audio.pause();
-                URL.revokeObjectURL(audio.src);
-            });
-            dispatch(setIsPlaying(false));
-        };
-    }, [videoFiles]);
 
     return (
         <div className="relative">
