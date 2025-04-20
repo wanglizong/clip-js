@@ -6,25 +6,9 @@ import { fetchFile } from "@ffmpeg/util";
 import CanvasVideoPreview from "./CanvasVideoPreview";
 import { useAppDispatch } from "../store";
 import { setVideoFiles } from "../store/slices/videoSlice";
-
-export interface VideoFile {
-    file: File;
-    startTime: number;  // Start time within the source video
-    endTime: number;    // End time within the source video
-    positionStart: number;  // Start position in the final video
-    positionEnd: number;    // End position in the final video
-    includeInMerge: boolean;
-    playbackSpeed: number;  // Playback speed of the video
-}
-
-export interface SoundFile {
-    file: File;
-    startTime: number;  // Start time within the source audio file
-    endTime: number;    // End time within the source audio file
-    positionStart: number;  // When to start playing in the timeline
-    positionEnd: number;    // When to stop playing in the timeline
-    volume: number;
-}
+import { storeFile, getFile, listFiles, deleteFile } from "../store";
+import { categorizeFile } from "../utils/utils";
+import { MediaFile as VideoFile } from "../types";
 
 interface FileUploaderProps {
     onFilesChange: (files: VideoFile[]) => void;
@@ -37,6 +21,34 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
     const dispatch = useAppDispatch();
     const [files, setFiles] = useState<VideoFile[]>([]);
     const [isMerging, setIsMerging] = useState(false);
+    const [storedFileIds, setStoredFileIds] = useState<string[]>([]);
+
+    // Load stored files on component mount
+    useEffect(() => {
+        const loadStoredFiles = async () => {
+            const storedFiles = await listFiles();
+            const updatedFiles = [...files];
+
+            for (const file of storedFiles) {
+                const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
+                updatedFiles.push({
+                    file: file.file,
+                    startTime: 0,
+                    endTime: 30, // Default 5 seconds
+                    positionStart: lastEnd, // Start after the last video
+                    positionEnd: lastEnd + 30, // Default 5 seconds duration
+                    includeInMerge: true,
+                    playbackSpeed: 1, // Default playback speed
+                    volume: 100,
+                    type: categorizeFile(file.file.type),
+                    zIndex: 0,
+                });
+            }
+            setFiles(updatedFiles);
+            setStoredFileIds(storedFiles.map(file => file.id));
+        };
+        loadStoredFiles();
+    }, []);
 
     // Update Redux state when files change
     useEffect(() => {
@@ -126,27 +138,41 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const newFiles = Array.from(e.target.files || []);
-        const updatedFiles = [
-            ...files,
-            ...newFiles.map((file, index) => {
+        const updatedFiles = [...files];
+
+        for (const file of newFiles) {
+            // Store file in IndexedDB
+            const fileId = await storeFile(file);
+            if (fileId) {
+                setStoredFileIds(prev => [...prev, fileId]);
+
                 const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
-                return {
+                updatedFiles.push({
                     file,
                     startTime: 0,
-                    endTime: 5, // Default 5 seconds
+                    endTime: 30, // Default 5 seconds
                     positionStart: lastEnd, // Start after the last video
-                    positionEnd: lastEnd + 5, // Default 5 seconds duration
+                    positionEnd: lastEnd + 30, // Default 5 seconds duration
                     includeInMerge: true,
-                    playbackSpeed: 1 // Default playback speed
-                };
-            })
-        ];
+                    playbackSpeed: 1,// Default playback speed
+                    volume: 100,
+                    type: categorizeFile(file.type),
+                    zIndex: 0,
+                });
+            }
+        }
+
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
     };
 
     const removeFile = async (index: number) => {
         const updatedFiles = files.filter((_, i) => i !== index);
+        const fileId = storedFileIds[index];
+        if (fileId) {
+            await deleteFile(fileId);
+            setStoredFileIds(prev => prev.filter(id => id !== fileId));
+        }
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
     };
@@ -177,7 +203,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
             <div className="flex items-center space-x-2">
                 <input
                     type="file"
-                    accept="video/*"
+                    accept="video/*,audio/*,image/*"
                     multiple
                     onChange={handleFileChange}
                     className="hidden"
