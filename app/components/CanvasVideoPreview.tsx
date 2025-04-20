@@ -1,26 +1,23 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
-import { VideoFile, SoundFile } from './FileUploader';
-import CanvasSoundPreview from './CanvasSoundPreview';
+import { useEffect, useRef, useState } from 'react';
+import { MediaFile as VideoFile } from '../types';
 import { useAppSelector, useAppDispatch } from '../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, setPlaybackSpeed } from '../store/slices/videoSlice';
+import { setCurrentTime, setIsPlaying, setIsMuted, setPlaybackSpeed, setVideoFiles } from '../store/slices/videoSlice';
 
 interface CanvasVideoPreviewProps {
     videoFiles: VideoFile[];
-    soundFiles?: SoundFile[];
     width?: number;
     height?: number;
 }
 
 export default function CanvasVideoPreview({
-    videoFiles,
-    soundFiles = [],
+    videoFiles: passedVideoFiles,
     width = 640,
     height = 360
 }: CanvasVideoPreviewProps) {
     const dispatch = useAppDispatch();
-    const { currentTime, isPlaying, isMuted, duration, playbackSpeeds } = useAppSelector((state) => state.video);
+    const { currentTime, isPlaying, isMuted, duration, playbackSpeeds, videoFiles } = useAppSelector((state) => state.video);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -28,6 +25,7 @@ export default function CanvasVideoPreview({
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
     const timelineRef = useRef<HTMLDivElement>(null);
+    const isFirstRun = useRef(true);
 
     // Format time helper
     const formatTime = (seconds: number) => {
@@ -53,9 +51,6 @@ export default function CanvasVideoPreview({
             if (newTime >= videoFile.positionStart && newTime <= videoFile.positionEnd) {
                 const videoTime = videoFile.startTime + (newTime - videoFile.positionStart);
                 video.currentTime = videoTime;
-                if (isPlaying) {
-                    video.play().catch(console.error);
-                }
             } else {
                 video.pause();
                 if (newTime < videoFile.positionStart) {
@@ -67,6 +62,10 @@ export default function CanvasVideoPreview({
         startTimeRef.current = performance.now() - (newTime * 1000);
         dispatch(setCurrentTime(newTime));
     };
+
+    useEffect(() => {
+        dispatch(setVideoFiles(passedVideoFiles));
+    }, [dispatch, passedVideoFiles]);
 
     // Initialize canvas
     const initCanvas = () => {
@@ -95,6 +94,7 @@ export default function CanvasVideoPreview({
 
         // Create new video elements
         videoFiles.forEach((videoFile, index) => {
+            console.log("index is", index, videoFile)
             const video = document.createElement('video');
             video.src = URL.createObjectURL(videoFile.file);
             video.loop = true;
@@ -109,6 +109,7 @@ export default function CanvasVideoPreview({
                 video.currentTime = videoFile.startTime;
             });
         });
+
     };
 
     // Draw frame
@@ -142,11 +143,11 @@ export default function CanvasVideoPreview({
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, width, height);
 
-        let allVideosEnded = true;
         let firstActiveVideoIndex = -1;
 
         // Handle all videos
         videoFiles.forEach((videoFile, index) => {
+
             const video = videoElementsRef.current[index];
             if (!video) return;
 
@@ -188,11 +189,17 @@ export default function CanvasVideoPreview({
 
                         // Draw video frame
                         ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+
+                        // TODO: Add text overlay
+                        // ctx.fillStyle = 'white'; // Text color
+                        // ctx.font = 'bold 32px Arial'; // Font style and size
+                        // ctx.textAlign = 'center'; // Text alignment
+
+                        // ctx.fillText(' Text Overlay', width / 2, height / 2);
+
                     }
                 }
-                allVideosEnded = false;
             } else {
-                // Not active - make sure it's paused
                 video.pause();
                 // Reset to start position if we're before this video's start time
                 if (currentTimeSeconds < videoFile.positionStart) {
@@ -200,12 +207,14 @@ export default function CanvasVideoPreview({
                 }
             }
         });
-
-        animationFrameRef.current = requestAnimationFrame(drawFrame);
+        // TODO: For Now Cause There is a bug here where the animation frame is being requested when the video is not playing
+        if (!isPlaying && !isFirstRun.current) {
+            animationFrameRef.current = requestAnimationFrame(drawFrame);
+        }
     };
 
-    // Toggle play/pause
     const togglePlay = () => {
+        isFirstRun.current = false;
         if (!isPlaying) {
             // If we're at the end, reset to start
             if (currentTime >= duration) {
@@ -256,7 +265,6 @@ export default function CanvasVideoPreview({
         const nextIndex = (currentIndex + 1) % speeds.length;
         const newSpeed = speeds[nextIndex];
         dispatch(setPlaybackSpeed({ index, speed: newSpeed }));
-        console.log(playbackSpeeds);
 
         const video = videoElementsRef.current[index];
         if (video) {
@@ -267,7 +275,6 @@ export default function CanvasVideoPreview({
     useEffect(() => {
         initCanvas();
         setupVideos();
-
         animationFrameRef.current = requestAnimationFrame(drawFrame);
 
         return () => {
@@ -278,8 +285,9 @@ export default function CanvasVideoPreview({
                 video.pause();
                 URL.revokeObjectURL(video.src);
             });
+            dispatch(setIsPlaying(false));
         };
-    }, [videoFiles, isMuted, playbackSpeeds]);
+    }, [videoFiles]);
 
     return (
         <div className="relative">
@@ -290,7 +298,7 @@ export default function CanvasVideoPreview({
                 style={{ width: '100%', height: 'auto' }}
                 className="border border-gray-300 rounded"
             />
-            <CanvasSoundPreview />
+            {/* <CanvasSoundPreview /> */}
             <div className="absolute bottom-2 right-2 flex space-x-2">
                 <button
                     onClick={toggleMute}
@@ -302,12 +310,12 @@ export default function CanvasVideoPreview({
                     onClick={togglePlay}
                     className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
                 >
-                    {isPlaying ? '⏸️' : '▶️'}
+                    {isPlaying ? 'true▶️' : 'false⏸️'}
                 </button>
             </div>
 
             {/* Video speed controls */}
-            <div className="absolute bottom-2 left-2 flex flex-col space-y-2">
+            <div className="absolute bottom-8 left-2 flex flex-col space-y-2">
                 {videoFiles.map((videoFile, index) => (
                     <button
                         key={index}
@@ -316,27 +324,6 @@ export default function CanvasVideoPreview({
                     >
                         Video {index + 1}: {playbackSpeeds[index]}x
                     </button>
-                ))}
-            </div>
-
-            {/* Sound volume controls */}
-            <div className="absolute top-2 left-2 flex flex-col space-y-2">
-                {soundFiles.map((soundFile, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                        <span className="text-white">Sound {index + 1}:</span>
-                        <input
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.1"
-                            value={soundFile.volume}
-                            onChange={(e) => {
-                                const newVolume = parseFloat(e.target.value);
-                                soundFiles[index].volume = newVolume;
-                            }}
-                            className="w-24"
-                        />
-                    </div>
                 ))}
             </div>
 
