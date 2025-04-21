@@ -1,26 +1,26 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import { MediaFile as VideoFile, TextElement } from '../types';
+import { MediaFile, TextElement } from '../types';
 import { useAppSelector, useAppDispatch } from '../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, setVideoFiles, setTextElements } from '../store/slices/projectSlice';
+import { setCurrentTime, setIsPlaying, setIsMuted, setMediaFiles, setTextElements } from '../store/slices/projectSlice';
 import { formatTime } from '../utils/utils';
 
 interface CanvasVideoPreviewProps {
-    videoFiles: VideoFile[];
+    mediaFiles: MediaFile[];
     textElements: TextElement[];
     width?: number;
     height?: number;
 }
 
 export default function CanvasVideoPreview({
-    videoFiles: passedVideoFiles,
+    mediaFiles: passedMediaFiles,
     textElements: passedTextElements,
     width = 640,
     height = 360
 }: CanvasVideoPreviewProps) {
     const dispatch = useAppDispatch();
-    const { currentTime, isPlaying, isMuted, duration, videoFiles, textElements } = useAppSelector((state) => state.projectState);
+    const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements } = useAppSelector((state) => state.projectState);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -59,7 +59,7 @@ export default function CanvasVideoPreview({
             });
             dispatch(setIsPlaying(false));
         };
-    }, [videoFiles]);
+    }, [mediaFiles]);
 
     const initCanvas = () => {
         const canvas = canvasRef.current;
@@ -97,7 +97,7 @@ export default function CanvasVideoPreview({
         audioIndexMap.current = [];
         imageIndexMap.current = [];
 
-        videoFiles.forEach((mediaFile, index) => {
+        mediaFiles.forEach((mediaFile, index) => {
             if (mediaFile.type === 'video') {
                 const video = document.createElement('video');
                 video.src = URL.createObjectURL(mediaFile.file);
@@ -175,13 +175,13 @@ export default function CanvasVideoPreview({
         const elementsToDraw: {
             type: 'video' | 'image' | 'text';
             element: HTMLVideoElement | HTMLImageElement | TextElement;
-            mediaFile: VideoFile | TextElement;
+            mediaFile: MediaFile | TextElement;
             index: number;
         }[] = [];
 
         // Collect active video elements
         videoIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
+            const mediaFile = mediaFiles[fileIndex];
             const video = videoElementsRef.current[elementIndex];
             if (!video) return;
 
@@ -205,7 +205,7 @@ export default function CanvasVideoPreview({
 
         // Collect active image elements
         imageIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
+            const mediaFile = mediaFiles[fileIndex];
             const image = imageElementsRef.current[elementIndex];
             if (!image) return;
 
@@ -244,7 +244,7 @@ export default function CanvasVideoPreview({
         elementsToDraw.forEach(({ type, element, mediaFile }) => {
             if (type === 'video') {
                 const video = element as HTMLVideoElement;
-                const videoFile = mediaFile as VideoFile;
+                const videoFile = mediaFile as MediaFile;
                 if (video.readyState >= video.HAVE_CURRENT_DATA) {
                     if (video.paused) {
                         const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
@@ -378,7 +378,7 @@ export default function CanvasVideoPreview({
 
         // Handle audio elements
         audioIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
+            const mediaFile = mediaFiles[fileIndex];
             const audio = audioElementsRef.current[elementIndex];
             if (!audio) return;
 
@@ -417,7 +417,7 @@ export default function CanvasVideoPreview({
 
         // Update all videos
         videoIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
+            const mediaFile = mediaFiles[fileIndex];
             const video = videoElementsRef.current[elementIndex];
             if (!video) return;
 
@@ -434,7 +434,7 @@ export default function CanvasVideoPreview({
 
         // Update all audios
         audioIndexMap.current.forEach((fileIndex, elementIndex) => {
-            const mediaFile = videoFiles[fileIndex];
+            const mediaFile = mediaFiles[fileIndex];
             const audio = audioElementsRef.current[elementIndex];
             if (!audio) return;
 
@@ -454,9 +454,9 @@ export default function CanvasVideoPreview({
 
 
     useEffect(() => {
-        dispatch(setVideoFiles(passedVideoFiles));
+        dispatch(setMediaFiles(passedMediaFiles));
         dispatch(setTextElements(passedTextElements));
-    }, [dispatch, passedVideoFiles, passedTextElements]);
+    }, [dispatch, passedMediaFiles, passedTextElements]);
 
     // Toggle Buttons
     const togglePlay = () => {

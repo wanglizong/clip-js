@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TextElement, MediaFile as VideoFile } from '../../types';
+import { TextElement, MediaFile } from '../../types';
 import { ProjectState } from '../../types';
 
 export const initialState: ProjectState = {
@@ -7,7 +7,7 @@ export const initialState: ProjectState = {
     projectName: '',
     createdAt: '',
     lastModified: '',
-    videoFiles: [],
+    mediaFiles: [],
     textElements: [],
     currentTime: 0,
     isPlaying: false,
@@ -34,8 +34,8 @@ const projectStateSlice = createSlice({
     name: 'projectState',
     initialState,
     reducers: {
-        setVideoFiles: (state, action: PayloadAction<VideoFile[]>) => {
-            state.videoFiles = action.payload;
+        setMediaFiles: (state, action: PayloadAction<MediaFile[]>) => {
+            state.mediaFiles = action.payload;
             // Calculate duration based on the last video's end time
             if (action.payload.length > 0) {
                 state.duration = Math.max(...action.payload.map(v => v.positionEnd));
@@ -61,7 +61,7 @@ const projectStateSlice = createSlice({
 });
 
 export const {
-    setVideoFiles,
+    setMediaFiles,
     setTextElements,
     setCurrentTime,
     setIsPlaying,

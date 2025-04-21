@@ -2,36 +2,36 @@
 
 import { MediaFile } from '../types';
 
-interface VideoListProps {
-    videoFiles: MediaFile[];
-    onUpdateVideo: (id: string, updates: Partial<MediaFile>) => void;
-    onDeleteVideo: (id: string) => void;
+interface MediaListProps {
+    mediaFiles: MediaFile[];
+    onUpdateMedia: (id: string, updates: Partial<MediaFile>) => void;
+    onDeleteMedia: (id: string) => void;
 }
 
-export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: VideoListProps) {
+export default function MediaList({ mediaFiles, onUpdateMedia, onDeleteMedia }: MediaListProps) {
 
     return (
         <div className="space-y-4">
-            {videoFiles.map((videoFile) => (
-                <div key={videoFile.id} className="border p-4 rounded space-y-2">
+            {mediaFiles.map((mediaFile) => (
+                <div key={mediaFile.id} className="border p-4 rounded space-y-2">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <input
                                 type="checkbox"
-                                checked={videoFile.includeInMerge}
-                                onChange={() => onUpdateVideo(videoFile.id, { includeInMerge: !videoFile.includeInMerge })}
+                                checked={mediaFile.includeInMerge}
+                                onChange={() => onUpdateMedia(mediaFile.id, { includeInMerge: !mediaFile.includeInMerge })}
                                 className="h-4 w-4"
                             />
-                            <span className="flex-1">{videoFile.file.name}</span>
+                            <span className="flex-1">{mediaFile.file.name}</span>
                         </div>
                         <button
-                            onClick={() => onDeleteVideo(videoFile.id)}
+                            onClick={() => onDeleteMedia(mediaFile.id)}
                             className="text-red-500 hover:text-red-700"
                         >
                             Remove
                         </button>
                     </div>
-                    {videoFile.includeInMerge && (
+                    {mediaFile.includeInMerge && (
                         <div className="grid grid-cols-2 gap-4">
                             {/* Source Video */}
                             <div className="space-y-2">
@@ -41,11 +41,11 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Start (s)</label>
                                         <input
                                             type="number"
-                                            value={videoFile.startTime}
+                                            value={mediaFile.startTime}
                                             min={0}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, {
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, {
                                                 startTime: Number(e.target.value),
-                                                endTime: videoFile.endTime
+                                                endTime: mediaFile.endTime
                                             })}
                                             className="border p-1 w-20"
                                         />
@@ -54,10 +54,10 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">End (s)</label>
                                         <input
                                             type="number"
-                                            value={videoFile.endTime}
-                                            min={videoFile.startTime}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, {
-                                                startTime: videoFile.startTime,
+                                            value={mediaFile.endTime}
+                                            min={mediaFile.startTime}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, {
+                                                startTime: mediaFile.startTime,
                                                 endTime: Number(e.target.value)
                                             })}
                                             className="border p-1 w-20"
@@ -73,11 +73,11 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Start (s)</label>
                                         <input
                                             type="number"
-                                            value={videoFile.positionStart}
+                                            value={mediaFile.positionStart}
                                             min={0}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, {
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, {
                                                 positionStart: Number(e.target.value),
-                                                positionEnd: Number(e.target.value) + (videoFile.positionEnd - videoFile.positionStart)
+                                                positionEnd: Number(e.target.value) + (mediaFile.positionEnd - mediaFile.positionStart)
                                             })}
                                             className="border p-1 w-20"
                                         />
@@ -86,9 +86,9 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">End (s)</label>
                                         <input
                                             type="number"
-                                            value={videoFile.positionEnd}
-                                            min={videoFile.positionStart}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, {
+                                            value={mediaFile.positionEnd}
+                                            min={mediaFile.positionStart}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, {
                                                 positionEnd: Number(e.target.value)
                                             })}
                                             className="border p-1 w-20"
@@ -104,8 +104,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">X Position</label>
                                         <input
                                             type="number"
-                                            value={videoFile.x || 0}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { x: Number(e.target.value) })}
+                                            value={mediaFile.x || 0}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { x: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -113,8 +113,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Y Position</label>
                                         <input
                                             type="number"
-                                            value={videoFile.y || 0}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { y: Number(e.target.value) })}
+                                            value={mediaFile.y || 0}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { y: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -122,8 +122,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Width</label>
                                         <input
                                             type="number"
-                                            value={videoFile.width || 100}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { width: Number(e.target.value) })}
+                                            value={mediaFile.width || 100}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { width: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -131,8 +131,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Height</label>
                                         <input
                                             type="number"
-                                            value={videoFile.height || 100}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { height: Number(e.target.value) })}
+                                            value={mediaFile.height || 100}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { height: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -140,8 +140,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Rotation</label>
                                         <input
                                             type="number"
-                                            value={videoFile.rotation || 0}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { rotation: Number(e.target.value) })}
+                                            value={mediaFile.rotation || 0}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { rotation: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -152,8 +152,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                             min="0"
                                             max="1"
                                             step="0.1"
-                                            value={videoFile.opacity || 1}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { opacity: Number(e.target.value) })}
+                                            value={mediaFile.opacity || 1}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { opacity: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -170,8 +170,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                             min="0"
                                             max="1"
                                             step="0.1"
-                                            value={videoFile.volume || 1}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { volume: Number(e.target.value) })}
+                                            value={mediaFile.volume || 1}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { volume: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -182,8 +182,8 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                             min="0.1"
                                             max="4"
                                             step="0.1"
-                                            value={videoFile.playbackSpeed || 1}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { playbackSpeed: Number(e.target.value) })}
+                                            value={mediaFile.playbackSpeed || 1}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { playbackSpeed: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>
@@ -197,9 +197,9 @@ export default function VideoList({ videoFiles, onUpdateVideo, onDeleteVideo }: 
                                         <label className="block text-sm">Start (s)</label>
                                         <input
                                             type="number"
-                                            value={videoFile.zIndex}
+                                            value={mediaFile.zIndex}
                                             min={0}
-                                            onChange={(e) => onUpdateVideo(videoFile.id, { zIndex: Number(e.target.value) })}
+                                            onChange={(e) => onUpdateMedia(mediaFile.id, { zIndex: Number(e.target.value) })}
                                             className="border p-1 w-20"
                                         />
                                     </div>

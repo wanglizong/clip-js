@@ -78,7 +78,7 @@ export interface ExportConfig {
 
 export interface ProjectState {
     id: string;
-    videoFiles: MediaFile[];
+    mediaFiles: MediaFile[];
     textElements: TextElement[];
     currentTime: number;
     isPlaying: boolean;

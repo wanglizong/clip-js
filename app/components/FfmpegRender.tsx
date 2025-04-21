@@ -1,12 +1,12 @@
 'use client'
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { MediaFile as VideoFile } from "../types";
+import { MediaFile } from "../types";
 import { useState } from "react";
 import { fetchFile } from "@ffmpeg/util";
 
 interface FileUploaderProps {
-    onFilesChange: (files: VideoFile[]) => void;
-    selectedFiles: VideoFile[];
+    onFilesChange: (files: MediaFile[]) => void;
+    selectedFiles: MediaFile[];
     onPreviewChange: (url: string | null) => void;
     ffmpeg: FFmpeg;
 }
@@ -14,7 +14,7 @@ interface FileUploaderProps {
 export default function FfmpegRender({ onFilesChange, selectedFiles, onPreviewChange, ffmpeg }: FileUploaderProps) {
     const [isMerging, setIsMerging] = useState(false);
 
-    const mergeVideos = async (videoFiles: VideoFile[], onPreviewChange: (url: string | null) => void, ffmpeg: FFmpeg) => {
+    const mergeVideos = async (videoFiles: MediaFile[], onPreviewChange: (url: string | null) => void, ffmpeg: FFmpeg) => {
         if (videoFiles.length === 0) {
             onPreviewChange(null);
             return;

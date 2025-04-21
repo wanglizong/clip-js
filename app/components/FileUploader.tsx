@@ -3,24 +3,24 @@
 import { useState, useEffect } from "react";
 import CanvasVideoPreview from "./CanvasVideoPreview";
 import { useAppDispatch } from "../store";
-import { setVideoFiles, setTextElements as setTextElementsAction } from "../store/slices/projectSlice";
+import { setMediaFiles, setTextElements as setTextElementsAction } from "../store/slices/projectSlice";
 import { storeFile, getFile, deleteFile, loadState } from "../store";
 import { categorizeFile } from "../utils/utils";
-import { MediaFile as VideoFile, TextElement } from "../types";
+import { MediaFile, TextElement } from "../types";
 import AddTextButton from './AddTextButton';
 import UploadFile from './UploadFile';
 import TextList from './TextList';
-import VideoList from './VideoList';
+import MediaList from './MediaList';
 
 interface FileUploaderProps {
-    onFilesChange: (files: VideoFile[]) => void;
-    selectedFiles: VideoFile[];
+    onFilesChange: (files: MediaFile[]) => void;
+    selectedFiles: MediaFile[];
     onPreviewChange: (url: string | null) => void;
 }
 
 export default function FileUploader({ onFilesChange, selectedFiles, onPreviewChange }: FileUploaderProps) {
     const dispatch = useAppDispatch();
-    const [files, setFiles] = useState<VideoFile[]>([]);
+    const [files, setFiles] = useState<MediaFile[]>([]);
     const [textElements, setTextElements] = useState<TextElement[]>([]);
 
     // Load stored elements on component mount
@@ -29,7 +29,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
             const storedState = await loadState();
             const loadedFiles = [...files];
             // Load stored files
-            for (const file of storedState?.projectState?.videoFiles || []) {
+            for (const file of storedState?.projectState?.mediaFiles || []) {
                 const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
                 const storedFileData = await getFile(file.id);
 
@@ -84,7 +84,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
     // Update Redux state when files change
     useEffect(() => {
-        dispatch(setVideoFiles(files.filter(f => f.includeInMerge)));
+        dispatch(setMediaFiles(files.filter(f => f.includeInMerge)));
         dispatch(setTextElementsAction(textElements));
     }, [files, textElements, dispatch]);
 
@@ -154,13 +154,13 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
     };
 
     // Video management functions
-    const handleUpdateVideo = (id: string, updates: Partial<VideoFile>) => {
-        setFiles(prev => prev.map(video =>
-            video.id === id ? { ...video, ...updates } : video
+    const handleUpdateMedia = (id: string, updates: Partial<MediaFile>) => {
+        setFiles(prev => prev.map(media =>
+            media.id === id ? { ...media, ...updates } : media
         ));
     };
 
-    const handleDeleteVideo = (id: string) => {
+    const handleDeleteMedia = (id: string) => {
         const index = files.findIndex(f => f.id === id);
         if (index !== -1) {
             removeFile(index);
@@ -180,7 +180,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                     <h3 className="text-lg font-semibold mb-2">Canvas Preview</h3>
                     {files.length > 0 && (
                         <CanvasVideoPreview
-                            videoFiles={files.filter(f => f.includeInMerge)}
+                            mediaFiles={files.filter(f => f.includeInMerge)}
                             textElements={textElements}
                         />
                     )}
@@ -197,10 +197,10 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                 </div>
             </div>
             {/* file List */}
-            <VideoList
-                videoFiles={files}
-                onUpdateVideo={handleUpdateVideo}
-                onDeleteVideo={handleDeleteVideo}
+            <MediaList
+                mediaFiles={files}
+                onUpdateMedia={handleUpdateMedia}
+                onDeleteMedia={handleDeleteMedia}
             />
             {/* Text List */}
             <TextList
