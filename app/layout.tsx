@@ -1,13 +1,23 @@
 import './globals.css'
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
+import { Inter, Roboto_Mono } from "next/font/google";
 import { Providers } from './providers'
+import Header from "./components/header/Header";
+import Footer from "./components/footer/Footer";
 
-const inter = Inter({ subsets: ['latin'] })
+const geistSans = Inter({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Roboto_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
 
 export const metadata: Metadata = {
   title: 'ClipJS',
-  description: 'Online video editor',
+  description: 'Online Video Editor',
 }
 
 export default function RootLayout({
@@ -17,8 +27,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
+      <body
+        // className={inter.className}
+        className={`min-h-svh max-w-[100vw] bg-darkSurfacePrimary text-text-primary dark:bg-darkSurfacePrimary dark:text-dark-text-primary font-sans ${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        <Providers>
+          <Header />
+          <main>
+            {children}
+          </main>
+          <Footer />
+        </Providers>
       </body>
     </html>
   )

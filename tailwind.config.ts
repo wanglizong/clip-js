@@ -13,6 +13,13 @@ const config: Config = {
         'gradient-conic':
           'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      colors: {
+        surfacePrimary: "oklch(.141 .005 285.823)",
+        darkSurfacePrimary: "oklch(.141 .005 285.823)",
+      },
+      border: {
+        DEFAULT: "rgba(128, 128, 128, 0.5)",
+      },
     },
   },
   plugins: [],
