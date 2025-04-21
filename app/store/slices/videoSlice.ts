@@ -7,7 +7,6 @@ interface VideoState {
     isPlaying: boolean;
     isMuted: boolean;
     duration: number;
-    playbackSpeeds: number[];
 }
 
 const initialState: VideoState = {
@@ -16,7 +15,6 @@ const initialState: VideoState = {
     isPlaying: false,
     isMuted: false,
     duration: 0,
-    playbackSpeeds: [],
 };
 
 const videoSlice = createSlice({
@@ -30,7 +28,6 @@ const videoSlice = createSlice({
                 state.duration = Math.max(...action.payload.map(v => v.positionEnd));
             }
             // Initialize playback speeds
-            state.playbackSpeeds = action.payload.map(() => 1);
         },
         setCurrentTime: (state, action: PayloadAction<number>) => {
             state.currentTime = action.payload;
@@ -40,11 +37,6 @@ const videoSlice = createSlice({
         },
         setIsMuted: (state, action: PayloadAction<boolean>) => {
             state.isMuted = action.payload;
-        },
-        // TODO: we use other array for playbacks not each file attribute cause dispatching videoFiles (when changing playback speed attribute) while its playing is causing a bug
-        setPlaybackSpeed: (state, action: PayloadAction<{ index: number; speed: number }>) => {
-            const { index, speed } = action.payload;
-            state.playbackSpeeds[index] = speed;
         },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<VideoState>) => {
@@ -58,7 +50,6 @@ export const {
     setCurrentTime,
     setIsPlaying,
     setIsMuted,
-    setPlaybackSpeed,
 } = videoSlice.actions;
 
 export default videoSlice.reducer; 

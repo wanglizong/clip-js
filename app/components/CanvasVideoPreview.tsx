@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MediaFile as VideoFile, TextElement } from '../types';
 import { useAppSelector, useAppDispatch } from '../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, setPlaybackSpeed, setVideoFiles } from '../store/slices/videoSlice';
+import { setCurrentTime, setIsPlaying, setIsMuted, setVideoFiles } from '../store/slices/videoSlice';
 import { formatTime } from '../utils/utils';
 
 interface CanvasVideoPreviewProps {
@@ -20,7 +20,7 @@ export default function CanvasVideoPreview({
     height = 360
 }: CanvasVideoPreviewProps) {
     const dispatch = useAppDispatch();
-    const { currentTime, isPlaying, isMuted, duration, playbackSpeeds, videoFiles } = useAppSelector((state) => state.video);
+    const { currentTime, isPlaying, isMuted, duration, videoFiles } = useAppSelector((state) => state.video);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -109,7 +109,7 @@ export default function CanvasVideoPreview({
                 video.muted = isMuted;
                 video.playsInline = true;
                 video.preload = 'auto';
-                video.playbackRate = playbackSpeeds[index] || 1;
+                video.playbackRate = mediaFile.playbackSpeed || 1;
                 video.volume = mediaFile.volume;
                 videoElementsRef.current.push(video);
                 videoIndexMap.current.push(index);
@@ -124,7 +124,7 @@ export default function CanvasVideoPreview({
                 audio.muted = isMuted;
                 audio.preload = 'auto';
                 audio.volume = mediaFile.volume;
-                audio.playbackRate = playbackSpeeds[index] || 1;
+                audio.playbackRate = mediaFile.playbackSpeed || 1;
                 audioElementsRef.current.push(audio);
                 audioIndexMap.current.push(index);
 
@@ -496,27 +496,11 @@ export default function CanvasVideoPreview({
             audio.muted = !isMuted;
         });
     };
-    const togglePlaybackSpeed = (index: number) => {
-        const speeds = [1, 1.5, 2, 0.5];
-        const currentSpeed = playbackSpeeds[index];
-        const currentIndex = speeds.indexOf(currentSpeed);
-        const nextIndex = (currentIndex + 1) % speeds.length;
-        const newSpeed = speeds[nextIndex];
-        dispatch(setPlaybackSpeed({ index, speed: newSpeed }));
-
-        const video = videoElementsRef.current[index];
-        if (video) {
-            video.playbackRate = newSpeed;
-        }
-        const audio = audioElementsRef.current[index];
-        if (audio) {
-            audio.playbackRate = newSpeed;
-        }
-    };
 
 
     return (
         <div className="relative">
+            {/* Canvas */}
             <canvas
                 ref={canvasRef}
                 width={width}
@@ -524,7 +508,7 @@ export default function CanvasVideoPreview({
                 style={{ width: '100%', height: 'auto' }}
                 className="border border-gray-300 rounded"
             />
-            {/* <CanvasSoundPreview /> */}
+            {/* Video controls */}
             <div className="absolute bottom-2 right-2 flex space-x-2">
                 <button
                     onClick={toggleMute}
@@ -538,19 +522,6 @@ export default function CanvasVideoPreview({
                 >
                     {isPlaying ? 'true▶️' : 'false⏸️'}
                 </button>
-            </div>
-
-            {/* Video speed controls */}
-            <div className="absolute bottom-8 left-2 flex flex-col space-y-2">
-                {videoFiles.map((videoFile, index) => (
-                    <button
-                        key={index}
-                        onClick={() => togglePlaybackSpeed(index)}
-                        className="bg-green-500 hover:bg-green-700 text-white py-1 px-3 rounded"
-                    >
-                        Video {index + 1}: {playbackSpeeds[index]}x
-                    </button>
-                ))}
             </div>
 
             {/* Timeline */}
