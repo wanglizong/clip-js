@@ -1,6 +1,7 @@
 export type MediaType = 'video' | 'audio' | 'image' | 'unknown';
 
 export interface MediaFile {
+    id: string;
     file: File;
     type: MediaType;
     startTime: number;  // within the source video

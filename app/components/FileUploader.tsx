@@ -6,7 +6,7 @@ import { fetchFile } from "@ffmpeg/util";
 import CanvasVideoPreview from "./CanvasVideoPreview";
 import { useAppDispatch } from "../store";
 import { setVideoFiles } from "../store/slices/videoSlice";
-import { storeFile, getFile, listFiles, deleteFile } from "../store";
+import { storeFile, getFile, listFiles, deleteFile, loadState } from "../store";
 import { categorizeFile } from "../utils/utils";
 import { MediaFile as VideoFile } from "../types";
 
@@ -27,21 +27,28 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
     useEffect(() => {
         const loadStoredFiles = async () => {
             const storedFiles = await listFiles();
+            const storedState = await loadState();
             const updatedFiles = [...files];
-
-            for (const file of storedFiles) {
+            for (const file of storedState?.video?.videoFiles || []) {
                 const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
+                const fileData = await getFile(file.id);
+                // Find the stored state for this file if it exists
+                const storedFileState = storedState?.video?.videoFiles?.find(
+                    (f: VideoFile) => f.file.name === file.file.name
+                );
+
                 updatedFiles.push({
-                    file: file.file,
-                    startTime: 0,
-                    endTime: 30, // Default 5 seconds
-                    positionStart: lastEnd, // Start after the last video
-                    positionEnd: lastEnd + 30, // Default 5 seconds duration
-                    includeInMerge: true,
-                    playbackSpeed: 1, // Default playback speed
-                    volume: 1,
-                    type: categorizeFile(file.file.type),
-                    zIndex: 0,
+                    id: file.id,
+                    file: fileData,
+                    startTime: file?.startTime ?? 0,
+                    endTime: file?.endTime ?? 30,
+                    positionStart: file?.positionStart ?? lastEnd,
+                    positionEnd: file?.positionEnd ?? lastEnd + 30,
+                    includeInMerge: file?.includeInMerge ?? true,
+                    playbackSpeed: file?.playbackSpeed ?? 1,
+                    volume: file?.volume ?? 1,
+                    type: categorizeFile(fileData.type),
+                    zIndex: file?.zIndex ?? 0,
                 });
             }
             setFiles(updatedFiles);
@@ -142,12 +149,15 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
         for (const file of newFiles) {
             // Store file in IndexedDB
-            const fileId = await storeFile(file);
+            const fileId = crypto.randomUUID();
+
+            await storeFile(file, fileId);
             if (fileId) {
                 setStoredFileIds(prev => [...prev, fileId]);
 
                 const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
                 updatedFiles.push({
+                    id: fileId,
                     file,
                     startTime: 0,
                     endTime: 30, // Default 5 seconds
