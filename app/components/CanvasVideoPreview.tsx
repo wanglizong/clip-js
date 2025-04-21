@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
-import { MediaFile as VideoFile } from '../types';
+import { useEffect, useRef, useState } from 'react';
+import { MediaFile as VideoFile, TextElement } from '../types';
 import { useAppSelector, useAppDispatch } from '../store';
 import { setCurrentTime, setIsPlaying, setIsMuted, setPlaybackSpeed, setVideoFiles } from '../store/slices/videoSlice';
 import { formatTime } from '../utils/utils';
 
 interface CanvasVideoPreviewProps {
     videoFiles: VideoFile[];
+    textElements: TextElement[];
     width?: number;
     height?: number;
 }
 
 export default function CanvasVideoPreview({
     videoFiles: passedVideoFiles,
+    textElements,
     width = 640,
     height = 360
 }: CanvasVideoPreviewProps) {
@@ -58,6 +60,10 @@ export default function CanvasVideoPreview({
             dispatch(setIsPlaying(false));
         };
     }, [videoFiles]);
+
+    useEffect(() => {
+        console.log('textElements changed', textElements);
+    }, [textElements]);
 
     const initCanvas = () => {
         const canvas = canvasRef.current;
@@ -171,9 +177,9 @@ export default function CanvasVideoPreview({
 
         // Create an array of all active elements to be drawn
         const elementsToDraw: {
-            type: 'video' | 'image';
-            element: HTMLVideoElement | HTMLImageElement;
-            mediaFile: VideoFile;
+            type: 'video' | 'image' | 'text';
+            element: HTMLVideoElement | HTMLImageElement | TextElement;
+            mediaFile: VideoFile | TextElement;
             index: number;
         }[] = [];
 
@@ -220,16 +226,32 @@ export default function CanvasVideoPreview({
             }
         });
 
+        // Collect active text elements
+        textElements.forEach((textElement, index) => {
+            const isActive = currentTimeSeconds >= textElement.positionStart &&
+                currentTimeSeconds <= textElement.positionEnd;
+
+            if (isActive) {
+                elementsToDraw.push({
+                    type: 'text',
+                    element: textElement,
+                    mediaFile: textElement,
+                    index
+                });
+            }
+        });
+
         // Sort elements by zIndex
-        elementsToDraw.sort((a, b) => a.mediaFile.zIndex - b.mediaFile.zIndex);
+        elementsToDraw.sort((a, b) => (a.mediaFile.zIndex || 0) - (b.mediaFile.zIndex || 0));
 
         // Draw all elements in order
         elementsToDraw.forEach(({ type, element, mediaFile }) => {
             if (type === 'video') {
                 const video = element as HTMLVideoElement;
+                const videoFile = mediaFile as VideoFile;
                 if (video.readyState >= video.HAVE_CURRENT_DATA) {
                     if (video.paused) {
-                        const videoTime = mediaFile.startTime + (currentTimeSeconds - mediaFile.positionStart);
+                        const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
                         video.currentTime = videoTime;
                         video.muted = isMuted;
                         video.play().catch(console.error);
@@ -295,6 +317,63 @@ export default function CanvasVideoPreview({
                     // Reset global alpha
                     if (mediaFile.opacity !== undefined) ctx.globalAlpha = 1;
                 }
+            } else if (type === 'text') {
+                console.log('text', element);
+                const textElement = element as TextElement;
+                const timeInText = currentTimeSeconds - textElement.positionStart;
+                const textDuration = textElement.positionEnd - textElement.positionStart;
+
+                // Handle fade in/out
+                let opacity = textElement.opacity || 1;
+                if (textElement.fadeInDuration && timeInText < textElement.fadeInDuration) {
+                    opacity = (timeInText / textElement.fadeInDuration) * (textElement.opacity || 1);
+                }
+                if (textElement.fadeOutDuration && timeInText > textDuration - textElement.fadeOutDuration) {
+                    opacity = ((textDuration - timeInText) / textElement.fadeOutDuration) * (textElement.opacity || 1);
+                }
+
+                // Handle animations
+                let x = textElement.x;
+                let y = textElement.y;
+                let scale = 1;
+
+                if (textElement.animation === 'slide-in' && timeInText < 1) {
+                    x = textElement.x - (width * (1 - timeInText));
+                } else if (textElement.animation === 'zoom' && timeInText < 1) {
+                    scale = 0.5 + (timeInText * 0.5);
+                } else if (textElement.animation === 'bounce' && timeInText < 1) {
+                    y = textElement.y - (50 * Math.sin(timeInText * Math.PI * 2));
+                }
+
+                ctx.save();
+                ctx.globalAlpha = opacity;
+
+                // Draw background if specified
+                if (textElement.backgroundColor && textElement.backgroundColor !== 'transparent') {
+                    ctx.fillStyle = textElement.backgroundColor;
+                    const metrics = ctx.measureText(textElement.text);
+                    const textWidth = metrics.width;
+                    const textHeight = textElement.fontSize || 24;
+                    ctx.fillRect(
+                        x - 5,
+                        y - textHeight + 5,
+                        textWidth + 10,
+                        textHeight + 10
+                    );
+                }
+
+                // Set text properties
+                ctx.font = `${textElement.fontSize || 24}px ${textElement.font || 'Arial'}`;
+                ctx.fillStyle = textElement.color || '#ffffff';
+                ctx.textAlign = textElement.align || 'center';
+
+                // Apply transformations
+                ctx.translate(x, y);
+                ctx.scale(scale, scale);
+
+                // Draw text
+                ctx.fillText(textElement.text, 0, 0);
+                ctx.restore();
             }
         });
 
