@@ -292,6 +292,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                         </div>
                         {videoFile.includeInMerge && (
                             <div className="grid grid-cols-2 gap-4">
+                                {/* Source Video */}
                                 <div className="space-y-2">
                                     <h4 className="font-semibold">Source Video</h4>
                                     <div className="flex items-center space-x-4">
@@ -317,6 +318,7 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                                         </div>
                                     </div>
                                 </div>
+                                {/* Final Position */}
                                 <div className="space-y-2">
                                     <h4 className="font-semibold">Final Position</h4>
                                     <div className="flex items-center space-x-4">
@@ -350,6 +352,31 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
                                                     updatedFiles[index] = {
                                                         ...updatedFiles[index],
                                                         positionEnd: Number(e.target.value)
+                                                    };
+                                                    setFiles(updatedFiles);
+                                                    onFilesChange(updatedFiles);
+                                                }}
+                                                className="border p-1 w-20"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* zindex */}
+                                <div className="space-y-2">
+                                    <h4 className="font-semibold">zindex</h4>
+                                    <div className="flex items-center space-x-4">
+                                        <div>
+                                            <label className="block text-sm">Start (s)</label>
+                                            <input
+                                                type="number"
+                                                value={videoFile.zIndex}
+                                                min={0}
+                                                onChange={(e) => {
+                                                    const updatedFiles = [...files];
+                                                    updatedFiles[index] = {
+                                                        ...updatedFiles[index],
+                                                        zIndex: Number(e.target.value),
                                                     };
                                                     setFiles(updatedFiles);
                                                     onFilesChange(updatedFiles);

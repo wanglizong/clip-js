@@ -24,6 +24,7 @@ export default function CanvasVideoPreview({
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
     const videoElementsRef = useRef<HTMLVideoElement[]>([]);
     const audioElementsRef = useRef<HTMLAudioElement[]>([]);
+    const imageElementsRef = useRef<HTMLImageElement[]>([]);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number>(0);
     const timelineRef = useRef<HTMLDivElement>(null);
@@ -31,6 +32,7 @@ export default function CanvasVideoPreview({
 
     const videoIndexMap = useRef<number[]>([]);
     const audioIndexMap = useRef<number[]>([]);
+    const imageIndexMap = useRef<number[]>([]);
 
     // Initialize the canvas and setup the videos
     useEffect(() => {
@@ -49,6 +51,9 @@ export default function CanvasVideoPreview({
             audioElementsRef.current.forEach(audio => {
                 audio.pause();
                 URL.revokeObjectURL(audio.src);
+            });
+            imageElementsRef.current.forEach(image => {
+                image.src = '';
             });
             dispatch(setIsPlaying(false));
         };
@@ -71,7 +76,7 @@ export default function CanvasVideoPreview({
 
     // Create new video and audio elements
     const setupVideos = () => {
-        // Clear existing videos and audio
+        // Clear existing videos, audio and images
         videoElementsRef.current.forEach(video => {
             video.pause();
             video.src = '';
@@ -80,10 +85,15 @@ export default function CanvasVideoPreview({
             audio.pause();
             audio.src = '';
         });
+        imageElementsRef.current.forEach(image => {
+            image.src = '';
+        });
         videoElementsRef.current = [];
         audioElementsRef.current = [];
+        imageElementsRef.current = [];
         videoIndexMap.current = [];
         audioIndexMap.current = [];
+        imageIndexMap.current = [];
 
         videoFiles.forEach((mediaFile, index) => {
             if (mediaFile.type === 'video') {
@@ -115,6 +125,11 @@ export default function CanvasVideoPreview({
                 audio.addEventListener('loadedmetadata', () => {
                     audio.currentTime = mediaFile.startTime;
                 });
+            } else if (mediaFile.type === 'image') {
+                const image = document.createElement('img');
+                image.src = URL.createObjectURL(mediaFile.file);
+                imageElementsRef.current.push(image);
+                imageIndexMap.current.push(index);
             }
         });
     };
@@ -154,7 +169,15 @@ export default function CanvasVideoPreview({
         ctx.fillStyle = 'black';
         ctx.fillRect(0, 0, width, height);
 
-        // Handle video elements
+        // Create an array of all active elements to be drawn
+        const elementsToDraw: {
+            type: 'video' | 'image';
+            element: HTMLVideoElement | HTMLImageElement;
+            mediaFile: VideoFile;
+            index: number;
+        }[] = [];
+
+        // Collect active video elements
         videoIndexMap.current.forEach((fileIndex, elementIndex) => {
             const mediaFile = videoFiles[fileIndex];
             const video = videoElementsRef.current[elementIndex];
@@ -164,6 +187,46 @@ export default function CanvasVideoPreview({
                 currentTimeSeconds <= mediaFile.positionEnd;
 
             if (isActive) {
+                elementsToDraw.push({
+                    type: 'video',
+                    element: video,
+                    mediaFile,
+                    index: fileIndex
+                });
+            } else {
+                video.pause();
+                if (currentTimeSeconds < mediaFile.positionStart) {
+                    video.currentTime = mediaFile.startTime;
+                }
+            }
+        });
+
+        // Collect active image elements
+        imageIndexMap.current.forEach((fileIndex, elementIndex) => {
+            const mediaFile = videoFiles[fileIndex];
+            const image = imageElementsRef.current[elementIndex];
+            if (!image) return;
+
+            const isActive = currentTimeSeconds >= mediaFile.positionStart &&
+                currentTimeSeconds <= mediaFile.positionEnd;
+
+            if (isActive) {
+                elementsToDraw.push({
+                    type: 'image',
+                    element: image,
+                    mediaFile,
+                    index: fileIndex
+                });
+            }
+        });
+
+        // Sort elements by zIndex
+        elementsToDraw.sort((a, b) => a.mediaFile.zIndex - b.mediaFile.zIndex);
+
+        // Draw all elements in order
+        elementsToDraw.forEach(({ type, element, mediaFile }) => {
+            if (type === 'video') {
+                const video = element as HTMLVideoElement;
                 if (video.readyState >= video.HAVE_CURRENT_DATA) {
                     if (video.paused) {
                         const videoTime = mediaFile.startTime + (currentTimeSeconds - mediaFile.positionStart);
@@ -191,10 +254,46 @@ export default function CanvasVideoPreview({
 
                     ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
                 }
-            } else {
-                video.pause();
-                if (currentTimeSeconds < mediaFile.positionStart) {
-                    video.currentTime = mediaFile.startTime;
+            } else if (type === 'image') {
+                const image = element as HTMLImageElement;
+                if (image.complete) {
+                    // Calculate image position and size
+                    const imageAspect = image.naturalWidth / image.naturalHeight;
+                    const canvasAspect = width / height;
+
+                    let drawWidth = width;
+                    let drawHeight = height;
+                    let offsetX = 0;
+                    let offsetY = 0;
+
+                    if (imageAspect > canvasAspect) {
+                        drawHeight = width / imageAspect;
+                        offsetY = (height - drawHeight) / 2;
+                    } else {
+                        drawWidth = height * imageAspect;
+                        offsetX = (width - drawWidth) / 2;
+                    }
+
+                    // Apply image-specific properties
+                    if (mediaFile.x !== undefined) offsetX = mediaFile.x;
+                    if (mediaFile.y !== undefined) offsetY = mediaFile.y;
+                    if (mediaFile.width !== undefined) drawWidth = mediaFile.width;
+                    if (mediaFile.height !== undefined) drawHeight = mediaFile.height;
+                    if (mediaFile.opacity !== undefined) ctx.globalAlpha = mediaFile.opacity;
+
+                    // Apply rotation if specified
+                    if (mediaFile.rotation !== undefined) {
+                        ctx.save();
+                        ctx.translate(offsetX + drawWidth / 2, offsetY + drawHeight / 2);
+                        ctx.rotate(mediaFile.rotation * Math.PI / 180);
+                        ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
+                        ctx.restore();
+                    } else {
+                        ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+                    }
+
+                    // Reset global alpha
+                    if (mediaFile.opacity !== undefined) ctx.globalAlpha = 1;
                 }
             }
         });
