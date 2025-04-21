@@ -61,10 +61,6 @@ export default function CanvasVideoPreview({
         };
     }, [videoFiles]);
 
-    useEffect(() => {
-        console.log('textElements changed', textElements);
-    }, [textElements]);
-
     const initCanvas = () => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -261,17 +257,21 @@ export default function CanvasVideoPreview({
                     const videoAspect = video.videoWidth / video.videoHeight;
                     const canvasAspect = width / height;
 
-                    let drawWidth = width;
-                    let drawHeight = height;
-                    let offsetX = 0;
-                    let offsetY = 0;
+                    let drawWidth = mediaFile.width || width;
+                    let drawHeight = mediaFile.height || height;
+                    let offsetX = mediaFile.x || 0;
+                    let offsetY = mediaFile.y || 0;
 
                     if (videoAspect > canvasAspect) {
-                        drawHeight = width / videoAspect;
-                        offsetY = (height - drawHeight) / 2;
+                        if (drawHeight === height && drawWidth === width)
+                            drawHeight = width / videoAspect;
+                        if (offsetY === 0 && offsetX === 0)
+                            offsetY = (height - drawHeight) / 2;
                     } else {
-                        drawWidth = height * videoAspect;
-                        offsetX = (width - drawWidth) / 2;
+                        if (drawHeight === height && drawWidth === width)
+                            drawWidth = height * videoAspect;
+                        if (offsetY === 0 && offsetX === 0)
+                            offsetX = (width - drawWidth) / 2;
                     }
 
                     ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
@@ -285,8 +285,8 @@ export default function CanvasVideoPreview({
 
                     let drawWidth = width;
                     let drawHeight = height;
-                    let offsetX = 0;
-                    let offsetY = 0;
+                    let offsetX = mediaFile.x || 0;
+                    let offsetY = mediaFile.y || 0;
 
                     if (imageAspect > canvasAspect) {
                         drawHeight = width / imageAspect;
@@ -318,7 +318,6 @@ export default function CanvasVideoPreview({
                     if (mediaFile.opacity !== undefined) ctx.globalAlpha = 1;
                 }
             } else if (type === 'text') {
-                console.log('text', element);
                 const textElement = element as TextElement;
                 const timeInText = currentTimeSeconds - textElement.positionStart;
                 const textDuration = textElement.positionEnd - textElement.positionStart;
