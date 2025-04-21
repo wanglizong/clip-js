@@ -1,24 +1,37 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { MediaFile as VideoFile } from '../../types';
+import { TextElement, MediaFile as VideoFile } from '../../types';
+import { ProjectState } from '../../types';
 
-interface VideoState {
-    videoFiles: VideoFile[];
-    currentTime: number;
-    isPlaying: boolean;
-    isMuted: boolean;
-    duration: number;
-}
-
-const initialState: VideoState = {
+export const initialState: ProjectState = {
+    id: '',
+    projectName: '',
+    createdAt: '',
+    lastModified: '',
     videoFiles: [],
+    textElements: [],
     currentTime: 0,
     isPlaying: false,
     isMuted: false,
     duration: 0,
+    zoomLevel: 1,
+    resolution: { width: 1920, height: 1080 },
+    fps: 30,
+    aspectRatio: '16:9',
+    history: [],
+    future: [],
+    exportSettings: {
+        resolution: { width: 1920, height: 1080 },
+        fps: 30,
+        format: 'mp4',
+        quality: 100,
+        audioEnabled: true,
+        includeSubtitles: false,
+        filename: '',
+    },
 };
 
-const videoSlice = createSlice({
-    name: 'video',
+const projectStateSlice = createSlice({
+    name: 'projectState',
     initialState,
     reducers: {
         setVideoFiles: (state, action: PayloadAction<VideoFile[]>) => {
@@ -27,7 +40,9 @@ const videoSlice = createSlice({
             if (action.payload.length > 0) {
                 state.duration = Math.max(...action.payload.map(v => v.positionEnd));
             }
-            // Initialize playback speeds
+        },
+        setTextElements: (state, action: PayloadAction<TextElement[]>) => {
+            state.textElements = action.payload;
         },
         setCurrentTime: (state, action: PayloadAction<number>) => {
             state.currentTime = action.payload;
@@ -39,7 +54,7 @@ const videoSlice = createSlice({
             state.isMuted = action.payload;
         },
         // Special reducer for rehydrating state from IndexedDB
-        rehydrate: (state, action: PayloadAction<VideoState>) => {
+        rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
         },
     },
@@ -47,9 +62,10 @@ const videoSlice = createSlice({
 
 export const {
     setVideoFiles,
+    setTextElements,
     setCurrentTime,
     setIsPlaying,
     setIsMuted,
-} = videoSlice.actions;
+} = projectStateSlice.actions;
 
-export default videoSlice.reducer; 
+export default projectStateSlice.reducer; 

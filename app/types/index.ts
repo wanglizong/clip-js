@@ -23,15 +23,12 @@ export interface MediaFile {
 
     // Effects
     crop?: { x: number; y: number; width: number; height: number };
-
-    // Runtime
-    // elementRef?: HTMLVideoElement | HTMLImageElement | HTMLAudioElement;
-
 }
 
 export interface TextElement {
     id: string;
     text: string;                     // The actual text content
+    includeInMerge?: boolean;
 
     // Timing
     positionStart: number;           // When text appears in final video
@@ -60,4 +57,41 @@ export interface TextElement {
 
     // Runtime only (not persisted)
     visible?: boolean;              // Internal flag for rendering logic
+}
+
+
+export type ExportFormat = 'mp4' | 'webm' | 'gif' | 'mov';
+
+export interface ExportConfig {
+    resolution: {
+        width: number;
+        height: number;
+    };
+    fps: number;
+    format: ExportFormat;
+    quality: number;
+    bitrate?: number;
+    audioEnabled: boolean;
+    includeSubtitles: boolean;
+    filename: string;
+}
+
+export interface ProjectState {
+    id: string;
+    videoFiles: MediaFile[];
+    textElements: TextElement[];
+    currentTime: number;
+    isPlaying: boolean;
+    isMuted: boolean;
+    duration: number;
+    zoomLevel: number;
+    projectName: string;
+    createdAt: string;
+    lastModified: string;
+    resolution: { width: number; height: number };
+    fps: number;
+    aspectRatio: string;
+    history: ProjectState[]; // stack for undo
+    future: ProjectState[]; // stack for redo
+    exportSettings: ExportConfig;
 }

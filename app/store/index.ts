@@ -2,7 +2,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { openDB } from 'idb';
-import videoReducer from './slices/videoSlice';
+import projectStateReducer from './slices/projectSlice';
 
 // Create IndexedDB database for files only
 const setupDB = async () => {
@@ -100,7 +100,7 @@ export const listFiles = async () => {
 
 export const store = configureStore({
     reducer: {
-        video: videoReducer,
+        projectState: projectStateReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({
@@ -128,14 +128,7 @@ if (typeof window !== 'undefined') {
         }
 
         const state = store.getState();
-        const stateWithVideoIds = {
-            ...state,
-            videoFiles: state?.video?.videoFiles?.map((file) => ({
-                ...file,
-                id: file.id,
-            }))
-        };
-        saveState(stateWithVideoIds);
+        saveState(state);
     });
 }
 

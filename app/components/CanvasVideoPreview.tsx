@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { MediaFile as VideoFile, TextElement } from '../types';
 import { useAppSelector, useAppDispatch } from '../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, setVideoFiles } from '../store/slices/videoSlice';
+import { setCurrentTime, setIsPlaying, setIsMuted, setVideoFiles, setTextElements } from '../store/slices/projectSlice';
 import { formatTime } from '../utils/utils';
 
 interface CanvasVideoPreviewProps {
@@ -15,12 +15,12 @@ interface CanvasVideoPreviewProps {
 
 export default function CanvasVideoPreview({
     videoFiles: passedVideoFiles,
-    textElements,
+    textElements: passedTextElements,
     width = 640,
     height = 360
 }: CanvasVideoPreviewProps) {
     const dispatch = useAppDispatch();
-    const { currentTime, isPlaying, isMuted, duration, videoFiles } = useAppSelector((state) => state.video);
+    const { currentTime, isPlaying, isMuted, duration, videoFiles, textElements } = useAppSelector((state) => state.projectState);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -455,7 +455,8 @@ export default function CanvasVideoPreview({
 
     useEffect(() => {
         dispatch(setVideoFiles(passedVideoFiles));
-    }, [dispatch, passedVideoFiles]);
+        dispatch(setTextElements(passedTextElements));
+    }, [dispatch, passedVideoFiles, passedTextElements]);
 
     // Toggle Buttons
     const togglePlay = () => {

@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import CanvasVideoPreview from "./CanvasVideoPreview";
 import { useAppDispatch } from "../store";
-import { setVideoFiles } from "../store/slices/videoSlice";
-import { storeFile, getFile, listFiles, deleteFile, loadState } from "../store";
+import { setVideoFiles, setTextElements as setTextElementsAction } from "../store/slices/projectSlice";
+import { storeFile, getFile, deleteFile, loadState } from "../store";
 import { categorizeFile } from "../utils/utils";
 import { MediaFile as VideoFile, TextElement } from "../types";
 import AddTextButton from './AddTextButton';
+import UploadFile from './UploadFile';
 import TextList from './TextList';
 import VideoList from './VideoList';
 
@@ -20,47 +21,72 @@ interface FileUploaderProps {
 export default function FileUploader({ onFilesChange, selectedFiles, onPreviewChange }: FileUploaderProps) {
     const dispatch = useAppDispatch();
     const [files, setFiles] = useState<VideoFile[]>([]);
-    const [storedFileIds, setStoredFileIds] = useState<string[]>([]);
     const [textElements, setTextElements] = useState<TextElement[]>([]);
 
-    // Load stored files on component mount
+    // Load stored elements on component mount
     useEffect(() => {
         const loadStoredFiles = async () => {
-            const storedFiles = await listFiles();
             const storedState = await loadState();
-            const updatedFiles = [...files];
-            for (const file of storedState?.video?.videoFiles || []) {
+            const loadedFiles = [...files];
+            // Load stored files
+            for (const file of storedState?.projectState?.videoFiles || []) {
                 const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
-                const fileData = await getFile(file.id);
-                // Find the stored state for this file if it exists
-                const storedFileState = storedState?.video?.videoFiles?.find(
-                    (f: VideoFile) => f.file.name === file.file.name
-                );
+                const storedFileData = await getFile(file.id);
 
-                updatedFiles.push({
+                loadedFiles.push({
                     id: file.id,
-                    file: fileData,
+                    file: storedFileData,
                     startTime: file?.startTime ?? 0,
                     endTime: file?.endTime ?? 30,
                     positionStart: file?.positionStart ?? lastEnd,
                     positionEnd: file?.positionEnd ?? lastEnd + 30,
                     includeInMerge: file?.includeInMerge ?? true,
+                    x: file?.x ?? 0,
+                    y: file?.y ?? 0,
+                    width: file?.width ?? 100,
+                    height: file?.height ?? 100,
+                    rotation: file?.rotation ?? 0,
+                    opacity: file?.opacity ?? 1,
+                    crop: file?.crop ?? { x: 0, y: 0, width: 100, height: 100 },
                     playbackSpeed: file?.playbackSpeed ?? 1,
                     volume: file?.volume ?? 1,
-                    type: categorizeFile(fileData.type),
+                    type: categorizeFile(storedFileData.type),
                     zIndex: file?.zIndex ?? 0,
                 });
             }
-            setFiles(updatedFiles);
-            setStoredFileIds(storedFiles.map(file => file.id));
+            setFiles(loadedFiles);
+
+            // Load stored text elements
+            const loadedTextElements = [...textElements];
+            for (const textElement of storedState?.projectState?.textElements || []) {
+                const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
+
+                loadedTextElements.push({
+                    id: textElement.id,
+                    text: textElement.text,
+                    positionStart: textElement?.positionStart ?? lastEnd,
+                    positionEnd: textElement?.positionEnd ?? lastEnd + 30,
+                    includeInMerge: textElement?.includeInMerge ?? true,
+                    x: textElement?.x ?? 0,
+                    y: textElement?.y ?? 0,
+                    width: textElement?.width ?? 100,
+                    height: textElement?.height ?? 100,
+                    rotation: textElement?.rotation ?? 0,
+                    opacity: textElement?.opacity ?? 1,
+                    zIndex: textElement?.zIndex ?? 0,
+                });
+            }
+            setTextElements(loadedTextElements);
         };
+
         loadStoredFiles();
     }, []);
 
     // Update Redux state when files change
     useEffect(() => {
         dispatch(setVideoFiles(files.filter(f => f.includeInMerge)));
-    }, [files, dispatch]);
+        dispatch(setTextElementsAction(textElements));
+    }, [files, textElements, dispatch]);
 
     // File related functions
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,18 +99,23 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
             await storeFile(file, fileId);
             if (fileId) {
-                setStoredFileIds(prev => [...prev, fileId]);
-
                 const lastEnd = files.length > 0 ? Math.max(...files.map(f => f.positionEnd)) : 0;
                 updatedFiles.push({
                     id: fileId,
                     file,
                     startTime: 0,
-                    endTime: 30, // Default 5 seconds
-                    positionStart: lastEnd, // Start after the last video
-                    positionEnd: lastEnd + 30, // Default 5 seconds duration
+                    endTime: 30,
+                    positionStart: lastEnd,
+                    positionEnd: lastEnd + 30,
                     includeInMerge: true,
-                    playbackSpeed: 1,// Default playback speed
+                    x: 0,
+                    y: 0,
+                    width: 100,
+                    height: 100,
+                    rotation: 0,
+                    opacity: 1,
+                    crop: { x: 0, y: 0, width: 100, height: 100 },
+                    playbackSpeed: 1,
                     volume: 1,
                     type: categorizeFile(file.type),
                     zIndex: 0,
@@ -98,10 +129,9 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
     const removeFile = async (index: number) => {
         const updatedFiles = files.filter((_, i) => i !== index);
-        const fileId = storedFileIds[index];
+        const fileId = files[index].id;
         if (fileId) {
             await deleteFile(fileId);
-            setStoredFileIds(prev => prev.filter(id => id !== fileId));
         }
         setFiles(updatedFiles);
         onFilesChange(updatedFiles);
@@ -139,22 +169,9 @@ export default function FileUploader({ onFilesChange, selectedFiles, onPreviewCh
 
     return (
         <div className="space-y-4">
-            {/* Button and Text Input */}
+            {/* Upload file and Add Text */}
             <div className="flex items-center space-x-2">
-                <input
-                    type="file"
-                    accept="video/*,audio/*,image/*"
-                    multiple
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="file-upload"
-                />
-                <label
-                    htmlFor="file-upload"
-                    className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded cursor-pointer"
-                >
-                    Add Files
-                </label>
+                <UploadFile handleFileChange={handleFileChange} />
                 <AddTextButton onAddText={handleAddText} />
             </div>
             {/* Canvas Preview */}

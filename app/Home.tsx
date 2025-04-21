@@ -4,12 +4,7 @@ import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 import { useEffect, useRef, useState } from "react";
 import FileUploader from "./components/FileUploader";
-
-interface VideoFile {
-  file: File;
-  startTime: number;
-  endTime: number;
-}
+import { MediaFile } from "./types";
 
 export default function Home() {
   const [loaded, setLoaded] = useState(false);
@@ -17,7 +12,7 @@ export default function Home() {
   const ffmpegRef = useRef(new FFmpeg());
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const messageRef = useRef<HTMLParagraphElement | null>(null);
-  const [selectedFiles, setSelectedFiles] = useState<VideoFile[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<MediaFile[]>([]);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const load = async () => {
@@ -49,7 +44,6 @@ export default function Home() {
         onFilesChange={setSelectedFiles}
         selectedFiles={selectedFiles}
         onPreviewChange={setPreviewUrl}
-        ffmpeg={ffmpegRef.current}
       />
 
       {previewUrl && (
