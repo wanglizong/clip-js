@@ -57,6 +57,9 @@ const projectStateSlice = createSlice({
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
         },
+        createNewProject: (state, action: PayloadAction<ProjectState>) => {
+            return { ...action.payload };
+        },
     },
 });
 
@@ -66,6 +69,8 @@ export const {
     setCurrentTime,
     setIsPlaying,
     setIsMuted,
+    rehydrate,
+    createNewProject,
 } = projectStateSlice.actions;
 
 export default projectStateSlice.reducer; 

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ThemeSwitch from "../theme/ThemeSwitch";
+import ThemeSwitch from "../buttons/ThemeSwitch";
 export default function Header() {
     return (
         <header className="bg-black border-b border-gray-800 shadow-sm dark:bg-black shadow-sm dark:border-b dark:border-gray-800">

@@ -3,13 +3,15 @@ import { configureStore } from '@reduxjs/toolkit';
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { openDB } from 'idb';
 import projectStateReducer from './slices/projectSlice';
+import projectsReducer from './slices/projectsSlice';
 
-// Create IndexedDB database for files only
+// Create IndexedDB database for files and projects
 const setupDB = async () => {
     if (typeof window === 'undefined') return null;
     const db = await openDB('clipjs-files', 1, {
         upgrade(db) {
             db.createObjectStore('files', { keyPath: 'id' });
+            db.createObjectStore('projects', { keyPath: 'id' });
         },
     });
     return db;
@@ -39,7 +41,7 @@ const saveState = (state: any) => {
     }
 };
 
-// File storage functions remain in IndexedDB
+// File storage functions
 export const storeFile = async (file: File, fileId: string) => {
     if (typeof window === 'undefined') return null;
     try {
@@ -98,9 +100,66 @@ export const listFiles = async () => {
     }
 };
 
+// Project storage functions
+export const storeProject = async (project: any) => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const db = await setupDB();
+
+        if (!db) return null;
+        if (!project.id || !project.projectName) {
+            console.log('Skipping empty project storage');
+            return null;
+        }
+
+        await db.put('projects', project);
+
+        return project.id;
+    } catch (error) {
+        console.error('Error storing project:', error);
+        return null;
+    }
+};
+
+export const getProject = async (projectId: string) => {
+    if (typeof window === 'undefined') return null;
+    try {
+        const db = await setupDB();
+        if (!db) return null;
+        return await db.get('projects', projectId);
+    } catch (error) {
+        console.error('Error retrieving project:', error);
+        return null;
+    }
+};
+
+export const deleteProject = async (projectId: string) => {
+    if (typeof window === 'undefined') return;
+    try {
+        const db = await setupDB();
+        if (!db) return;
+        await db.delete('projects', projectId);
+    } catch (error) {
+        console.error('Error deleting project:', error);
+    }
+};
+
+export const listProjects = async () => {
+    if (typeof window === 'undefined') return [];
+    try {
+        const db = await setupDB();
+        if (!db) return [];
+        return await db.getAll('projects');
+    } catch (error) {
+        console.error('Error listing projects:', error);
+        return [];
+    }
+};
+
 export const store = configureStore({
     reducer: {
         projectState: projectStateReducer,
+        projects: projectsReducer,
     },
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware({

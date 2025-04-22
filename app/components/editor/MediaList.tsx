@@ -1,14 +1,25 @@
 "use client";
 
-import { MediaFile } from '../types';
+import { useAppSelector } from '../../store';
+import { setMediaFiles } from '../../store/slices/projectSlice';
+import { MediaFile } from '../../types';
+import { useAppDispatch } from '../../store';
 
-interface MediaListProps {
-    mediaFiles: MediaFile[];
-    onUpdateMedia: (id: string, updates: Partial<MediaFile>) => void;
-    onDeleteMedia: (id: string) => void;
-}
+// Video management functions
+export default function MediaList() {
+    const { mediaFiles } = useAppSelector((state) => state.projectState);
+    const dispatch = useAppDispatch();
+    const onUpdateMedia = (id: string, updates: Partial<MediaFile>) => {
+        dispatch(setMediaFiles(mediaFiles.map(media =>
+            media.id === id ? { ...media, ...updates } : media
+        )));
+    };
 
-export default function MediaList({ mediaFiles, onUpdateMedia, onDeleteMedia }: MediaListProps) {
+    const onDeleteMedia = (id: string) => {
+        const index = mediaFiles.findIndex(f => f.id === id);
+        const updatedFiles = mediaFiles.filter((_, i) => i !== index);
+        dispatch(setMediaFiles(updatedFiles));
+    };
 
     return (
         <div className="space-y-4">
@@ -211,4 +222,4 @@ export default function MediaList({ mediaFiles, onUpdateMedia, onDeleteMedia }: 
             ))}
         </div>
     );
-} 
+}

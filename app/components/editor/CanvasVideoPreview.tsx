@@ -1,26 +1,19 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import { MediaFile, TextElement } from '../types';
-import { useAppSelector, useAppDispatch } from '../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, setMediaFiles, setTextElements } from '../store/slices/projectSlice';
-import { formatTime } from '../utils/utils';
+import { MediaFile, TextElement } from '../../types';
+import { useAppSelector, useAppDispatch, getProject, storeProject } from '../../store';
+import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '../../store/slices/projectSlice';
+import { formatTime } from '../../utils/utils';
+import { updateProject } from '../../store/slices/projectsSlice';
 
-interface CanvasVideoPreviewProps {
-    mediaFiles: MediaFile[];
-    textElements: TextElement[];
-    width?: number;
-    height?: number;
-}
 
-export default function CanvasVideoPreview({
-    mediaFiles: passedMediaFiles,
-    textElements: passedTextElements,
-    width = 640,
-    height = 360
-}: CanvasVideoPreviewProps) {
+export default function CanvasVideoPreview() {
     const dispatch = useAppDispatch();
-    const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements } = useAppSelector((state) => state.projectState);
+    const projectState = useAppSelector((state) => state.projectState);
+    const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements, resolution } = projectState;
+    const { currentProjectId } = useAppSelector((state) => state.projects);
+    const { width, height } = resolution;
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -60,6 +53,30 @@ export default function CanvasVideoPreview({
             dispatch(setIsPlaying(false));
         };
     }, [mediaFiles]);
+
+    // set project state from with the current project id
+    useEffect(() => {
+        const loadProject = async () => {
+            if (currentProjectId) {
+                const project = await getProject(currentProjectId);
+                if (project) {
+                    dispatch(rehydrate(project));
+                }
+            }
+        };
+        loadProject();
+    }, [dispatch, currentProjectId]);
+
+    useEffect(() => {
+        const saveProject = async () => {
+            console.log('Saving project', projectState);
+            if (!projectState) return;
+            await storeProject(projectState);
+            dispatch(updateProject(projectState));
+        };
+        saveProject();
+    }, [projectState, dispatch]);
+
 
     const initCanvas = () => {
         const canvas = canvasRef.current;
@@ -451,12 +468,6 @@ export default function CanvasVideoPreview({
         startTimeRef.current = performance.now() - (newTime * 1000);
         dispatch(setCurrentTime(newTime));
     }
-
-
-    useEffect(() => {
-        dispatch(setMediaFiles(passedMediaFiles));
-        dispatch(setTextElements(passedTextElements));
-    }, [dispatch, passedMediaFiles, passedTextElements]);
 
     // Toggle Buttons
     const togglePlay = () => {

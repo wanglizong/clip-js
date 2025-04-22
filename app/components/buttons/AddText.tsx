@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from 'react';
-import { TextElement } from '../types';
+import { TextElement } from '../../types';
+import { useAppDispatch, useAppSelector } from "../../store";
+import { setTextElements } from '../../store/slices/projectSlice';
 
-interface AddTextButtonProps {
-    onAddText: (textElement: TextElement) => void;
-}
 
-export default function AddTextButton({ onAddText }: AddTextButtonProps) {
+export default function AddTextButton() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [textConfig, setTextConfig] = useState<Partial<TextElement>>({
         text: '',
@@ -24,6 +23,12 @@ export default function AddTextButton({ onAddText }: AddTextButtonProps) {
         rotation: 0,
         animation: 'none'
     });
+    const { textElements } = useAppSelector((state) => state.projectState);
+    const dispatch = useAppDispatch();
+
+    const onAddText = (textElement: TextElement) => {
+        dispatch(setTextElements([...textElements, textElement]));
+    };
 
     const handleAddText = () => {
         const newTextElement: TextElement = {

@@ -1,17 +1,17 @@
 "use client";
 
 import { useState } from 'react';
-import { TextElement } from '../types';
+import { TextElement } from '../../types';
+import { useAppSelector } from '../../store';
+import { setTextElements } from '../../store/slices/projectSlice';
+import { useAppDispatch } from '../../store';
 
-interface TextListProps {
-    textElements: TextElement[];
-    onUpdateText: (id: string, updates: Partial<TextElement>) => void;
-    onDeleteText: (id: string) => void;
-}
 
-export default function TextList({ textElements, onUpdateText, onDeleteText }: TextListProps) {
+export default function TextList() {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const { textElements } = useAppSelector((state) => state.projectState);
+    const dispatch = useAppDispatch();
 
     const handleTextClick = (id: string) => {
         setExpandedId(expandedId === id ? null : id);
@@ -24,6 +24,16 @@ export default function TextList({ textElements, onUpdateText, onDeleteText }: T
     const handleSave = (id: string, updates: Partial<TextElement>) => {
         onUpdateText(id, updates);
         setEditingId(null);
+    };
+
+    const onUpdateText = (id: string, updates: Partial<TextElement>) => {
+        dispatch(setTextElements(textElements.map(text =>
+            text.id === id ? { ...text, ...updates } : text
+        )));
+    };
+
+    const onDeleteText = (id: string) => {
+        dispatch(setTextElements(textElements.filter(text => text.id !== id)));
     };
 
     return (

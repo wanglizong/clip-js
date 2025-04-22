@@ -1,5 +1,5 @@
 "use client";
-import { Home, PreviousPage } from './components/buttons';
+import { Home, PreviousPage } from './components/buttons/buttons';
 export default function notFound() {
     return (
         <div className='flex items-center justify-center w-full min-h-[70vh] text-gray-900 my-12 px-4'>
