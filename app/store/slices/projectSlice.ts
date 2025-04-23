@@ -14,6 +14,7 @@ export const initialState: ProjectState = {
     isMuted: false,
     duration: 0,
     zoomLevel: 1,
+    activeSection: 'media',
     resolution: { width: 1920, height: 1080 },
     fps: 30,
     aspectRatio: '16:9',
@@ -53,6 +54,9 @@ const projectStateSlice = createSlice({
         setIsMuted: (state, action: PayloadAction<boolean>) => {
             state.isMuted = action.payload;
         },
+        setActiveSection: (state, action: PayloadAction<"media" | "text">) => {
+            state.activeSection = action.payload;
+        },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
@@ -69,6 +73,7 @@ export const {
     setCurrentTime,
     setIsPlaying,
     setIsMuted,
+    setActiveSection,
     rehydrate,
     createNewProject,
 } = projectStateSlice.actions;

@@ -6,11 +6,13 @@ import { useAppSelector, useAppDispatch, getProject, storeProject } from '../../
 import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '../../store/slices/projectSlice';
 import { formatTime } from '../../utils/utils';
 import { updateProject } from '../../store/slices/projectsSlice';
+import GlobalKeyHandlerProps from './keys/GlobalKeyHandlerProps';
 
 
 export default function CanvasVideoPreview() {
     const dispatch = useAppDispatch();
     const projectState = useAppSelector((state) => state.projectState);
+    // TODO: current time cause project state to be updated rapidly while it is playing and we don't even use it to restore to the second user was on when page reloaded 
     const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements, resolution } = projectState;
     const { currentProjectId } = useAppSelector((state) => state.projects);
     const { width, height } = resolution;
@@ -67,10 +69,11 @@ export default function CanvasVideoPreview() {
         loadProject();
     }, [dispatch, currentProjectId]);
 
+    // Save the project state to the database
     useEffect(() => {
         const saveProject = async () => {
-            console.log('Saving project', projectState);
             if (!projectState) return;
+            console.log("Saving project", projectState);
             await storeProject(projectState);
             dispatch(updateProject(projectState));
         };
@@ -520,18 +523,19 @@ export default function CanvasVideoPreview() {
                 className="border border-gray-300 rounded"
             />
             {/* Video controls */}
-            <div className="absolute bottom-2 right-2 flex space-x-2">
+            <div className="absolute bottom-16 right-2 flex space-x-2">
                 <button
                     onClick={toggleMute}
-                    className="bg-gray-500 hover:bg-gray-700 text-white py-1 px-3 rounded"
+                    className="bg-white hover:bg-gray-200 text-black py-1 px-3 rounded"
                 >
-                    {isMuted ? '🔇' : '🔊'}
+                    <img src={isMuted ? 'https://www.svgrepo.com/show/391332/sound-mute.svg' : 'https://www.svgrepo.com/show/391335/sound-up.svg'} alt="Mute" width={24} height={24} />
                 </button>
+                <GlobalKeyHandlerProps onSpace={togglePlay} onMute={toggleMute} />
                 <button
                     onClick={togglePlay}
-                    className="bg-blue-500 hover:bg-blue-700 text-white py-1 px-3 rounded"
+                    className="bg-white hover:bg-gray-200 text-black py-1 px-3 rounded"
                 >
-                    {isPlaying ? 'true▶️' : 'false⏸️'}
+                    <img src={isPlaying ? 'https://www.svgrepo.com/show/512674/play-1003.svg' : 'https://www.svgrepo.com/show/535553/pause.svg'} alt="Play" width={24} height={24} />
                 </button>
             </div>
 
@@ -539,12 +543,12 @@ export default function CanvasVideoPreview() {
             <div className="mt-2">
                 <div
                     ref={timelineRef}
-                    className="relative h-2 bg-gray-300 rounded-full cursor-pointer"
+                    className="relative h-3 bg-gray-300 rounded-full cursor-pointer"
                     onClick={handleTimelineClick}
                 >
                     <div
-                        className="absolute h-full bg-blue-500 rounded-full"
-                        style={{ width: `${(currentTime / duration) * 100}%` }}
+                        className="absolute h-full inset-y-0 left-[-2px] bg-black rounded-full"
+                        style={{ width: `${(currentTime / duration) * 100 + 1}%` }}
                     />
                 </div>
                 <div className="flex justify-between text-sm text-gray-600 mt-1">

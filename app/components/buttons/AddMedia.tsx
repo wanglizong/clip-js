@@ -1,9 +1,12 @@
+"use client";
 
 import { useAppDispatch, useAppSelector } from "../../store";
 import { setMediaFiles } from "../../store/slices/projectSlice";
 import { storeFile } from "../../store";
 import { categorizeFile } from "../../utils/utils";
-export default function UploadFile() {
+import Image from 'next/image';
+
+export default function AddMedia() {
     const { mediaFiles } = useAppSelector((state) => state.projectState);
     const dispatch = useAppDispatch();
 
@@ -27,11 +30,11 @@ export default function UploadFile() {
                     includeInMerge: true,
                     x: 0,
                     y: 0,
-                    width: 100,
-                    height: 100,
+                    width: 1920,
+                    height: 1080,
                     rotation: 0,
                     opacity: 1,
-                    crop: { x: 0, y: 0, width: 100, height: 100 },
+                    crop: { x: 0, y: 0, width: 1920, height: 1080 },
                     playbackSpeed: 1,
                     volume: 1,
                     type: categorizeFile(file.type),
@@ -43,23 +46,30 @@ export default function UploadFile() {
     };
 
     return (
-        <div>
-            <div className="flex items-center space-x-2">
-                <input
-                    type="file"
-                    accept="video/*,audio/*,image/*"
-                    multiple
-                    onChange={handleFileChange}
-                    className="hidden"
-                    id="file-upload"
+        <div
+            className="rounded-full bg-white border border-solid border-transparent transition-colors flex flex-col items-center justify-center text-gray-800 hover:bg-[#ccc] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-auto py-2 px-2 sm:px-5 sm:w-auto"
+        >
+            <label
+                htmlFor="file-upload"
+                className="cursor-pointer rounded-full bg-white border border-solid border-transparent transition-colors flex flex-col items-center justify-center text-gray-800 hover:bg-[#ccc] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-auto py-2 px-2 sm:px-5 sm:w-auto"
+            >
+                <Image
+                    alt="Add Project"
+                    className="Black"
+                    height={12}
+                    width={12}
+                    src="https://www.svgrepo.com/show/529274/upload.svg"
                 />
-                <label
-                    htmlFor="file-upload"
-                    className="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded cursor-pointer"
-                >
-                    Add Files
-                </label>
-            </div>
+                <span className="text-xs">Library</span>
+            </label>
+            <input
+                type="file"
+                accept="video/*,audio/*,image/*"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+                id="file-upload"
+            />
         </div>
     );
 }

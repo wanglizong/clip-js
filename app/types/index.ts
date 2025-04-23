@@ -88,6 +88,7 @@ export interface ProjectState {
     projectName: string;
     createdAt: string;
     lastModified: string;
+    activeSection: 'media' | 'text';
     resolution: { width: number; height: number };
     fps: number;
     aspectRatio: string;

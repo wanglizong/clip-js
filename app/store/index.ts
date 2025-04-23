@@ -108,7 +108,6 @@ export const storeProject = async (project: any) => {
 
         if (!db) return null;
         if (!project.id || !project.projectName) {
-            console.log('Skipping empty project storage');
             return null;
         }
 
