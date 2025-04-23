@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppSelector } from '../../store';
-import { setMediaFiles } from '../../store/slices/projectSlice';
+import { setActiveElement, setMediaFiles, setTextElements } from '../../store/slices/projectSlice';
 import { MediaFile } from '../../types';
 import { useAppDispatch } from '../../store';
 
@@ -16,6 +16,9 @@ export default function MediaProperties() {
     };
 
     const onDeleteMedia = (id: string) => {
+        if (mediaFiles[activeElementIndex].id === id) {
+            dispatch(setActiveElement(null));
+        }
         const index = mediaFiles.findIndex(f => f.id === id);
         const updatedFiles = mediaFiles.filter((_, i) => i !== index);
         dispatch(setMediaFiles(updatedFiles));

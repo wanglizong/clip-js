@@ -22,9 +22,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [ ] delete and duplicate for each element on timeline
 - [ ] thumbnail for vids and imgs
 - [ ] insert elements in timeline with https://www.npmjs.com/package/react-moveable
-- [ ] add shapes as media and text
+- [ ] add shapes blur effects also as media and text
 - [ ] Opacity (tricky cause i ues canvas)
-
+- [ ] functionality separate audio 
+- [ ] add crop feature to vids
+- [ ] duplicate elements
 There are also other various TODOS across the project search with TODO
 
 ### Least priority for now

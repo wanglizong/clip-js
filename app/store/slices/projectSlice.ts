@@ -69,10 +69,10 @@ const projectStateSlice = createSlice({
         setIsMuted: (state, action: PayloadAction<boolean>) => {
             state.isMuted = action.payload;
         },
-        setActiveSection: (state, action: PayloadAction<"media" | "text" | "export">) => {
+        setActiveSection: (state, action: PayloadAction<ActiveElement>) => {
             state.activeSection = action.payload;
         },
-        setActiveElement: (state, action: PayloadAction<ActiveElement>) => {
+        setActiveElement: (state, action: PayloadAction<ActiveElement | null>) => {
             state.activeElement = action.payload;
         },
         setActiveElementIndex: (state, action: PayloadAction<number>) => {
@@ -96,6 +96,8 @@ export const {
     setIsPlaying,
     setIsMuted,
     setActiveSection,
+    setActiveElement,
+    setActiveElementIndex,
     rehydrate,
     createNewProject,
 } = projectStateSlice.actions;

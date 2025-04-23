@@ -1,16 +1,12 @@
 "use client";
-import { FFmpeg } from "@ffmpeg/ffmpeg";
-// import { fetchFile, toBlobURL } from "@ffmpeg/util";
-import { useEffect, useRef, useState } from "react";
-import { MediaFile } from "../../../types";
+import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../store";
-import { getProject, storeProject } from "../../../store";
-import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
+import { getProject } from "../../../store";
+import { setCurrentProject } from "../../../store/slices/projectsSlice";
 import { setActiveSection } from "../../../store/slices/projectSlice";
 import CanvasVideoPreview from "../../../components/editor/CanvasVideoPreview";
 import AddText from '../../../components/buttons/AddText';
 import AddMedia from '../../../components/buttons/AddMedia';
-import TextList from '../../../components/editor/TextProperties';
 import MediaList from '../../../components/editor/MediaList';
 import { useRouter } from 'next/navigation';
 import TextButton from "@/app/components/buttons/TextButton";
@@ -18,45 +14,15 @@ import LibraryButton from "@/app/components/buttons/LibraryButton";
 import ExportButton from "@/app/components/buttons/ExportButton";
 import MediaProperties from "@/app/components/editor/MediaProperties";
 import TextProperties from "../../../components/editor/TextProperties";
+import { Timeline } from "../../../components/editor/timeline/Timline";
+
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
     const dispatch = useAppDispatch();
-    const [loaded, setLoaded] = useState(true);
-    const [isLoading, setIsLoading] = useState(false);
-    // const ffmpegRef = useRef(new FFmpeg());
-    const videoRef = useRef<HTMLVideoElement | null>(null);
-    const messageRef = useRef<HTMLParagraphElement | null>(null);
-    const [selectedFiles, setSelectedFiles] = useState<MediaFile[]>([]);
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const projectState = useAppSelector((state) => state.projectState);
     const router = useRouter();
-    // TODO: store active section on project states
-    // const [activeSection, setActiveSection] = useState<"media" | "text" | null>("media"); // State to track active section
     const { activeSection, activeElement } = projectState;
-    // const loadFFmpeg = async () => {
-    //     setIsLoading(true);
-    //     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
-    //     const ffmpeg = ffmpegRef.current;
-    //     ffmpeg.on("log", ({ message }) => {
-    //         if (messageRef.current) messageRef.current.innerHTML = message;
-    //     });
-    //     await ffmpeg.load({
-    //         coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
-    //         wasmURL: await toBlobURL(
-    //             `${baseURL}/ffmpeg-core.wasm`,
-    //             "application/wasm"
-    //         ),
-    //     });
-    //     setLoaded(true);
-    //     localStorage.setItem("ffmpegLoaded", "true");
-    //     setIsLoading(false);
-    // };
-
-    // useEffect(() => {
-    //     loadFFmpeg();
-    // }, []);
-
-    // when page is loaded
+    // when page is loaded set the project id if it exists
     useEffect(() => {
         const loadProject = async () => {
             if (id) {
@@ -72,12 +38,11 @@ export default function Project({ params }: { params: { id: string } }) {
     }, [id, dispatch]);
 
     const handleFocus = (section: "media" | "text" | "export") => {
-        dispatch(setActiveSection(section)); // Update the active section
+        dispatch(setActiveSection(section));
     };
 
     return (
         <div className="flex flex-col h-screen">
-            {/* Main Content */}
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Sidebar - Buttons */}
                 <div className="flex-[0.1] min-w-[60px] max-w-[100px] border-r overflow-y-auto p-4">
@@ -88,7 +53,7 @@ export default function Project({ params }: { params: { id: string } }) {
                     </div>
                 </div>
 
-                {/* Media List */}
+                {/* Add media and text */}
                 <div className="flex-[0.3] min-w-[200px] border-r overflow-y-auto p-4">
                     {activeSection === "media" && (
                         <div>
@@ -99,7 +64,6 @@ export default function Project({ params }: { params: { id: string } }) {
                     )}
                     {activeSection === "text" && (
                         <div>
-                            {/* <TextList /> */}
                             <AddText />
                         </div>
                     )}
@@ -122,10 +86,15 @@ export default function Project({ params }: { params: { id: string } }) {
                     )}
                     {activeElement === "text" && (
                         <div>
+                            <h2 className="text-lg font-semibold mb-4">Text Properties</h2>
                             <TextProperties />
                         </div>
                     )}
                 </div>
+            </div>
+            {/* Timeline at bottom */}
+            <div className="h-[450px] border-t">
+                <Timeline />
             </div>
         </div>
     );

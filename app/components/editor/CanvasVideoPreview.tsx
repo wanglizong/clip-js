@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MediaFile, TextElement } from '../../types';
 import { useAppSelector, useAppDispatch, getProject, storeProject } from '../../store';
 import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '../../store/slices/projectSlice';
@@ -12,10 +12,10 @@ import GlobalKeyHandlerProps from './keys/GlobalKeyHandlerProps';
 export default function CanvasVideoPreview() {
     const dispatch = useAppDispatch();
     const projectState = useAppSelector((state) => state.projectState);
-    // TODO: current time cause project state to be updated rapidly while it is playing and we don't even use it to restore to the second user was on when page reloaded 
     const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements, resolution } = projectState;
     const { currentProjectId } = useAppSelector((state) => state.projects);
     const { width, height } = resolution;
+    // const [currentTime, setCurrentTime] = useState(0);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -169,14 +169,19 @@ export default function CanvasVideoPreview() {
         // Stop if we've reached the end
         if (currentTimeSeconds >= duration) {
             dispatch(setIsPlaying(false));
+            // setCurrentTime(duration);
             dispatch(setCurrentTime(duration));
             videoElementsRef.current.forEach(video => {
                 video.pause();
-                video.currentTime = video.duration;
+                if (isFinite(video.duration)) {
+                    video.currentTime = video.duration;
+                }
             });
             audioElementsRef.current.forEach(audio => {
                 audio.pause();
-                audio.currentTime = audio.duration;
+                if (isFinite(audio.duration)) {
+                    audio.currentTime = audio.duration;
+                }
             });
             if (animationFrameRef.current) {
                 cancelAnimationFrame(animationFrameRef.current);
@@ -185,6 +190,7 @@ export default function CanvasVideoPreview() {
             return;
         }
 
+        // setCurrentTime(currentTimeSeconds);
         dispatch(setCurrentTime(currentTimeSeconds));
 
         // Clear canvas
@@ -469,6 +475,7 @@ export default function CanvasVideoPreview() {
             }
         })
         startTimeRef.current = performance.now() - (newTime * 1000);
+        // setCurrentTime(newTime);
         dispatch(setCurrentTime(newTime));
     }
 
@@ -479,6 +486,7 @@ export default function CanvasVideoPreview() {
             // If we're at the end, reset to start
             if (currentTime >= duration) {
                 const newTime = 0;
+                // setCurrentTime(newTime);
                 dispatch(setCurrentTime(newTime));
                 startTimeRef.current = performance.now();
             } else {

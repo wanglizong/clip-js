@@ -78,6 +78,7 @@ export interface ExportConfig {
 
 export type ActiveElement = 'media' | 'text' | 'export';
 
+
 export interface ProjectState {
     id: string;
     mediaFiles: MediaFile[];

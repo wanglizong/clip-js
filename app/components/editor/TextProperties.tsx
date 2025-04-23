@@ -1,7 +1,7 @@
 "use client";
 
 import { useAppSelector } from '../../store';
-import { setTextElements } from '../../store/slices/projectSlice';
+import { setActiveElement, setTextElements } from '../../store/slices/projectSlice';
 import { TextElement } from '../../types';
 import { useAppDispatch } from '../../store';
 
@@ -17,6 +17,9 @@ export default function TextProperties() {
     };
 
     const onDeleteText = (id: string) => {
+        if (textElements[activeElementIndex].id === id) {
+            dispatch(setActiveElement(null));
+        }
         dispatch(setTextElements(textElements.filter(text => text.id !== id)));
     };
 
