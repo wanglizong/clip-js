@@ -21,7 +21,11 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ### high priority
 - [ ] delete and duplicate for each element on timeline
 - [ ] thumbnail for vids and imgs
-- [ ] movable with https://www.npmjs.com/package/react-moveable
+- [ ] insert elements in timeline with https://www.npmjs.com/package/react-moveable
+- [ ] add shapes as media and text
+- [ ] Opacity (tricky cause i ues canvas)
+
+There are also other various TODOS across the project search with TODO
 
 ### Least priority for now
 - [ ] PWA Mode: So users can edit offline.

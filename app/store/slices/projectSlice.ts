@@ -1,12 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TextElement, MediaFile } from '../../types';
+import { TextElement, MediaFile, ActiveElement } from '../../types';
 import { ProjectState } from '../../types';
 
 export const initialState: ProjectState = {
-    id: '',
+    id: crypto.randomUUID(),
     projectName: '',
-    createdAt: '',
-    lastModified: '',
+    createdAt: new Date().toISOString(),
+    lastModified: new Date().toISOString(),
     mediaFiles: [],
     textElements: [],
     currentTime: 0,
@@ -15,6 +15,8 @@ export const initialState: ProjectState = {
     duration: 0,
     zoomLevel: 1,
     activeSection: 'media',
+    activeElement: null,
+    activeElementIndex: 0,
     resolution: { width: 1920, height: 1080 },
     fps: 30,
     aspectRatio: '16:9',
@@ -42,6 +44,19 @@ const projectStateSlice = createSlice({
                 state.duration = Math.max(...action.payload.map(v => v.positionEnd));
             }
         },
+        setProjectName: (state, action: PayloadAction<string>) => {
+            state.projectName = action.payload;
+        },
+        setProjectId: (state, action: PayloadAction<string>) => {
+            state.id = action.payload;
+        },
+        setProjectCreatedAt: (state, action: PayloadAction<string>) => {
+            state.createdAt = action.payload;
+        },
+        setProjectLastModified: (state, action: PayloadAction<string>) => {
+            state.lastModified = action.payload;
+        },
+
         setTextElements: (state, action: PayloadAction<TextElement[]>) => {
             state.textElements = action.payload;
         },
@@ -54,15 +69,21 @@ const projectStateSlice = createSlice({
         setIsMuted: (state, action: PayloadAction<boolean>) => {
             state.isMuted = action.payload;
         },
-        setActiveSection: (state, action: PayloadAction<"media" | "text">) => {
+        setActiveSection: (state, action: PayloadAction<"media" | "text" | "export">) => {
             state.activeSection = action.payload;
+        },
+        setActiveElement: (state, action: PayloadAction<ActiveElement>) => {
+            state.activeElement = action.payload;
+        },
+        setActiveElementIndex: (state, action: PayloadAction<number>) => {
+            state.activeElementIndex = action.payload;
         },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
         },
-        createNewProject: (state, action: PayloadAction<ProjectState>) => {
-            return { ...action.payload };
+        createNewProject: (state) => {
+            return { ...initialState };
         },
     },
 });
@@ -71,6 +92,7 @@ export const {
     setMediaFiles,
     setTextElements,
     setCurrentTime,
+    setProjectName,
     setIsPlaying,
     setIsMuted,
     setActiveSection,

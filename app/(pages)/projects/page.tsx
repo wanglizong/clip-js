@@ -31,6 +31,7 @@ export default function Projects() {
     const handleCreateProject = async () => {
         if (!newProjectName.trim()) return;
 
+        // TODO: use reducer not this to create new project
         const newProject: ProjectState = {
             id: crypto.randomUUID(),
             projectName: newProjectName,
@@ -43,6 +44,8 @@ export default function Projects() {
             isMuted: false,
             duration: 0,
             activeSection: 'media',
+            activeElement: 'text',
+            activeElementIndex: 0,
             zoomLevel: 1,
             resolution: { width: 1920, height: 1080 },
             fps: 30,
@@ -194,6 +197,3 @@ export default function Projects() {
 
     );
 }
-
-
-// onClick={() => dispatch(setCurrentProject(project.id))}

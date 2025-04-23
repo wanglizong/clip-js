@@ -76,6 +76,8 @@ export interface ExportConfig {
     filename: string;
 }
 
+export type ActiveElement = 'media' | 'text' | 'export';
+
 export interface ProjectState {
     id: string;
     mediaFiles: MediaFile[];
@@ -88,7 +90,10 @@ export interface ProjectState {
     projectName: string;
     createdAt: string;
     lastModified: string;
-    activeSection: 'media' | 'text';
+    activeSection: ActiveElement;
+    activeElement: ActiveElement | null;
+    activeElementIndex: number;
+
     resolution: { width: number; height: number };
     fps: number;
     aspectRatio: string;

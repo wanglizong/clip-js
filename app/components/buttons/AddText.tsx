@@ -75,16 +75,15 @@ export default function AddTextButton() {
         <div className="relative">
             {(
                 <div className="flex items-center justify-center z-50">
-                    <div className="bg-black p-6 rounded-lg w-96">
+                    <div className="p-6 rounded-lg w-96">
                         <div className="space-y-8">
                             <div>
                                 <label className="text-xl font-bold mb-2 text-white">Text Content</label>
-                                <input
-                                    type="text"
+                                <textarea
+                                    // type="text"
                                     value={textConfig.text}
                                     onChange={(e) => setTextConfig({ ...textConfig, text: e.target.value })}
                                     className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
-
                                 />
                             </div>
 
@@ -169,7 +168,7 @@ export default function AddTextButton() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium text-white">Background Color</label>
+                                    <label className="block text-sm font-medium text-white">Background </label>
                                     <input
                                         type="color"
                                         value={textConfig.backgroundColor}

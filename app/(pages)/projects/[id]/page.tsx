@@ -10,12 +10,14 @@ import { setActiveSection } from "../../../store/slices/projectSlice";
 import CanvasVideoPreview from "../../../components/editor/CanvasVideoPreview";
 import AddText from '../../../components/buttons/AddText';
 import AddMedia from '../../../components/buttons/AddMedia';
-import TextList from '../../../components/editor/TextList';
+import TextList from '../../../components/editor/TextProperties';
 import MediaList from '../../../components/editor/MediaList';
 import { useRouter } from 'next/navigation';
 import TextButton from "@/app/components/buttons/TextButton";
 import LibraryButton from "@/app/components/buttons/LibraryButton";
-
+import ExportButton from "@/app/components/buttons/ExportButton";
+import MediaProperties from "@/app/components/editor/MediaProperties";
+import TextProperties from "../../../components/editor/TextProperties";
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
     const dispatch = useAppDispatch();
@@ -30,7 +32,7 @@ export default function Project({ params }: { params: { id: string } }) {
     const router = useRouter();
     // TODO: store active section on project states
     // const [activeSection, setActiveSection] = useState<"media" | "text" | null>("media"); // State to track active section
-    const { activeSection } = projectState;
+    const { activeSection, activeElement } = projectState;
     // const loadFFmpeg = async () => {
     //     setIsLoading(true);
     //     const baseURL = "https://unpkg.com/@ffmpeg/core@0.12.10/dist/umd";
@@ -69,7 +71,7 @@ export default function Project({ params }: { params: { id: string } }) {
         loadProject();
     }, [id, dispatch]);
 
-    const handleFocus = (section: "media" | "text") => {
+    const handleFocus = (section: "media" | "text" | "export") => {
         dispatch(setActiveSection(section)); // Update the active section
     };
 
@@ -82,6 +84,7 @@ export default function Project({ params }: { params: { id: string } }) {
                     <div className="flex flex-col  space-y-2">
                         <TextButton onClick={() => handleFocus("text")} />
                         <LibraryButton onClick={() => handleFocus("media")} />
+                        <ExportButton onClick={() => handleFocus("export")} />
                     </div>
                 </div>
 
@@ -96,7 +99,7 @@ export default function Project({ params }: { params: { id: string } }) {
                     )}
                     {activeSection === "text" && (
                         <div>
-                            ]                            <TextList />
+                            {/* <TextList /> */}
                             <AddText />
                         </div>
                     )}
@@ -107,6 +110,21 @@ export default function Project({ params }: { params: { id: string } }) {
                     <div className="max-w-4xl mx-auto">
                         <CanvasVideoPreview />
                     </div>
+                </div>
+
+                {/* Right Sidebar - Element Properties */}
+                <div className="flex-[0.4] min-w-[200px] border-l overflow-y-auto p-4">
+                    {activeElement === "media" && (
+                        <div>
+                            <h2 className="text-lg font-semibold mb-4">Media Properties</h2>
+                            <MediaProperties />
+                        </div>
+                    )}
+                    {activeElement === "text" && (
+                        <div>
+                            <TextProperties />
+                        </div>
+                    )}
                 </div>
             </div>
         </div>
