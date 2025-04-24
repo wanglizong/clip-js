@@ -1,3 +1,20 @@
+
+
+
+
+
+
+
+
+// TODO: use canva and get rid of the remotion player
+// this is the old canvas preview but it is a good starting point
+
+
+
+
+
+
+
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
@@ -10,7 +27,7 @@ import GlobalKeyHandlerProps from '../keys/GlobalKeyHandlerProps';
 import { timeStamp } from 'console';
 
 
-export default function CanvasVideoPreview() {
+export default function CanvasPreview() {
     const dispatch = useAppDispatch();
     const projectState = useAppSelector((state) => state.projectState);
     const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements, resolution } = projectState;

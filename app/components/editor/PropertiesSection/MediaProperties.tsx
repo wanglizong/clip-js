@@ -130,6 +130,24 @@ export default function MediaProperties() {
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
                         </div>
+                        <div>
+                            <label className="block text-sm">Zindex</label>
+                            <input
+                                type="number"
+                                value={mediaFile.zIndex || 0}
+                                onChange={(e) => onUpdateMedia(mediaFile.id, { zIndex: Number(e.target.value) })}
+                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm">Opacity</label>
+                            <input
+                                type="number"
+                                value={mediaFile.opacity || 100}
+                                onChange={(e) => onUpdateMedia(mediaFile.id, { opacity: Number(e.target.value) })}
+                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                            />
+                        </div>
                     </div>
                 </div>
                 {/* Audio Properties */}

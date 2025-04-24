@@ -25,6 +25,7 @@ export default function AddMedia() {
                     file,
                     startTime: 0,
                     endTime: 30,
+                    src: URL.createObjectURL(file),
                     positionStart: lastEnd,
                     positionEnd: lastEnd + 30,
                     includeInMerge: true,

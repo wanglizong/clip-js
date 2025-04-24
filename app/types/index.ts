@@ -5,6 +5,7 @@ export interface MediaFile {
     file: File;
     type: MediaType;
     startTime: number;  // within the source video
+    src?: string;
     endTime: number;
     positionStart: number;  // position in the final video
     positionEnd: number;

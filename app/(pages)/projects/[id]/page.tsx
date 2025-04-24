@@ -1,10 +1,11 @@
 "use client";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "../../../store";
+import { storeProject, useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
-import { setCurrentProject } from "../../../store/slices/projectsSlice";
+import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
+import { rehydrate, setMediaFiles } from '../../../store/slices/projectSlice';
 import { setActiveSection } from "../../../store/slices/projectSlice";
-import CanvasVideoPreview from "../../../components/editor/player/CanvasVideoPreview";
+// import CanvasPreview from "../../../components/editor/player/CanvasPreview";
 import AddText from '../../../components/editor/AssetsPanel/AddButtons/AddText';
 import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/AddMedia';
 import MediaList from '../../../components/editor/AssetsPanel/MediaList';
@@ -15,11 +16,16 @@ import ExportButton from "@/app/components/editor/AssetsPanel/SidebarButtons/Exp
 import MediaProperties from "../../../components/editor/PropertiesSection/MediaProperties";
 import TextProperties from "../../../components/editor/PropertiesSection/TextProperties";
 import { Timeline } from "../../../components/editor/timeline/Timline";
+// import RemotionPreview from "../../../components/editor/player/RemotionPreview";
+import { PreviewPlayer } from "../../../components/editor/player/remotion/Player";
+import { MediaFile } from "@/app/types";
 
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
     const dispatch = useAppDispatch();
     const projectState = useAppSelector((state) => state.projectState);
+    const { currentProjectId } = useAppSelector((state) => state.projects);
+
     const router = useRouter();
     const { activeSection, activeElement } = projectState;
     // when page is loaded set the project id if it exists
@@ -36,6 +42,34 @@ export default function Project({ params }: { params: { id: string } }) {
         };
         loadProject();
     }, [id, dispatch]);
+
+    // set project state from with the current project id
+    useEffect(() => {
+        const loadProject = async () => {
+            if (currentProjectId) {
+                const project = await getProject(currentProjectId);
+                if (project) {
+                    dispatch(rehydrate(project));
+                    dispatch(setMediaFiles(project.mediaFiles.map((media: MediaFile) =>
+                        ({ ...media, src: URL.createObjectURL(media.file) })
+                    )));
+                }
+            }
+        };
+        loadProject();
+    }, [dispatch, currentProjectId]);
+
+
+    // save
+    useEffect(() => {
+        const saveProject = async () => {
+            if (!projectState) return;
+            await storeProject(projectState);
+            dispatch(updateProject(projectState));
+        };
+        saveProject();
+    }, [projectState, dispatch]);
+
 
     const handleFocus = (section: "media" | "text" | "export") => {
         dispatch(setActiveSection(section));
@@ -70,10 +104,8 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Center - Video Preview */}
-                <div className="flex-[1] p-4 overflow-y-auto">
-                    <div className="max-w-4xl mx-auto">
-                        <CanvasVideoPreview />
-                    </div>
+                <div className="flex items-center justify-center flex-[1] overflow-hidden">
+                    <PreviewPlayer />
                 </div>
 
                 {/* Right Sidebar - Element Properties */}
