@@ -3,16 +3,6 @@ import Composition from "./sequence/composition";
 import { useAppSelector, useAppDispatch } from "@/app/store";
 import { useRef, useState } from "react";
 
-
-const calculateFrames = (
-    display: { from: number; to: number },
-    fps: number
-) => {
-    const from = (display.from / 1000) * fps;
-    const durationInFrames = (display.to / 1000) * fps - from;
-    return { from, durationInFrames };
-};
-
 const fps = 30;
 
 export const PreviewPlayer = () => {

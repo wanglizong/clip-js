@@ -1,5 +1,5 @@
 import { AbsoluteFill, OffthreadVideo, Sequence } from "remotion";
-import { MediaFile } from "@/app/types";
+import { MediaFile, TextElement } from "@/app/types";
 
 const REMOTION_SAFE_FRAME = 0;
 
@@ -22,9 +22,8 @@ const calculateFrames = (
 
 export const SequenceItem: Record<
     string,
-    (item: MediaFile, options: SequenceItemOptions) => JSX.Element
-> = {
-    video: (item, options: SequenceItemOptions) => {
+    (item: any, options: SequenceItemOptions) => JSX.Element> = {
+    video: (item: MediaFile, options: SequenceItemOptions) => {
         const { fps } = options;
 
         const playbackRate = item.playbackSpeed || 1;
@@ -96,6 +95,57 @@ export const SequenceItem: Record<
                         />
                     </div>
                 </AbsoluteFill>
+            </Sequence>
+        );
+    },
+    text: (item: TextElement, options: SequenceItemOptions) => {
+        const { handleTextChange, fps, editableTextId } = options;
+
+
+        const { from, durationInFrames } = calculateFrames(
+            {
+                from: item.positionStart,
+                to: item.positionEnd
+            },
+            fps
+        );
+
+        // TODO: add more options for text
+        return (
+            <Sequence
+                className={`designcombo-scene-item id-${item.id} designcombo-scene-item-type-text pointer-events-none`}
+                key={item.id}
+                from={from}
+                durationInFrames={durationInFrames + REMOTION_SAFE_FRAME}
+                data-track-item="transition-element"
+                style={{
+                    position: "absolute",
+                    width: item.width || 300,
+                    height: item.height || 400,
+                    fontSize: item.fontSize || "16px",
+                    top: item.x || 300,
+                    left: item.y || 600,
+                    color: item.color || "#000000",
+                    // backgroundColor: item.backgroundColor || "transparent",
+                    opacity: item.opacity! / 100,
+                    fontFamily: item.font || "Arial",
+                }}
+            >
+                <div
+                    data-text-id={item.id}
+                    style={{
+                        height: "100%",
+                        boxShadow: "none",
+                        outline: "none",
+                        whiteSpace: "normal",
+                        backgroundColor: item.backgroundColor || "transparent",
+                        zIndex: item.zIndex || 0,
+                        position: "relative",
+                        width: "100%",
+                    }}
+                    dangerouslySetInnerHTML={{ __html: item.text }}
+                    className="designcombo_textLayer"
+                />
             </Sequence>
         );
     },

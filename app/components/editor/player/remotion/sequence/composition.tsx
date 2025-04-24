@@ -1,13 +1,13 @@
 import { storeProject, useAppDispatch, useAppSelector } from "@/app/store";
 import { SequenceItem } from "./sequence-item";
-import { MediaFile } from "@/app/types";
+import { MediaFile, TextElement } from "@/app/types";
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { use, useCallback, useEffect, useRef, useState } from "react";
 import { setCurrentTime, setMediaFiles } from "@/app/store/slices/projectSlice";
 
 const Composition = () => {
     const projectState = useAppSelector((state) => state.projectState);
-    const { mediaFiles } = projectState;
+    const { mediaFiles, textElements } = projectState;
     const frame = useCurrentFrame();
     const dispatch = useAppDispatch();
 
@@ -34,6 +34,16 @@ const Composition = () => {
                         ...item,
                     } as MediaFile;
                     return SequenceItem[trackItem.type](trackItem, {
+                        fps
+                    });
+                })}
+            {textElements
+                .map((item: TextElement) => {
+                    if (!item) return;
+                    const trackItem = {
+                        ...item,
+                    } as TextElement;
+                    return SequenceItem["text"](trackItem, {
                         fps
                     });
                 })}

@@ -59,6 +59,9 @@ const projectStateSlice = createSlice({
 
         setTextElements: (state, action: PayloadAction<TextElement[]>) => {
             state.textElements = action.payload;
+            if (action.payload.length > 0) {
+                state.duration = Math.max(...action.payload.map(v => v.positionEnd));
+            }
         },
         setCurrentTime: (state, action: PayloadAction<number>) => {
             state.currentTime = action.payload;
