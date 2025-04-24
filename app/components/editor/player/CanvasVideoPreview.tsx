@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { MediaFile, TextElement } from '../../types';
-import { useAppSelector, useAppDispatch, getProject, storeProject } from '../../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '../../store/slices/projectSlice';
-import { formatTime } from '../../utils/utils';
-import { updateProject } from '../../store/slices/projectsSlice';
-import GlobalKeyHandlerProps from './keys/GlobalKeyHandlerProps';
+import { MediaFile, TextElement } from '../../../types';
+import { useAppSelector, useAppDispatch, getProject, storeProject } from '../../../store';
+import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '../../../store/slices/projectSlice';
+import { formatTime } from '../../../utils/utils';
+import { updateProject } from '../../../store/slices/projectsSlice';
+import GlobalKeyHandlerProps from '../keys/GlobalKeyHandlerProps';
+import { timeStamp } from 'console';
 
 
 export default function CanvasVideoPreview() {
@@ -15,7 +16,6 @@ export default function CanvasVideoPreview() {
     const { currentTime, isPlaying, isMuted, duration, mediaFiles, textElements, resolution } = projectState;
     const { currentProjectId } = useAppSelector((state) => state.projects);
     const { width, height } = resolution;
-    // const [currentTime, setCurrentTime] = useState(0);
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -35,7 +35,26 @@ export default function CanvasVideoPreview() {
     useEffect(() => {
         initCanvas();
         setupVideos();
-        animationFrameRef.current = requestAnimationFrame(drawFrame);
+        if (isPlaying) {
+            animationFrameRef.current = requestAnimationFrame(drawFrame);
+        }
+        else {
+            console.log("not playing");           // Request a single frame
+            animationFrameRef.current = requestAnimationFrame((timestamp) => {
+                drawFrame(timestamp);
+                // Cancel after drawing
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current);
+                }
+            });
+
+            // // Cleanup
+            return () => {
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current);
+                }
+            };
+        }
 
         return () => {
             if (animationFrameRef.current) {
@@ -56,6 +75,51 @@ export default function CanvasVideoPreview() {
         };
     }, [mediaFiles]);
 
+    useEffect(() => {
+        console.log("currentTime", currentTime);
+    }, [currentTime]);
+
+    useEffect(() => {
+        if (!isPlaying) {
+            // // Update all videos
+            // videoIndexMap.current.forEach((fileIndex, elementIndex) => {
+            //     const mediaFile = mediaFiles[fileIndex];
+            //     const video = videoElementsRef.current[elementIndex];
+            //     if (!video) return;
+
+            //     if (currentTime >= mediaFile.positionStart && currentTime <= mediaFile.positionEnd) {
+            //         const videoTime = mediaFile.startTime + (currentTime - mediaFile.positionStart);
+            //         video.currentTime = videoTime;
+            //     } else {
+            //         video.pause();
+            //         if (currentTime < mediaFile.positionStart) {
+            //             video.currentTime = mediaFile.startTime;
+            //         }
+            //     }
+            // })
+
+            // startTimeRef.current = performance.now() - (currentTime * 1000);
+            // dispatch(setCurrentTime(currentTime));
+            // Request a single frame
+            animationFrameRef.current = requestAnimationFrame((timestamp) => {
+                console.log("currentTime", timestamp);
+                drawFrame(timestamp);
+                // Cancel after drawing
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current);
+                }
+            });
+
+            // // Cleanup
+            return () => {
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current);
+                }
+            };
+        }
+    }, [textElements, dispatch]);
+
+
     // set project state from with the current project id
     useEffect(() => {
         const loadProject = async () => {
@@ -70,10 +134,10 @@ export default function CanvasVideoPreview() {
     }, [dispatch, currentProjectId]);
 
     // Save the project state to the database
+    // TODO: add a debounce to the saveProject function
     useEffect(() => {
         const saveProject = async () => {
             if (!projectState) return;
-            console.log("Saving project", projectState);
             await storeProject(projectState);
             dispatch(updateProject(projectState));
         };
@@ -169,7 +233,6 @@ export default function CanvasVideoPreview() {
         // Stop if we've reached the end
         if (currentTimeSeconds >= duration) {
             dispatch(setIsPlaying(false));
-            // setCurrentTime(duration);
             dispatch(setCurrentTime(duration));
             videoElementsRef.current.forEach(video => {
                 video.pause();
@@ -190,8 +253,9 @@ export default function CanvasVideoPreview() {
             return;
         }
 
-        // setCurrentTime(currentTimeSeconds);
-        dispatch(setCurrentTime(currentTimeSeconds));
+        if (isPlaying) {
+            dispatch(setCurrentTime(currentTimeSeconds));
+        }
 
         // Clear canvas
         ctx.fillStyle = 'black';
@@ -271,37 +335,36 @@ export default function CanvasVideoPreview() {
             if (type === 'video') {
                 const video = element as HTMLVideoElement;
                 const videoFile = mediaFile as MediaFile;
-                if (video.readyState >= video.HAVE_CURRENT_DATA) {
-                    if (video.paused) {
-                        const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
-                        video.currentTime = videoTime;
-                        video.muted = isMuted;
-                        video.play().catch(console.error);
-                    }
-
-                    // Calculate video position and size
-                    const videoAspect = video.videoWidth / video.videoHeight;
-                    const canvasAspect = width / height;
-
-                    let drawWidth = mediaFile.width || width;
-                    let drawHeight = mediaFile.height || height;
-                    let offsetX = mediaFile.x || 0;
-                    let offsetY = mediaFile.y || 0;
-
-                    if (videoAspect > canvasAspect) {
-                        if (drawHeight === height && drawWidth === width)
-                            drawHeight = width / videoAspect;
-                        if (offsetY === 0 && offsetX === 0)
-                            offsetY = (height - drawHeight) / 2;
-                    } else {
-                        if (drawHeight === height && drawWidth === width)
-                            drawWidth = height * videoAspect;
-                        if (offsetY === 0 && offsetX === 0)
-                            offsetX = (width - drawWidth) / 2;
-                    }
-
-                    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+                if (video.paused) {
+                    const videoTime = videoFile.startTime + (currentTimeSeconds - videoFile.positionStart);
+                    video.currentTime = videoTime;
+                    video.muted = isMuted;
+                    video.play().catch(console.error);
                 }
+
+                // Calculate video position and size
+                const videoAspect = video.videoWidth / video.videoHeight;
+                const canvasAspect = width / height;
+
+                let drawWidth = mediaFile.width || width;
+                let drawHeight = mediaFile.height || height;
+                let offsetX = mediaFile.x || 0;
+                let offsetY = mediaFile.y || 0;
+
+                if (videoAspect > canvasAspect) {
+                    if (drawHeight === height && drawWidth === width)
+                        drawHeight = width / videoAspect;
+                    if (offsetY === 0 && offsetX === 0)
+                        offsetY = (height - drawHeight) / 2;
+                } else {
+                    if (drawHeight === height && drawWidth === width)
+                        drawWidth = height * videoAspect;
+                    if (offsetY === 0 && offsetX === 0)
+                        offsetX = (width - drawWidth) / 2;
+                }
+
+                ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
+
             } else if (type === 'image') {
                 const image = element as HTMLImageElement;
                 if (image.complete) {
@@ -475,8 +538,25 @@ export default function CanvasVideoPreview() {
             }
         })
         startTimeRef.current = performance.now() - (newTime * 1000);
-        // setCurrentTime(newTime);
         dispatch(setCurrentTime(newTime));
+
+        if (!isPlaying) {
+            // Request a single frame
+            animationFrameRef.current = requestAnimationFrame((timestamp) => {
+                drawFrame(timestamp);
+                // Cancel after drawing
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current);
+                }
+            });
+
+            // // Cleanup
+            return () => {
+                if (animationFrameRef.current) {
+                    cancelAnimationFrame(animationFrameRef.current);
+                }
+            };
+        }
     }
 
     // Toggle Buttons
@@ -486,7 +566,6 @@ export default function CanvasVideoPreview() {
             // If we're at the end, reset to start
             if (currentTime >= duration) {
                 const newTime = 0;
-                // setCurrentTime(newTime);
                 dispatch(setCurrentTime(newTime));
                 startTimeRef.current = performance.now();
             } else {

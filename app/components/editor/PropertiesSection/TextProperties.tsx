@@ -1,9 +1,9 @@
 "use client";
 
-import { useAppSelector } from '../../store';
-import { setActiveElement, setTextElements } from '../../store/slices/projectSlice';
-import { TextElement } from '../../types';
-import { useAppDispatch } from '../../store';
+import { useAppSelector } from '../../../store';
+import { setActiveElement, setTextElements } from '../../../store/slices/projectSlice';
+import { TextElement } from '../../../types';
+import { useAppDispatch } from '../../../store';
 
 export default function TextProperties() {
     const { textElements, activeElementIndex } = useAppSelector((state) => state.projectState);

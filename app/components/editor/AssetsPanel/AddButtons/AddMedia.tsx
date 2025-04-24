@@ -1,9 +1,9 @@
 "use client";
 
-import { useAppDispatch, useAppSelector } from "../../store";
-import { setMediaFiles } from "../../store/slices/projectSlice";
-import { storeFile } from "../../store";
-import { categorizeFile } from "../../utils/utils";
+import { useAppDispatch, useAppSelector } from "../../../../store";
+import { setMediaFiles } from "../../../../store/slices/projectSlice";
+import { storeFile } from "../../../../store";
+import { categorizeFile } from "../../../../utils/utils";
 import Image from 'next/image';
 
 export default function AddMedia() {

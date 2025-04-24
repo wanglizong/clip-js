@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from 'react';
-import { TextElement } from '../../types';
-import { useAppDispatch, useAppSelector } from "../../store";
-import { setTextElements } from '../../store/slices/projectSlice';
+import { TextElement } from '../../../../types';
+import { useAppDispatch, useAppSelector } from '../../../../store';
+import { setTextElements } from '../../../../store/slices/projectSlice';
 import Image from 'next/image';
 
 export default function AddTextButton() {

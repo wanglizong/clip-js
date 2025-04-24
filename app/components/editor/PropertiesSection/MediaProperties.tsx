@@ -1,9 +1,9 @@
 "use client";
 
-import { useAppSelector } from '../../store';
-import { setActiveElement, setMediaFiles, setTextElements } from '../../store/slices/projectSlice';
-import { MediaFile } from '../../types';
-import { useAppDispatch } from '../../store';
+import { useAppSelector } from '../../../store';
+import { setActiveElement, setMediaFiles, setTextElements } from '../../../store/slices/projectSlice';
+import { MediaFile } from '../../../types';
+import { useAppDispatch } from '../../../store';
 
 export default function MediaProperties() {
     const { mediaFiles, activeElementIndex } = useAppSelector((state) => state.projectState);

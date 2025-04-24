@@ -4,16 +4,16 @@ import { useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
 import { setCurrentProject } from "../../../store/slices/projectsSlice";
 import { setActiveSection } from "../../../store/slices/projectSlice";
-import CanvasVideoPreview from "../../../components/editor/CanvasVideoPreview";
-import AddText from '../../../components/buttons/AddText';
-import AddMedia from '../../../components/buttons/AddMedia';
-import MediaList from '../../../components/editor/MediaList';
+import CanvasVideoPreview from "../../../components/editor/player/CanvasVideoPreview";
+import AddText from '../../../components/editor/AssetsPanel/AddButtons/AddText';
+import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/AddMedia';
+import MediaList from '../../../components/editor/AssetsPanel/MediaList';
 import { useRouter } from 'next/navigation';
-import TextButton from "@/app/components/buttons/TextButton";
-import LibraryButton from "@/app/components/buttons/LibraryButton";
-import ExportButton from "@/app/components/buttons/ExportButton";
-import MediaProperties from "@/app/components/editor/MediaProperties";
-import TextProperties from "../../../components/editor/TextProperties";
+import TextButton from "@/app/components/editor/AssetsPanel/SidebarButtons/TextButton";
+import LibraryButton from "@/app/components/editor/AssetsPanel/SidebarButtons/LibraryButton";
+import ExportButton from "@/app/components/editor/AssetsPanel/SidebarButtons/ExportButton";
+import MediaProperties from "../../../components/editor/PropertiesSection/MediaProperties";
+import TextProperties from "../../../components/editor/PropertiesSection/TextProperties";
 import { Timeline } from "../../../components/editor/timeline/Timline";
 
 export default function Project({ params }: { params: { id: string } }) {
@@ -93,7 +93,7 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
             </div>
             {/* Timeline at bottom */}
-            <div className="h-[450px] border-t">
+            <div className="h-[400px] border-t">
                 <Timeline />
             </div>
         </div>

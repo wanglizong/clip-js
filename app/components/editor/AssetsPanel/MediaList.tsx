@@ -1,11 +1,11 @@
 "use client";
 
-import { useAppSelector } from '../../store';
-import { setMediaFiles } from '../../store/slices/projectSlice';
-import { MediaFile } from '../../types';
-import { useAppDispatch } from '../../store';
+import { useAppSelector } from '../../../store';
+import { setMediaFiles } from '../../../store/slices/projectSlice';
+import { MediaFile } from '../../../types';
+import { useAppDispatch } from '../../../store';
 import Image from 'next/image';
-// Video management functions
+
 export default function MediaList() {
     const { mediaFiles } = useAppSelector((state) => state.projectState);
     const dispatch = useAppDispatch();

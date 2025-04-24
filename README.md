@@ -1,6 +1,6 @@
 ## Overview
 
-This is an Online video editor built with canvas (no libraries) and ffmpeg (web assembly port).
+This is an Online video editor built with remotion i av tried using canvas without libraries but i failed ;( and ffmpeg (web assembly port).
 
 ## Getting Started
 
@@ -27,6 +27,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [ ] functionality separate audio 
 - [ ] add crop feature to vids
 - [ ] duplicate elements
+- [ ] add toasts
+
 There are also other various TODOS across the project search with TODO
 
 ### Least priority for now
