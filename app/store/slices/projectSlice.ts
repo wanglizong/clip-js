@@ -41,7 +41,7 @@ const projectStateSlice = createSlice({
             state.mediaFiles = action.payload;
             // Calculate duration based on the last video's end time
             if (action.payload.length > 0) {
-                state.duration = Math.max(...action.payload.map(v => v.positionEnd));
+                state.duration = Math.max(...action.payload.map(v => v.positionEnd / v.playbackSpeed));
             }
         },
         setProjectName: (state, action: PayloadAction<string>) => {

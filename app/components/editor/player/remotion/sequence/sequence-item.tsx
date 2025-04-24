@@ -1,6 +1,5 @@
-import { AbsoluteFill, Audio, Img, OffthreadVideo, Sequence } from "remotion";
-// import TextLayer from "./editable-text";
-import { MediaFile } from "../../../../../types";
+import { AbsoluteFill, OffthreadVideo, Sequence } from "remotion";
+import { MediaFile } from "@/app/types";
 
 const REMOTION_SAFE_FRAME = 0;
 
@@ -37,6 +36,7 @@ export const SequenceItem: Record<
             fps
         );
 
+        // TODO: Add crop
         // const crop = item.crop || {
         //     x: 0,
         //     y: 0,
@@ -51,19 +51,13 @@ export const SequenceItem: Record<
                 durationInFrames={durationInFrames + REMOTION_SAFE_FRAME}
                 style={{ pointerEvents: "none" }}
             >
-                {/* {item.isMain && (
-                    <MainLayerBackground
-                        key={item.id + "background"}
-                        background={details.background || "#ffffff"}
-                    />
-                )} */}
                 <AbsoluteFill
                     data-track-item="transition-element"
                     className={`designcombo-scene-item id-${item.id} designcombo-scene-item-type-${item.type}`}
                     style={{
                         pointerEvents: "auto",
-                        top: 0,
-                        left: 0,
+                        top: item.x,
+                        left: item.y,
                         width: item.width || "100%",
                         height: item.height || "auto",
                         transform: "none",
@@ -74,8 +68,6 @@ export const SequenceItem: Record<
                                 : 1,
                         borderRadius: `10px`, // Default border radius
                         overflow: "hidden",
-                        // transformOrigin: item.transformOrigin || "center center",
-                        // filter: `brightness(${item.brightness}%) blur(${item.blur}px)`
                     }}
                 >
                     <div
@@ -85,8 +77,6 @@ export const SequenceItem: Record<
                             position: "relative",
                             overflow: "hidden",
                             pointerEvents: "none",
-                            scale: `${item.x ? "-1" : "1"} ${item.y ? "-1" : "1"
-                                }`
                         }}
                     >
                         <OffthreadVideo
@@ -98,7 +88,7 @@ export const SequenceItem: Record<
                             style={{
                                 pointerEvents: "none",
                                 top: 0,
-                                left: -  0,
+                                left: 0,
                                 width: item.width || "100%", // Default width
                                 height: item.height || "auto", // Default height
                                 position: "absolute"

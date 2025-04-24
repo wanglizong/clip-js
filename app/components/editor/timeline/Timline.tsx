@@ -4,8 +4,10 @@ import { memo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import Header from "./Header";
+
 export const Timeline = () => {
     const { mediaFiles, textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
+
     const dispatch = useDispatch();
     const handleClick = (element: string, index: number | string) => {
         if (element === 'media') {
@@ -58,7 +60,7 @@ export const Timeline = () => {
                                     style={{
                                         // TODO: i increased each clip 60px to the right to make space for the logo this is not a good solution i will change it later
                                         left: `${clip.positionStart * 100 + 60}px`,
-                                        width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
+                                        width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
                                     }}
                                 >
                                     <Image
@@ -97,7 +99,7 @@ export const Timeline = () => {
                                         className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
                                         style={{
                                             left: `${clip.positionStart * 100 + 60}px`,
-                                            width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
+                                            width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
                                         }}
                                     >
                                         <Image
@@ -137,7 +139,7 @@ export const Timeline = () => {
                                         className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
                                         style={{
                                             left: `${clip.positionStart * 100 + 60}px`,
-                                            width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
+                                            width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
                                         }}
                                     >
                                         <Image

@@ -1,9 +1,7 @@
-import { Player } from "@remotion/player";
+import { Player, PlayerRef } from "@remotion/player";
 import Composition from "./sequence/composition";
-import { Video, Sequence } from "remotion";
 import { useAppSelector, useAppDispatch } from "@/app/store";
-import { useCallback, useEffect } from "react";
-import { setMediaFiles } from "@/app/store/slices/projectSlice";
+import { useRef, useState } from "react";
 
 
 const calculateFrames = (
@@ -19,15 +17,23 @@ const fps = 30;
 
 export const PreviewPlayer = () => {
     const projectState = useAppSelector((state) => state.projectState);
-    const dispatch = useAppDispatch();
     const { duration } = projectState;
+    const playerRef = useRef<PlayerRef>(null);
 
+    // TODO: this when clicking timeline header but is not used now
+    // useEffect(() => {
+    //     const frame = Math.round(currentTime * fps);
+    //     if (playerRef.current) {
+    //         playerRef.current.seekTo(frame);
+    //     }
+    // }, [currentTime, fps]);
 
     return (
         <Player
+            ref={playerRef}
             component={Composition}
             inputProps={{}}
-            durationInFrames={duration * fps + 1}
+            durationInFrames={Math.round(duration * fps) + 1}
             compositionWidth={1920}
             compositionHeight={1080}
             fps={fps}
