@@ -14,8 +14,8 @@ const calculateFrames = (
     display: { from: number; to: number },
     fps: number
 ) => {
-    const from = Math.round(display.from * fps);
-    const to = Math.round(display.to * fps);
+    const from = display.from * fps;
+    const to = display.to * fps;
     const durationInFrames = Math.max(1, to - from);
     return { from, durationInFrames };
 };
@@ -48,7 +48,7 @@ export const SequenceItem: Record<
             to: (item.endTime) / playbackRate
         };
 
-        console.log('trim', item.startTime, item.endTime, 'from', item.positionStart, 'to', item.positionEnd, 'durationInFrames', durationInFrames)
+        // console.log('trim', item.startTime, item.endTime, 'from', item.positionStart, 'to', item.positionEnd, 'durationInFrames', durationInFrames)
 
         return (
             <Sequence

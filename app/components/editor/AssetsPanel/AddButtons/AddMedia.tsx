@@ -33,7 +33,7 @@ export default function AddMedia({ fileId }: { fileId: string }) {
                 width: 1920,
                 height: 1080,
                 rotation: 0,
-                opacity: 1,
+                opacity: 100,
                 crop: { x: 0, y: 0, width: 1920, height: 1080 },
                 playbackSpeed: 1,
                 volume: 1,

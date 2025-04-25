@@ -167,28 +167,28 @@ export const store = configureStore({
 });
 
 // Load persisted state from localStorage
-const persistedState = loadState();
-if (persistedState) {
-    store.dispatch({
-        type: 'REPLACE_STATE',
-        payload: persistedState
-    });
-}
+// const persistedState = loadState();
+// if (persistedState) {
+//     store.dispatch({
+//         type: 'REPLACE_STATE',
+//         payload: persistedState
+//     });
+// }
 
 // TODO: for some reason state get saved to localStorage twice when its none cause loss of old state i shall find better way to do this later
 // Subscribe to store changes to save to localStorage
-if (typeof window !== 'undefined') {
-    let isInitial = 2;
-    store.subscribe(() => {
-        if (isInitial) {
-            isInitial -= 1;
-            return;
-        }
+// if (typeof window !== 'undefined') {
+//     let isInitial = 2;
+//     store.subscribe(() => {
+//         if (isInitial) {
+//             isInitial -= 1;
+//             return;
+//         }
 
-        const state = store.getState();
-        saveState(state);
-    });
-}
+//         const state = store.getState();
+//         saveState(state);
+//     });
+// }
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

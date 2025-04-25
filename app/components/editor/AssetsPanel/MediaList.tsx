@@ -1,6 +1,6 @@
 "use client";
 
-import { listFiles, deleteFile, useAppSelector, storeFile } from '../../../store';
+import { listFiles, deleteFile, useAppSelector, storeFile, getFile } from '../../../store';
 import { setMediaFiles, setFilesID } from '../../../store/slices/projectSlice';
 import { MediaFile, UploadedFile } from '../../../types';
 import { useAppDispatch } from '../../../store';
@@ -13,8 +13,18 @@ export default function MediaList() {
 
     useEffect(() => {
         const fetchFiles = async () => {
-            const storedFiles = await listFiles();
-            setFiles(storedFiles);
+            const storedFilesArray: UploadedFile[] = [];
+
+            for (const fileId of filesID || []) {
+                const file = await getFile(fileId);
+                if (file) {
+                    storedFilesArray.push({
+                        file: file,
+                        id: fileId,
+                    });
+                }
+            }
+            setFiles(storedFilesArray);
         };
         fetchFiles();
     }, [dispatch, filesID]);

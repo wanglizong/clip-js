@@ -4,6 +4,7 @@ import { memo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import Header from "./Header";
+import VideoTimeline from "./elements-timeline/VideoTimeline";
 
 export const Timeline = () => {
     const { mediaFiles, textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
@@ -26,8 +27,8 @@ export const Timeline = () => {
     return (
         <div className="flex flex-col gap-2">
             <div className="relative overflow-x-auto w-full border-t border-gray-300 bg-[#1E1D21]" >
-                <Header />
                 {/* Header */}
+                <Header />
                 {/* Video Files Timeline */}
                 <div className="bg-[#1E1D21]" >
                     {/* Timeline cursor */}
@@ -35,7 +36,7 @@ export const Timeline = () => {
                         className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-10"
                         style={{
                             // TODO: Arbitrary offset but it works for now
-                            left: `${currentTime * 100 + 70}px`,
+                            left: `${currentTime * 100 + 50}px`,
                         }}
                     />
                     <div className="relative h-16 min-w-[800px]">
@@ -49,30 +50,7 @@ export const Timeline = () => {
                                 src="https://www.svgrepo.com/show/532727/video.svg"
                             />
                         </div>
-
-                        {mediaFiles
-                            .filter((clip) => clip.type === 'video')
-                            .map((clip) => (
-                                <div
-                                    onClick={() => handleClick('media', clip.id)}
-                                    key={clip.id}
-                                    className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
-                                    style={{
-                                        // TODO: i increased each clip 60px to the right to make space for the logo this is not a good solution i will change it later
-                                        left: `${clip.positionStart * 100 + 60}px`,
-                                        width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
-                                    }}
-                                >
-                                    <Image
-                                        alt="Video"
-                                        className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
-                                        height={30}
-                                        width={30}
-                                        src="https://www.svgrepo.com/show/532727/video.svg"
-                                    />
-                                    <span className="text-x">{clip.fileName}</span>
-                                </div>
-                            ))}
+                        <VideoTimeline />
                     </div>
 
                     {/* Audio Files Timeline */}

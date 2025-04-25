@@ -2,3 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
+.moveable-origin {
+    display: none !important;
+}

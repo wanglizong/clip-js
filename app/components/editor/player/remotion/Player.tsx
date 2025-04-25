@@ -23,7 +23,7 @@ export const PreviewPlayer = () => {
             ref={playerRef}
             component={Composition}
             inputProps={{}}
-            durationInFrames={Math.round(duration * fps) + 1}
+            durationInFrames={Math.floor(duration * fps) + 1}
             compositionWidth={1920}
             compositionHeight={1080}
             fps={fps}

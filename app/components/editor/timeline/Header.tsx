@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../../../store';
 export const Header = () => {
     const { duration, currentTime } = useAppSelector((state) => state.projectState);
-    const timeMarkers = Array.from({ length: duration * 2 }, (_, i) => i);
+    const secondInterval = 0.2; // Every 0.2s
+    const totalSeconds = Math.max(duration + 2, 61);
+    const tickMarkers = Array.from({ length: totalSeconds / secondInterval }, (_, i) => i * secondInterval);
 
     // TODO: this when clicking timeline header but is not used now
 
@@ -32,28 +34,38 @@ export const Header = () => {
         }
     }, [currentTime]);
 
-
     return (
         <div className="flex items-center gap-2 p-2 w-full cursor-pointer" ref={containerRef}>
             <div className="min-w-[50px]"></div>
-            <div className="relative h-8 min-w-[800px]" >
-                {timeMarkers.map((marker) => (
-                    <div
-                        key={marker}
-                        ref={(el) => {
-                            if (el) markerRefs.current[marker] = el;
-                        }}
-                        className="absolute top-0 text-gray-400 text-xs"
-                        style={{
-                            left: `${marker * 100}px`,
-                            width: `${100}px`,
-                        }}
-                    >
-                        {marker}s
-                    </div>
-                ))}
+
+            <div className="relative h-8 min-w-[800px]">
+                {tickMarkers.map((marker) => {
+                    const isWholeSecond = Number.isInteger(marker);
+                    return (
+                        <div
+                            key={marker}
+                            className="absolute flex flex-col items-center"
+                            style={{
+                                left: `${marker * 100}px`,
+                                width: `1px`,
+                                height: '100%',
+                            }}
+                        >
+                            {/* Tick line */}
+                            <div className={`w-px ${isWholeSecond ? 'h-7 bg-gray-400' : 'h-2 bg-gray-300'}`} />
+
+                            {/* second labels */}
+                            {isWholeSecond && (
+                                <span className="mt-1 text-[10px] text-gray-400">
+                                    {marker}s
+                                </span>
+                            )}
+                        </div>
+                    );
+                })}
             </div>
         </div>
+
     );
 };
 
