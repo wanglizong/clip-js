@@ -1,13 +1,13 @@
 "use client";
 import { useEffect } from "react";
-import { storeProject, useAppDispatch, useAppSelector } from "../../../store";
+import { getFile, storeProject, useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
 import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
 import { rehydrate, setMediaFiles } from '../../../store/slices/projectSlice';
 import { setActiveSection } from "../../../store/slices/projectSlice";
 // import CanvasPreview from "../../../components/editor/player/CanvasPreview";
 import AddText from '../../../components/editor/AssetsPanel/AddButtons/AddText';
-import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/AddMedia';
+import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/UploadMedia';
 import MediaList from '../../../components/editor/AssetsPanel/MediaList';
 import { useRouter } from 'next/navigation';
 import TextButton from "@/app/components/editor/AssetsPanel/SidebarButtons/TextButton";
@@ -50,8 +50,12 @@ export default function Project({ params }: { params: { id: string } }) {
                 const project = await getProject(currentProjectId);
                 if (project) {
                     dispatch(rehydrate(project));
-                    dispatch(setMediaFiles(project.mediaFiles.map((media: MediaFile) =>
-                        ({ ...media, src: URL.createObjectURL(media.file) })
+
+                    dispatch(setMediaFiles(await Promise.all(
+                        project.mediaFiles.map(async (media: MediaFile) => {
+                            const file = await getFile(media.fileId);
+                            return { ...media, src: URL.createObjectURL(file) };
+                        })
                     )));
                 }
             }
@@ -91,9 +95,10 @@ export default function Project({ params }: { params: { id: string } }) {
                 <div className="flex-[0.3] min-w-[200px] border-r overflow-y-auto p-4">
                     {activeSection === "media" && (
                         <div>
-                            <h2 className="text-lg font-semibold mb-2">Media</h2>
+                            <h2 className="text-lg flex flex-row gap-2 items-center justify-center font-semibold mb-2">
+                                <AddMedia />
+                            </h2>
                             <MediaList />
-                            <AddMedia />
                         </div>
                     )}
                     {activeSection === "text" && (

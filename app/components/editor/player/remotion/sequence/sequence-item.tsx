@@ -29,8 +29,8 @@ export const SequenceItem: Record<
         const playbackRate = item.playbackSpeed || 1;
         const { from, durationInFrames } = calculateFrames(
             {
-                from: item.positionStart / playbackRate,
-                to: item.positionEnd / playbackRate
+                from: item.positionStart,
+                to: item.positionEnd
             },
             fps
         );
@@ -42,6 +42,13 @@ export const SequenceItem: Record<
         //     width: item.width,
         //     height: item.height
         // };
+
+        const trim = {
+            from: (item.startTime) / playbackRate,
+            to: (item.endTime) / playbackRate
+        };
+
+        console.log('trim', item.startTime, item.endTime, 'from', item.positionStart, 'to', item.positionEnd, 'durationInFrames', durationInFrames)
 
         return (
             <Sequence
@@ -79,8 +86,8 @@ export const SequenceItem: Record<
                         }}
                     >
                         <OffthreadVideo
-                            startFrom={(item.startTime) * fps}
-                            endAt={(item.endTime) * fps + REMOTION_SAFE_FRAME}
+                            startFrom={(trim.from) * fps}
+                            endAt={(trim.to) * fps + REMOTION_SAFE_FRAME}
                             playbackRate={playbackRate}
                             src={item.src || ""}
                             volume={item.volume || 0 / 100}

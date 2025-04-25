@@ -24,6 +24,8 @@ export default function MediaProperties() {
         dispatch(setMediaFiles(updatedFiles));
     };
 
+    if (!mediaFile) return null;
+
     return (
         <div className="space-y-4">
             <div className="grid grid-cols-2 gap-8">

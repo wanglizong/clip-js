@@ -33,6 +33,15 @@ export const initialState: ProjectState = {
     },
 };
 
+const calculateTotalDuration = (
+    mediaFiles: MediaFile[],
+    textElements: TextElement[]
+): number => {
+    const mediaDurations = mediaFiles.map(v => v.positionEnd);
+    const textDurations = textElements.map(v => v.positionEnd);
+    return Math.max(0, ...mediaDurations, ...textDurations);
+};
+
 const projectStateSlice = createSlice({
     name: 'projectState',
     initialState,
@@ -40,9 +49,7 @@ const projectStateSlice = createSlice({
         setMediaFiles: (state, action: PayloadAction<MediaFile[]>) => {
             state.mediaFiles = action.payload;
             // Calculate duration based on the last video's end time
-            if (action.payload.length > 0) {
-                state.duration = Math.max(...action.payload.map(v => v.positionEnd / v.playbackSpeed));
-            }
+            state.duration = calculateTotalDuration(state.mediaFiles, state.textElements);
         },
         setProjectName: (state, action: PayloadAction<string>) => {
             state.projectName = action.payload;
@@ -59,9 +66,7 @@ const projectStateSlice = createSlice({
 
         setTextElements: (state, action: PayloadAction<TextElement[]>) => {
             state.textElements = action.payload;
-            if (action.payload.length > 0) {
-                state.duration = Math.max(...action.payload.map(v => v.positionEnd));
-            }
+            state.duration = calculateTotalDuration(state.mediaFiles, state.textElements);
         },
         setCurrentTime: (state, action: PayloadAction<number>) => {
             state.currentTime = action.payload;
@@ -81,6 +86,9 @@ const projectStateSlice = createSlice({
         setActiveElementIndex: (state, action: PayloadAction<number>) => {
             state.activeElementIndex = action.payload;
         },
+        setFilesID: (state, action: PayloadAction<string[]>) => {
+            state.filesID = action.payload;
+        },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
@@ -97,6 +105,7 @@ export const {
     setCurrentTime,
     setProjectName,
     setIsPlaying,
+    setFilesID,
     setIsMuted,
     setActiveSection,
     setActiveElement,

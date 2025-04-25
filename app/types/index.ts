@@ -1,8 +1,16 @@
 export type MediaType = 'video' | 'audio' | 'image' | 'unknown';
 
-export interface MediaFile {
+export interface UploadedFile {
     id: string;
     file: File;
+    type?: MediaType;
+    src?: string;
+}
+
+export interface MediaFile {
+    id: string;
+    fileName: string;
+    fileId: string;
     type: MediaType;
     startTime: number;  // within the source video
     src?: string;
@@ -84,6 +92,7 @@ export interface ProjectState {
     id: string;
     mediaFiles: MediaFile[];
     textElements: TextElement[];
+    filesID?: string[],
     currentTime: number;
     isPlaying: boolean;
     isMuted: boolean;

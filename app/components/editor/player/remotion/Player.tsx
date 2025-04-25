@@ -1,7 +1,7 @@
 import { Player, PlayerRef } from "@remotion/player";
 import Composition from "./sequence/composition";
 import { useAppSelector, useAppDispatch } from "@/app/store";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 const fps = 30;
 

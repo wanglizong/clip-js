@@ -70,7 +70,7 @@ export const Timeline = () => {
                                         width={30}
                                         src="https://www.svgrepo.com/show/532727/video.svg"
                                     />
-                                    <span className="text-x">{clip.file.name}</span>
+                                    <span className="text-x">{clip.fileName}</span>
                                 </div>
                             ))}
                     </div>
@@ -109,7 +109,7 @@ export const Timeline = () => {
                                             width={30}
                                             src="https://www.svgrepo.com/show/532708/music.svg"
                                         />
-                                        <span className="text-x">{clip.file.name}</span>
+                                        <span className="text-x">{clip.fileName}</span>
                                     </div>
                                 ))}
                         </div>
@@ -149,7 +149,7 @@ export const Timeline = () => {
                                             width={30}
                                             src="https://www.svgrepo.com/show/535454/image.svg"
                                         />
-                                        <span className="text-x">{clip.file.name}</span>
+                                        <span className="text-x">{clip.fileName}</span>
                                     </div>
                                 ))}
                         </div>
