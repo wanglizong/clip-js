@@ -17,7 +17,7 @@ const ThemeSwitch = () => {
 
   return (
     <button
-      onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
+      onClick={() => setTheme("dark")}
       className="p-2 text-gray-800 dark:text-gray-200 bg-transparent dark:bg-black"
       aria-label="Toggle Dark Mode"
     >
