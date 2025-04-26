@@ -1,48 +1,59 @@
 ## Overview
 
-This is an Online video editor built with remotion i av tried using canvas without libraries but i failed ;( and ffmpeg (web assembly port).
+This is an Online video editor built with nextjs and remotion for real-time preview.
 
-## Getting Started
+i am currently working on adding rendering option with ffmpeg (web assembly port) tho.
 
-First, run the development server:
+## Features
+
+- Timeline Editing: Arrange and trim media on a visual timeline.
+- Media Support: Add videos, audios, images, and text elements with flexibility.
+- Multi-track Support: Edit multiple video and audio tracks simultaneously.
+- Real-time Preview: See immediate previews of edits.
+
+![Alt Text](/images/image.png)
+
+## Installation
+
+Clone the repo, install dependencies, and run the dev server:
 
 ```bash
+npm install
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then navigate to [http://localhost:3000](http://localhost:3000)
 
 ## TODOs
 
-### high priority
-- [ ] delete and duplicate for each element on timeline
-- [ ] thumbnail for vids and imgs
-- [ ] insert elements in timeline with https://www.npmjs.com/package/react-moveable
-- [ ] add shapes blur effects also as media and text
-- [ ] Opacity (tricky cause i ues canvas)
-- [ ] functionality separate audio 
-- [ ] add crop feature to vids
-- [ ] duplicate elements
-- [ ] add toasts
-- [ ] responsive
-- [ ] add close to each tap
+Prioritized tasks contributions are welcomed!
 
-There are also other various TODOS across the project search with TODO
-
-### Least priority for now
-- [ ] PWA Mode: So users can edit offline.
+- [ ] render option with ffmpeg (web assembly port).
+- [ ] duplicate and split for each element on timeline
+- [ ] add playback speed for vids and audio
+- [ ] responsive for phones **(ui)**
+- [ ] Refactor timeline components cause it has a lot of repetitive code.
+- [ ] add elements as shapes blur effects.
+- [ ] functionality to separate audio from vids
+- [ ] add crop feature to vids with react-moveable and make positioning with it too
+- [ ] Remove Remotion built-in player timeline and fully transition to the custom built one for playback and scrubbing. **(ui)**
 - [ ] shortcuts
+	- [ ] space
 	- [ ] ctrl + z
-	- [ ] ctrl + s
-	- [ ] c 
-	- [ ] x
-	- [ ] del
-	- [ ] others for split
-- [ ] Arabic support
+	- [ ] ctrl + c
+	- [ ] ctrl + x
+	- [ ] del split duplicate
+	- [ ] etc 
+- [ ] add zoom in out for timeline **(ui)**
+- [ ] more effects for text
+- [ ] better ui controls for probs section and adding new text **(ui)**
+- [ ] PWA Mode: So users can edit offline.
 - [ ] meme effects
-- [ ] animation effects for text
-- [ ] migrate to WebGL
+- [ ] add toasts **(ui)**
+- [ ] insert elements in timeline with https://www.npmjs.com/package/react-moveable (already used in timelines) **(ui)**
+- [ ] thumbnail for listed vids and imgs **(ui)**
+- [ ] add close option to each sidebars **(ui)**
+- [ ] migrate to WebGL or WebGpu or a library that work on it like https://github.com/diffusionstudio/core
+
+There are also other various TODOS across the project (search with TODO)
