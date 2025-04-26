@@ -1,14 +1,14 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { getFile, storeProject, useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
 import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
-import { rehydrate, setMediaFiles } from '../../../store/slices/projectSlice';
+import { rehydrate, setActiveElement, setMediaFiles } from '../../../store/slices/projectSlice';
 import { setActiveSection } from "../../../store/slices/projectSlice";
 // import CanvasPreview from "../../../components/editor/player/CanvasPreview";
-import AddText from '../../../components/editor/AssetsPanel/AddButtons/AddText';
+import AddText from '../../../components/editor/AssetsPanel/tools-section/AddText';
 import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/UploadMedia';
-import MediaList from '../../../components/editor/AssetsPanel/MediaList';
+import MediaList from '../../../components/editor/AssetsPanel/tools-section/MediaList';
 import { useRouter } from 'next/navigation';
 import TextButton from "@/app/components/editor/AssetsPanel/SidebarButtons/TextButton";
 import LibraryButton from "@/app/components/editor/AssetsPanel/SidebarButtons/LibraryButton";
@@ -19,6 +19,7 @@ import { Timeline } from "../../../components/editor/timeline/Timline";
 // import RemotionPreview from "../../../components/editor/player/RemotionPreview";
 import { PreviewPlayer } from "../../../components/editor/player/remotion/Player";
 import { MediaFile } from "@/app/types";
+import ExportList from "../../../components/editor/AssetsPanel/tools-section/ExportList";
 
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
@@ -104,6 +105,12 @@ export default function Project({ params }: { params: { id: string } }) {
                     {activeSection === "text" && (
                         <div>
                             <AddText />
+                        </div>
+                    )}
+                    {activeSection === "export" && (
+                        <div>
+                            <h2 className="text-lg font-semibold mb-4">Export</h2>
+                            <ExportList />
                         </div>
                     )}
                 </div>

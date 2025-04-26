@@ -18,12 +18,12 @@
 "use client";
 
 import { useEffect, useRef, useState } from 'react';
-import { MediaFile, TextElement } from '../../../types';
-import { useAppSelector, useAppDispatch, getProject, storeProject } from '../../../store';
-import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '../../../store/slices/projectSlice';
-import { formatTime } from '../../../utils/utils';
-import { updateProject } from '../../../store/slices/projectsSlice';
-import GlobalKeyHandlerProps from '../keys/GlobalKeyHandlerProps';
+import { MediaFile, TextElement } from '@/app/types';
+import { useAppSelector, useAppDispatch, getProject, storeProject } from '@/app/store';
+import { setCurrentTime, setIsPlaying, setIsMuted, rehydrate } from '@/app/store/slices/projectSlice';
+import { formatTime } from '@/app/utils/utils';
+import { updateProject } from '@/app/store/slices/projectsSlice';
+import GlobalKeyHandlerProps from '@/app/components/editor/keys/GlobalKeyHandlerProps';
 import { timeStamp } from 'console';
 
 
@@ -198,43 +198,43 @@ export default function CanvasPreview() {
         audioIndexMap.current = [];
         imageIndexMap.current = [];
 
-        mediaFiles.forEach((mediaFile, index) => {
-            if (mediaFile.type === 'video') {
-                const video = document.createElement('video');
-                video.src = URL.createObjectURL(mediaFile.file);
-                video.loop = true;
-                video.muted = isMuted;
-                video.playsInline = true;
-                video.preload = 'auto';
-                video.playbackRate = mediaFile.playbackSpeed || 1;
-                video.volume = mediaFile.volume;
-                videoElementsRef.current.push(video);
-                videoIndexMap.current.push(index);
+        // mediaFiles.forEach((mediaFile, index) => {
+        //     if (mediaFile.type === 'video') {
+        //         const video = document.createElement('video');
+        //         video.src = URL.createObjectURL(mediaFile.file);
+        //         video.loop = true;
+        //         video.muted = isMuted;
+        //         video.playsInline = true;
+        //         video.preload = 'auto';
+        //         video.playbackRate = mediaFile.playbackSpeed || 1;
+        //         video.volume = mediaFile.volume;
+        //         videoElementsRef.current.push(video);
+        //         videoIndexMap.current.push(index);
 
-                video.addEventListener('loadedmetadata', () => {
-                    video.currentTime = mediaFile.startTime;
-                });
-            } else if (mediaFile.type === 'audio') {
-                const audio = document.createElement('audio');
-                audio.src = URL.createObjectURL(mediaFile.file);
-                audio.loop = true;
-                audio.muted = isMuted;
-                audio.preload = 'auto';
-                audio.volume = mediaFile.volume;
-                audio.playbackRate = mediaFile.playbackSpeed || 1;
-                audioElementsRef.current.push(audio);
-                audioIndexMap.current.push(index);
+        //         video.addEventListener('loadedmetadata', () => {
+        //             video.currentTime = mediaFile.startTime;
+        //         });
+        //     } else if (mediaFile.type === 'audio') {
+        //         const audio = document.createElement('audio');
+        //         audio.src = URL.createObjectURL(mediaFile.file);
+        //         audio.loop = true;
+        //         audio.muted = isMuted;
+        //         audio.preload = 'auto';
+        //         audio.volume = mediaFile.volume;
+        //         audio.playbackRate = mediaFile.playbackSpeed || 1;
+        //         audioElementsRef.current.push(audio);
+        //         audioIndexMap.current.push(index);
 
-                audio.addEventListener('loadedmetadata', () => {
-                    audio.currentTime = mediaFile.startTime;
-                });
-            } else if (mediaFile.type === 'image') {
-                const image = document.createElement('img');
-                image.src = URL.createObjectURL(mediaFile.file);
-                imageElementsRef.current.push(image);
-                imageIndexMap.current.push(index);
-            }
-        });
+        //         audio.addEventListener('loadedmetadata', () => {
+        //             audio.currentTime = mediaFile.startTime;
+        //         });
+        //     } else if (mediaFile.type === 'image') {
+        //         const image = document.createElement('img');
+        //         image.src = URL.createObjectURL(mediaFile.file);
+        //         imageElementsRef.current.push(image);
+        //         imageIndexMap.current.push(index);
+        //     }
+        // });
     };
 
     // Draw frame
