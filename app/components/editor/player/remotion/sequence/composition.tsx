@@ -22,7 +22,7 @@ const Composition = () => {
             }
         }
 
-    }, [frame]);
+    }, [frame, dispatch]);
 
     const fps = 30;
     return (

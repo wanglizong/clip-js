@@ -20,11 +20,11 @@ export const featuresGridList = {
         },
         {
             id: "3",
-            title: "Add Media From any source",
-            description: "you can add videos or audio from youtube, spotify, facebook, twitter ...etc",
+            title: "Add Audio",
+            description: "Add your own audio clips to any video.",
             icon: {
-                url: "https://www.svgrepo.com/show/478280/internet-2.svg",
-                alt: "Add Media From any source",
+                url: "https://www.svgrepo.com/show/532708/music.svg",
+                alt: "Add Audio",
             },
         },
         {

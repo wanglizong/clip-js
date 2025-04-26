@@ -1,10 +1,10 @@
 "use client";
 
-import { listFiles, deleteFile, useAppSelector, storeFile, getFile } from '../../../store';
-import { setMediaFiles, setFilesID } from '../../../store/slices/projectSlice';
-import { MediaFile, UploadedFile } from '../../../types';
-import { useAppDispatch } from '../../../store';
-import AddMedia from './AddButtons/AddMedia';
+import { listFiles, deleteFile, useAppSelector, storeFile, getFile } from '@/app/store';
+import { setMediaFiles, setFilesID } from '@/app/store/slices/projectSlice';
+import { MediaFile, UploadedFile } from '@/app/types';
+import { useAppDispatch } from '@/app/store';
+import AddMedia from '../AddButtons/AddMedia';
 import { useEffect, useState } from 'react';
 export default function MediaList() {
     const { mediaFiles, filesID } = useAppSelector((state) => state.projectState);

@@ -8,17 +8,17 @@ import Image from 'next/image';
 
 export default function AddTextButton() {
     const [textConfig, setTextConfig] = useState<Partial<TextElement>>({
-        text: '',
+        text: 'Example',
         positionStart: 0,
         positionEnd: 10,
-        x: 0,
-        y: 0,
-        fontSize: 24,
-        color: '#ffffff',
+        x: 500,
+        y: 600,
+        fontSize: 200,
+        color: '#ff0000',
         backgroundColor: 'transparent',
         align: 'center',
         zIndex: 0,
-        opacity: 1,
+        opacity: 100,
         rotation: 0,
         animation: 'none'
     });
@@ -55,17 +55,17 @@ export default function AddTextButton() {
         onAddText(newTextElement);
         // Reset form
         setTextConfig({
-            text: '',
+            text: 'Example',
             positionStart: 0,
             positionEnd: 10,
-            x: 0,
-            y: 0,
-            fontSize: 24,
-            color: '#ffffff',
+            x: 500,
+            y: 600,
+            fontSize: 200,
+            color: '#ff0000',
             backgroundColor: 'transparent',
             align: 'center',
             zIndex: 0,
-            opacity: 1,
+            opacity: 100,
             rotation: 0,
             animation: 'none'
         });

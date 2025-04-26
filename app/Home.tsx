@@ -21,7 +21,7 @@ export default function Home() {
         </h1>
 
         <p className="mx-auto mt-9 max-w-2xl text-lg tracking-tight text-white-700 sm:mt-6">
-          <span className="inline-block">Edit your videos from your PC or phone no downloads, no limits, and no watermarks.</span>
+          <span className="inline-block">Edit your videos from your PC or phone no downloads, no registration, no watermarks.</span>
           <span className="inline-block">Online, Free and Open Source</span>
         </p>
 

@@ -37,7 +37,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">Start (s)</label>
                             <input
                                 type="number"
-                                // readOnly={true}
+                                readOnly={true}
                                 value={mediaFile.startTime}
                                 min={0}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, {
@@ -104,6 +104,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">X Position</label>
                             <input
                                 type="number"
+                                step="10"
                                 value={mediaFile.x || 0}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { x: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -113,6 +114,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">Y Position</label>
                             <input
                                 type="number"
+                                step="10"
                                 value={mediaFile.y || 0}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { y: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -122,6 +124,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">Width</label>
                             <input
                                 type="number"
+                                step="10"
                                 value={mediaFile.width || 100}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { width: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -131,6 +134,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">Height</label>
                             <input
                                 type="number"
+                                step="10"
                                 value={mediaFile.height || 100}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { height: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -148,10 +152,12 @@ export default function MediaProperties() {
                         <div>
                             <label className="block text-sm">Opacity</label>
                             <input
-                                type="number"
-                                value={mediaFile.opacity || 100}
+                                type="range"
+                                min="0"
+                                max="100"
+                                value={mediaFile.opacity}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { opacity: Number(e.target.value) })}
-                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                                className="w-full bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
                             />
                         </div>
                     </div>
@@ -159,20 +165,21 @@ export default function MediaProperties() {
                 {/* Audio Properties */}
                 <div className="space-y-2">
                     <h4 className="font-semibold">Audio Properties</h4>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4">
                         <div>
-                            <label className="block text-sm">Volume</label>
+                            <label className="block text-sm mb-2 text-white">Volume</label>
                             <input
-                                type="number"
+                                type="range"
                                 min="0"
                                 max="100"
                                 step="1"
-                                value={mediaFile.volume || 100}
+                                value={mediaFile.volume}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { volume: Number(e.target.value) })}
-                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                                className="w-full bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
                             />
                         </div>
-                        <div>
+                        {/* TODO: Add playback speed */}
+                        {/* <div>
                             <label className="block text-sm">Speed</label>
                             <input
                                 type="number"
@@ -183,7 +190,7 @@ export default function MediaProperties() {
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { playbackSpeed: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 <div >

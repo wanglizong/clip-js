@@ -8,19 +8,16 @@ const Footer = () => {
       <div className="container mx-auto px-4 flex flex-wrap justify-center sm:justify-between items-center text-sm">
         <p className="ml-4">&copy; {currentYear} ClipJS. All rights reserved.</p>
         <div className="flex space-x-4 mt-2 mr-4 sm:mt-0">
-          <a href="#" aria-label="Facebook" className="hover:text-gray-300">
-            <AiOutlineFacebook className="w-5 h-5" />
-          </a>
-          <a href="#" aria-label="LinkedIn" className="hover:text-gray-300">
+          <a href="https://www.linkedin.com/in/mohyware" aria-label="LinkedIn" className="hover:text-gray-300">
             <AiOutlineLinkedin className="w-5 h-5" />
           </a>
-          <a href="#" aria-label="Instagram" className="hover:text-gray-300">
+          <a href="https://www.instagram.com/mohyware" aria-label="Instagram" className="hover:text-gray-300">
             <AiOutlineInstagram className="w-5 h-5" />
           </a>
-          <a href="#" aria-label="X (formerly Twitter)" className="hover:text-gray-300">
+          <a href="https://x.com/mohyware" aria-label="X (formerly Twitter)" className="hover:text-gray-300">
             <AiOutlineX className="w-5 h-5" />
           </a>
-          <a href="#" aria-label="GitHub" className="hover:text-gray-300">
+          <a href="https://github.com/mohyware" aria-label="GitHub" className="hover:text-gray-300">
             <AiOutlineGithub className="w-5 h-5" />
           </a>
         </div>

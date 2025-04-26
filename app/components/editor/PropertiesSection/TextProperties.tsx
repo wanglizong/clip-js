@@ -81,6 +81,7 @@ export default function TextProperties() {
                             <label className="block text-sm">X Position</label>
                             <input
                                 type="number"
+                                step="10"
                                 value={textElement.x || 0}
                                 onChange={(e) => onUpdateText(textElement.id, { x: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -90,6 +91,7 @@ export default function TextProperties() {
                             <label className="block text-sm">Y Position</label>
                             <input
                                 type="number"
+                                step="10"
                                 value={textElement.y || 0}
                                 onChange={(e) => onUpdateText(textElement.id, { y: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -99,6 +101,7 @@ export default function TextProperties() {
                             <label className="block text-sm">Font Size</label>
                             <input
                                 type="number"
+                                step="5"
                                 value={textElement.fontSize || 24}
                                 onChange={(e) => onUpdateText(textElement.id, { fontSize: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
@@ -132,13 +135,13 @@ export default function TextProperties() {
                         <div>
                             <label className="block text-sm">Opacity</label>
                             <input
-                                type="number"
+                                type="range"
                                 min="0"
                                 max="100"
                                 step="1"
-                                value={textElement.opacity || 1}
+                                value={textElement.opacity}
                                 onChange={(e) => onUpdateText(textElement.id, { opacity: Number(e.target.value) })}
-                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                                className="w-full bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
                             />
                         </div>
                     </div>
