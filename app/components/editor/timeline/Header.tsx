@@ -43,6 +43,9 @@ export const Header = () => {
                     const isWholeSecond = Number.isInteger(marker);
                     return (
                         <div
+                            ref={(el) => {
+                                if (el) markerRefs.current[marker] = el;
+                            }}
                             key={marker}
                             className="absolute flex flex-col items-center"
                             style={{

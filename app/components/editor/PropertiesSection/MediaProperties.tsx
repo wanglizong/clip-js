@@ -161,9 +161,9 @@ export default function MediaProperties() {
                             <input
                                 type="number"
                                 min="0"
-                                max="1"
-                                step="0.1"
-                                value={mediaFile.volume || 1}
+                                max="100"
+                                step="1"
+                                value={mediaFile.volume || 100}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, { volume: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />

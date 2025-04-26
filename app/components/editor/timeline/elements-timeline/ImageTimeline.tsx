@@ -9,7 +9,7 @@ import Header from "../Header";
 import { MediaFile } from "@/app/types";
 import { debounce, throttle } from "lodash";
 
-export default function VideoTimeline() {
+export default function ImageTimeline() {
     const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
     const { mediaFiles, textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
@@ -74,7 +74,7 @@ export default function VideoTimeline() {
     return (
         <div >
             {mediaFiles
-                .filter((clip) => clip.type === 'video')
+                .filter(clip => clip.type === 'image')
                 .map((clip) => (
                     <div key={clip.id} className="bg-green-500">
                         <div
@@ -85,21 +85,22 @@ export default function VideoTimeline() {
                             style={{
                                 // TODO: i increased each clip 60px to the right to make space for the logo this is not a good solution i will change it later
                                 left: `${clip.positionStart * 100 + 50}px`,
-                                width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
+                                width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
                                 zIndex: clip.zIndex,
                             }}
                         >
                             {/* <MoveableTimeline /> */}
                             <Image
-                                alt="Video"
+                                alt="Image"
                                 className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
                                 height={30}
                                 width={30}
-                                src="https://www.svgrepo.com/show/532727/video.svg"
+                                src="https://www.svgrepo.com/show/535454/image.svg"
                             />
                             <span className="text-x">{clip.fileName}</span>
 
                         </div>
+
                         <Moveable
                             target={targetRefs.current[clip.id] || null}
                             container={null}
@@ -142,6 +143,8 @@ export default function VideoTimeline() {
                             }}
                             onResizeEnd={({ target, isDrag, clientX, clientY }) => {
                             }}
+                            className={activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? '' : 'moveable-control-box-hidden'}
+
                         />
                     </div>
 

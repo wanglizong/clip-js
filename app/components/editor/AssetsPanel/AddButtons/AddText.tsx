@@ -45,7 +45,7 @@ export default function AddTextButton() {
             backgroundColor: textConfig.backgroundColor || 'transparent',
             align: textConfig.align || 'center',
             zIndex: textConfig.zIndex || 0,
-            opacity: textConfig.opacity || 1,
+            opacity: textConfig.opacity || 100,
             rotation: textConfig.rotation || 0,
             fadeInDuration: textConfig.fadeInDuration,
             fadeOutDuration: textConfig.fadeOutDuration,

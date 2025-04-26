@@ -9,7 +9,7 @@ import Header from "../Header";
 import { MediaFile } from "@/app/types";
 import { debounce, throttle } from "lodash";
 
-export default function VideoTimeline() {
+export default function AudioTimeline() {
     const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
     const { mediaFiles, textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
@@ -74,7 +74,7 @@ export default function VideoTimeline() {
     return (
         <div >
             {mediaFiles
-                .filter((clip) => clip.type === 'video')
+                .filter(clip => clip.type === 'audio')
                 .map((clip) => (
                     <div key={clip.id} className="bg-green-500">
                         <div
@@ -91,11 +91,11 @@ export default function VideoTimeline() {
                         >
                             {/* <MoveableTimeline /> */}
                             <Image
-                                alt="Video"
+                                alt="Audio"
                                 className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
                                 height={30}
                                 width={30}
-                                src="https://www.svgrepo.com/show/532727/video.svg"
+                                src="https://www.svgrepo.com/show/532708/music.svg"
                             />
                             <span className="text-x">{clip.fileName}</span>
 

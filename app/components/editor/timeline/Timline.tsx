@@ -5,6 +5,9 @@ import { useDispatch } from "react-redux";
 import Image from "next/image";
 import Header from "./Header";
 import VideoTimeline from "./elements-timeline/VideoTimeline";
+import ImageTimeline from "./elements-timeline/ImageTimeline";
+import AudioTimeline from "./elements-timeline/AudioTimline";
+import TextTimeline from "./elements-timeline/TextTimeline";
 
 export const Timeline = () => {
     const { mediaFiles, textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
@@ -67,29 +70,7 @@ export const Timeline = () => {
                                     src="https://www.svgrepo.com/show/532708/music.svg"
                                 />
                             </div>
-
-                            {mediaFiles
-                                .filter(clip => clip.type === 'audio')
-                                .map((clip) => (
-                                    <div
-                                        onClick={() => handleClick('media', clip.id)}
-                                        key={clip.id}
-                                        className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
-                                        style={{
-                                            left: `${clip.positionStart * 100 + 60}px`,
-                                            width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
-                                        }}
-                                    >
-                                        <Image
-                                            alt="Audio"
-                                            className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
-                                            height={30}
-                                            width={30}
-                                            src="https://www.svgrepo.com/show/532708/music.svg"
-                                        />
-                                        <span className="text-x">{clip.fileName}</span>
-                                    </div>
-                                ))}
+                            <AudioTimeline />
                         </div>
                     </div>
 
@@ -107,29 +88,7 @@ export const Timeline = () => {
                                     src="https://www.svgrepo.com/show/535454/image.svg"
                                 />
                             </div>
-
-                            {mediaFiles
-                                .filter(clip => clip.type === 'image')
-                                .map((clip) => (
-                                    <div
-                                        onClick={() => handleClick('media', clip.id)}
-                                        key={clip.id}
-                                        className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
-                                        style={{
-                                            left: `${clip.positionStart * 100 + 60}px`,
-                                            width: `${(clip.positionEnd / clip.playbackSpeed - clip.positionStart / clip.playbackSpeed) * 100}px`,
-                                        }}
-                                    >
-                                        <Image
-                                            alt="Video"
-                                            className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
-                                            height={30}
-                                            width={30}
-                                            src="https://www.svgrepo.com/show/535454/image.svg"
-                                        />
-                                        <span className="text-x">{clip.fileName}</span>
-                                    </div>
-                                ))}
+                            <ImageTimeline />
                         </div>
                     </div>
 
@@ -146,27 +105,27 @@ export const Timeline = () => {
                                 src="https://www.svgrepo.com/show/535686/text.svg"
                             />
                         </div>
-
-                        {textElements.map((clip, index) => (
-                            <div
-                                onClick={() => handleClick('text', index)}
-                                key={clip.id}
-                                className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'text' && textElements[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
-                                style={{
-                                    left: `${clip.positionStart * 100 + 60}px`,
-                                    width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
-                                }}
-                            >
-                                <Image
-                                    alt="Text"
-                                    className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
-                                    height={30}
-                                    width={30}
-                                    src="https://www.svgrepo.com/show/535686/text.svg"
-                                />
-                                <span className="text-x">{clip.text}</span>
-                            </div>
-                        ))}
+                        <TextTimeline />
+                        {/* {textElements.map((clip, index) => (
+                                <div
+                                    onClick={() => handleClick('text', index)}
+                                    key={clip.id}
+                                    className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'text' && textElements[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
+                                    style={{
+                                        left: `${clip.positionStart * 100 + 60}px`,
+                                        width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
+                                    }}
+                                >
+                                    <Image
+                                        alt="Text"
+                                        className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
+                                        height={30}
+                                        width={30}
+                                        src="https://www.svgrepo.com/show/535686/text.svg"
+                                    />
+                                    <span className="text-x">{clip.text}</span>
+                                </div>
+                            ))} */}
                     </div>
 
                 </div>
