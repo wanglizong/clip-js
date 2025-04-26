@@ -20,3 +20,10 @@
 // useEffect(() => {
 //     loadFFmpeg();
 // }, []);
+export default async function Loadffmpeg() {
+    return (
+        <div className="flex justify-center items-center py-12">
+            Nothing Here Now :)
+        </div>
+    );
+}

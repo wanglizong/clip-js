@@ -90,7 +90,11 @@ export default function AudioTimeline() {
                     <div key={clip.id} className="bg-green-500">
                         <div
                             key={clip.id}
-                            ref={(el) => (targetRefs.current[clip.id] = el)}
+                            ref={(el: HTMLDivElement | null) => {
+                                if (el) {
+                                    targetRefs.current[clip.id] = el;
+                                }
+                            }}
                             onClick={() => handleClick('media', clip.id)}
                             className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
                             style={{
