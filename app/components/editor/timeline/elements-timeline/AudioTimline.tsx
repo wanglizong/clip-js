@@ -55,19 +55,30 @@ export default function AudioTimeline() {
         onUpdateMedia(clip.id, {
             positionStart: newPositionStart,
             positionEnd: (newPositionStart - clip.positionStart) + clip.positionEnd,
-            endTime: (newPositionStart - clip.positionStart) + clip.endTime
+            endTime: Math.max((newPositionStart - clip.positionStart) + clip.endTime, clip.endTime)
         })
 
         // TODO: the same arbitrary offset
         target.style.left = `${constrainedLeft + 50}px`;
     };
 
-    const handleResize = (clip: MediaFile, target: HTMLElement, width: number) => {
+    const handleRightResize = (clip: MediaFile, target: HTMLElement, width: number) => {
         const newPositionEnd = width / 100;
 
         onUpdateMedia(clip.id, {
             positionEnd: clip.positionStart + newPositionEnd,
-            endTime: clip.positionStart + newPositionEnd,
+            endTime: Math.max(clip.positionStart + newPositionEnd, clip.endTime)
+        })
+    };
+
+    const handleLeftResize = (clip: MediaFile, target: HTMLElement, width: number) => {
+        const newPositionEnd = width / 100;
+        // Ensure we do not resize beyond the right edge of the clip
+        const constrainedLeft = Math.max(clip.positionStart + ((clip.positionEnd - clip.positionStart) - newPositionEnd), 0);
+
+        onUpdateMedia(clip.id, {
+            positionStart: constrainedLeft,
+            startTime: constrainedLeft,
         })
     };
 
@@ -135,10 +146,13 @@ export default function AudioTimeline() {
                                 if (direction[0] === 1) {
                                     handleClick('media', clip.id)
                                     delta[0] && (target!.style.width = `${width}px`);
-                                    handleResize(clip, target as HTMLElement, width);
-
+                                    handleRightResize(clip, target as HTMLElement, width);
                                 }
-
+                                else if (direction[0] === -1) {
+                                    handleClick('media', clip.id)
+                                    delta[0] && (target!.style.width = `${width}px`);
+                                    handleLeftResize(clip, target as HTMLElement, width);
+                                }
                             }}
                             onResizeEnd={({ target, isDrag, clientX, clientY }) => {
                             }}

@@ -6,7 +6,7 @@ import { memo, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import Header from "../Header";
-import { TextElement } from "@/app/types";
+import { MediaFile, TextElement } from "@/app/types";
 import { debounce, throttle } from "lodash";
 
 export default function TextTimeline() {
@@ -68,7 +68,16 @@ export default function TextTimeline() {
             positionEnd: clip.positionStart + newPositionEnd,
         })
     };
+    const handleLeftResize = (clip: TextElement, target: HTMLElement, width: number) => {
+        const newPositionEnd = width / 100;
+        // Ensure we do not resize beyond the right edge of the clip
+        const constrainedLeft = Math.max(clip.positionStart + ((clip.positionEnd - clip.positionStart) - newPositionEnd), 0);
 
+        onUpdateText(clip.id, {
+            positionStart: constrainedLeft,
+            // startTime: constrainedLeft,
+        })
+    };
     return (
         <div >
             {textElements.map((clip, index) => (
@@ -135,7 +144,11 @@ export default function TextTimeline() {
                                 handleResize(clip, target as HTMLElement, width);
 
                             }
-
+                            else if (direction[0] === -1) {
+                                handleClick('text', clip.id)
+                                delta[0] && (target!.style.width = `${width}px`);
+                                handleLeftResize(clip, target as HTMLElement, width);
+                            }
                         }}
                         onResizeEnd={({ target, isDrag, clientX, clientY }) => {
                         }}
