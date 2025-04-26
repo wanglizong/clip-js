@@ -28,6 +28,8 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 - [ ] add crop feature to vids
 - [ ] duplicate elements
 - [ ] add toasts
+- [ ] responsive
+- [ ] add close to each tap
 
 There are also other various TODOS across the project search with TODO
 

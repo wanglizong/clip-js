@@ -41,11 +41,11 @@ export default function MediaList() {
             {files.length > 0 && (
                 <div className="space-y-4">
                     {files.map((mediaFile) => (
-                        <div key={mediaFile.id} className="border p-4 rounded space-y-2">
+                        <div key={mediaFile.id} className="border border-gray-700 p-4 rounded space-y-2">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
                                     <AddMedia fileId={mediaFile.id} />
-                                    <span className="py-2 px-2 text-sm flex-1">{mediaFile.file.name}</span>
+                                    <span className="py-2 px-2 text-sm flex-1 overflow-hidden text-clip">{mediaFile.file.name}</span>
                                 </div>
                                 <button
                                     onClick={() => onDeleteMedia(mediaFile.id)}

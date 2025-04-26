@@ -83,7 +83,7 @@ export default function Project({ params }: { params: { id: string } }) {
         <div className="flex flex-col h-screen">
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Sidebar - Buttons */}
-                <div className="flex-[0.1] min-w-[60px] max-w-[100px] border-r overflow-y-auto p-4">
+                <div className="flex-[0.1] min-w-[60px] max-w-[100px] border-r border-gray-700 overflow-y-auto p-4">
                     <div className="flex flex-col  space-y-2">
                         <TextButton onClick={() => handleFocus("text")} />
                         <LibraryButton onClick={() => handleFocus("media")} />
@@ -92,7 +92,7 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Add media and text */}
-                <div className="flex-[0.3] min-w-[200px] border-r overflow-y-auto p-4">
+                <div className="flex-[0.3] min-w-[200px] border-r border-gray-800 overflow-y-auto p-4">
                     {activeSection === "media" && (
                         <div>
                             <h2 className="text-lg flex flex-row gap-2 items-center justify-center font-semibold mb-2">
@@ -114,7 +114,7 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
 
                 {/* Right Sidebar - Element Properties */}
-                <div className="flex-[0.4] min-w-[200px] border-l overflow-y-auto p-4">
+                <div className="flex-[0.4] min-w-[200px] border-l border-gray-800 overflow-y-auto p-4">
                     {activeElement === "media" && (
                         <div>
                             <h2 className="text-lg font-semibold mb-4">Media Properties</h2>
@@ -130,7 +130,7 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
             </div>
             {/* Timeline at bottom */}
-            <div className="h-[400px] border-t">
+            <div className="flex-[0.4] border-t border-gray-500">
                 <Timeline />
             </div>
         </div>

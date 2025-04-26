@@ -37,6 +37,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">Start (s)</label>
                             <input
                                 type="number"
+                                // readOnly={true}
                                 value={mediaFile.startTime}
                                 min={0}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, {
@@ -50,6 +51,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">End (s)</label>
                             <input
                                 type="number"
+                                readOnly={true}
                                 value={mediaFile.endTime}
                                 min={mediaFile.startTime}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, {
@@ -69,6 +71,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">Start (s)</label>
                             <input
                                 type="number"
+                                readOnly={true}
                                 value={mediaFile.positionStart}
                                 min={0}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, {
@@ -82,6 +85,7 @@ export default function MediaProperties() {
                             <label className="block text-sm">End (s)</label>
                             <input
                                 type="number"
+                                readOnly={true}
                                 value={mediaFile.positionEnd}
                                 min={mediaFile.positionStart}
                                 onChange={(e) => onUpdateMedia(mediaFile.id, {

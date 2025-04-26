@@ -2,7 +2,7 @@ import Link from "next/link";
 import ThemeSwitch from "../buttons/ThemeSwitch";
 export default function Header() {
     return (
-        <header className="bg-black border-b border-gray-800 shadow-sm dark:bg-black shadow-sm dark:border-b dark:border-gray-800">
+        <header className="bg-black border-b border-gray-800 dark:bg-black shadow-sm dark:border-b dark:border-gray-800">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="text-3xl dark:text-gray-100">ClipJS</span>

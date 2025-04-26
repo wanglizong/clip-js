@@ -10,26 +10,11 @@ import AudioTimeline from "./elements-timeline/AudioTimline";
 import TextTimeline from "./elements-timeline/TextTimeline";
 
 export const Timeline = () => {
-    const { mediaFiles, textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
-
-    const dispatch = useDispatch();
-    const handleClick = (element: string, index: number | string) => {
-        if (element === 'media') {
-            dispatch(setActiveElement('media') as any);
-            // TODO: cause we pass id when media to find the right index i will change this later (this happens cause each timeline pass its index not index from mediaFiles array)
-            const actualIndex = mediaFiles.findIndex(clip => clip.id === index as unknown as string);
-            dispatch(setActiveElementIndex(actualIndex));
-        } else if (element === 'text') {
-            dispatch(setActiveElement('text') as any);
-            dispatch(setActiveElementIndex(index as number));
-        } else if (element === 'export') {
-            dispatch(setActiveElement('export') as any);
-        }
-    };
+    const { currentTime } = useAppSelector((state) => state.projectState);
 
     return (
         <div className="flex flex-col gap-2">
-            <div className="relative overflow-x-auto w-full border-t border-gray-300 bg-[#1E1D21]" >
+            <div className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21]" >
                 {/* Header */}
                 <Header />
                 {/* Video Files Timeline */}
@@ -106,26 +91,6 @@ export const Timeline = () => {
                             />
                         </div>
                         <TextTimeline />
-                        {/* {textElements.map((clip, index) => (
-                                <div
-                                    onClick={() => handleClick('text', index)}
-                                    key={clip.id}
-                                    className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'text' && textElements[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
-                                    style={{
-                                        left: `${clip.positionStart * 100 + 60}px`,
-                                        width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
-                                    }}
-                                >
-                                    <Image
-                                        alt="Text"
-                                        className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
-                                        height={30}
-                                        width={30}
-                                        src="https://www.svgrepo.com/show/535686/text.svg"
-                                    />
-                                    <span className="text-x">{clip.text}</span>
-                                </div>
-                            ))} */}
                     </div>
 
                 </div>

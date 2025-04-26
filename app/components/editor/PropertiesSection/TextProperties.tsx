@@ -50,6 +50,7 @@ export default function TextProperties() {
                                 type="number"
                                 value={textElement.positionStart}
                                 min={0}
+                                readOnly={true}
                                 onChange={(e) => onUpdateText(textElement.id, {
                                     positionStart: Number(e.target.value),
                                     positionEnd: Number(e.target.value) + (textElement.positionEnd - textElement.positionStart)
@@ -61,6 +62,7 @@ export default function TextProperties() {
                             <label className="block text-sm">End (s)</label>
                             <input
                                 type="number"
+                                readOnly={true}
                                 value={textElement.positionEnd}
                                 min={textElement.positionStart}
                                 onChange={(e) => onUpdateText(textElement.id, {
@@ -102,7 +104,8 @@ export default function TextProperties() {
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
                         </div>
-                        <div>
+                        {/* TODO: add z-index */}
+                        {/* <div>
                             <label className="block text-sm">Z-Index</label>
                             <input
                                 type="number"
@@ -110,7 +113,7 @@ export default function TextProperties() {
                                 onChange={(e) => onUpdateText(textElement.id, { zIndex: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
-                        </div>
+                        </div> */}
                     </div>
                 </div>
                 {/* Style Properties */}
@@ -127,32 +130,14 @@ export default function TextProperties() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm">Background </label>
-                            <input
-                                type="color"
-                                value={textElement.backgroundColor || 'transparent'}
-                                onChange={(e) => onUpdateText(textElement.id, { backgroundColor: e.target.value })}
-                                className="w-full h-10 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
-                            />
-                        </div>
-                        <div>
                             <label className="block text-sm">Opacity</label>
                             <input
                                 type="number"
                                 min="0"
-                                max="1"
-                                step="0.1"
+                                max="100"
+                                step="1"
                                 value={textElement.opacity || 1}
                                 onChange={(e) => onUpdateText(textElement.id, { opacity: Number(e.target.value) })}
-                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm">Rotation</label>
-                            <input
-                                type="number"
-                                value={textElement.rotation || 0}
-                                onChange={(e) => onUpdateText(textElement.id, { rotation: Number(e.target.value) })}
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
                         </div>

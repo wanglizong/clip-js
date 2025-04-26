@@ -166,26 +166,16 @@ export default function AddTextButton() {
                                         className="mt-1 block w-full bg-darkSurfacePrimary rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     />
                                 </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium text-white">Background </label>
-                                    <input
-                                        type="color"
-                                        value={textConfig.backgroundColor}
-                                        onChange={(e) => setTextConfig({ ...textConfig, backgroundColor: e.target.value })}
-                                        className="mt-1 block w-full bg-darkSurfacePrimary  rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                                    />
+                                <div className="mt-2 flex justify-end space-x-3">
+                                    <button
+                                        onClick={handleAddText}
+                                        className="px-4 py-2 bg-white text-black hover:bg-[#ccc] rounded"
+                                    >
+                                        Add Text
+                                    </button>
                                 </div>
                             </div>
 
-                            <div className="mt-6 flex justify-end space-x-3">
-                                <button
-                                    onClick={handleAddText}
-                                    className="px-4 py-2 bg-white text-black hover:bg-[#ccc] rounded"
-                                >
-                                    Add Text
-                                </button>
-                            </div>
                         </div>
                     </div>
 
