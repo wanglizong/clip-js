@@ -125,7 +125,7 @@ export const SequenceItem: Record<
                 data-track-item="transition-element"
                 style={{
                     position: "absolute",
-                    width: item.width || 300,
+                    width: item.width || 3000,
                     height: item.height || 400,
                     fontSize: item.fontSize || "16px",
                     top: item.x || 300,

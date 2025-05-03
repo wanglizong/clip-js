@@ -117,6 +117,20 @@ export default function TextProperties() {
                                 className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                             />
                         </div> */}
+                        {/* Font Type */}
+                        <div >
+                            <label className="block text-sm font-medium text-white">Font Type</label>
+                            <select
+                                value={textElement.font}
+                                onChange={(e) => onUpdateText(textElement.id, { font: e.target.value })}
+                                className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                            >
+                                <option value="Arial">Arial</option>
+                                <option value="Inter">Inter</option>
+                                <option value="Lato">Lato</option>
+                                <option value="Montserrat">Montserrat</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
                 {/* Style Properties */}

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { TextElement } from '../../../../types';
 import { useAppDispatch, useAppSelector } from '../../../../store';
-import { setTextElements } from '../../../../store/slices/projectSlice';
+import { setResolution, setTextElements } from '../../../../store/slices/projectSlice';
 import Image from 'next/image';
 
 export default function AddTextButton() {
@@ -77,16 +77,17 @@ export default function AddTextButton() {
                 <div className="flex items-center justify-center z-50">
                     <div className="p-6 rounded-lg w-96">
                         <div className="space-y-8">
+                            {/* Text Content */}
                             <div>
                                 <label className="text-xl font-bold mb-2 text-white">Text Content</label>
                                 <textarea
-                                    // type="text"
                                     value={textConfig.text}
                                     onChange={(e) => setTextConfig({ ...textConfig, text: e.target.value })}
                                     className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
                                 />
                             </div>
 
+                            {/* Start and End Time */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-white">Start Time (s)</label>
@@ -110,6 +111,7 @@ export default function AddTextButton() {
                                 </div>
                             </div>
 
+                            {/* Position */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-white">X Position</label>
@@ -131,6 +133,7 @@ export default function AddTextButton() {
                                 </div>
                             </div>
 
+                            {/* Font Size and Z-Index */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-white">Font Size</label>
@@ -155,7 +158,24 @@ export default function AddTextButton() {
                                 </div>
                             </div>
 
+                            {/* Font Type */}
+                            <div className="grid grid-cols-1 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-white">Font Type</label>
+                                    <select
+                                        value={textConfig.font}
+                                        onChange={(e) => setTextConfig({ ...textConfig, font: e.target.value })}
+                                        className="w-full p-2 bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:ring-2 focus:ring-white-500 focus:border-white-500"
+                                    >
+                                        <option value="Arial">Arial</option>
+                                        <option value="Inter">Inter</option>
+                                        <option value="Lato">Lato</option>
+                                        <option value="Montserrat">Montserrat</option>
+                                    </select>
+                                </div>
+                            </div>
 
+                            {/* Text Color and Add Text Button */}
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-sm font-medium text-white">Text Color</label>
