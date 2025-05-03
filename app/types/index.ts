@@ -94,6 +94,7 @@ export interface ProjectState {
     duration: number;
     zoomLevel: number;
     timelineZoom: number;
+    enableMarkerTracking: boolean;
     projectName: string;
     createdAt: string;
     lastModified: string;

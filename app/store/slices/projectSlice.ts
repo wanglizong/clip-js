@@ -15,6 +15,7 @@ export const initialState: ProjectState = {
     duration: 0,
     zoomLevel: 1,
     timelineZoom: 100,
+    enableMarkerTracking: true,
     activeSection: 'media',
     activeElement: null,
     activeElementIndex: 0,
@@ -107,6 +108,9 @@ const projectStateSlice = createSlice({
         setTimelineZoom: (state, action: PayloadAction<number>) => {
             state.timelineZoom = action.payload;
         },
+        setMarkerTrack: (state, action: PayloadAction<boolean>) => {
+            state.enableMarkerTracking = action.payload;
+        },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
@@ -129,6 +133,7 @@ export const {
     setQuality,
     setSpeed,
     setFps,
+    setMarkerTrack,
     setIsMuted,
     setActiveSection,
     setActiveElement,

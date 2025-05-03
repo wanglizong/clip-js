@@ -49,6 +49,7 @@ export default function Projects() {
             filesID: [],
             zoomLevel: 1,
             timelineZoom: 100,
+            enableMarkerTracking: true,
             resolution: { width: 1920, height: 1080 },
             fps: 30,
             aspectRatio: '16:9',
