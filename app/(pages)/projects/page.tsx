@@ -48,6 +48,7 @@ export default function Projects() {
             activeElementIndex: 0,
             filesID: [],
             zoomLevel: 1,
+            timelineZoom: 100,
             resolution: { width: 1920, height: 1080 },
             fps: 30,
             aspectRatio: '16:9',

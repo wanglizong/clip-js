@@ -11,8 +11,9 @@ import { debounce, throttle } from "lodash";
 
 export default function TextTimeline() {
     const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
-    const { textElements, activeElement, activeElementIndex, currentTime } = useAppSelector((state) => state.projectState);
+    const { textElements, activeElement, activeElementIndex, timelineZoom } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
+    const moveableRef = useRef<Moveable>(null);
 
 
     // this affect the performance cause of too much re-renders
@@ -51,7 +52,7 @@ export default function TextTimeline() {
     const handleDrag = (clip: TextElement, target: HTMLElement, left: number) => {
         // no negative left
         const constrainedLeft = Math.max(left, 0);
-        const newPositionStart = constrainedLeft / 100;
+        const newPositionStart = constrainedLeft / timelineZoom;
         onUpdateText(clip.id, {
             positionStart: newPositionStart,
             positionEnd: (newPositionStart - clip.positionStart) + clip.positionEnd,
@@ -62,14 +63,14 @@ export default function TextTimeline() {
     };
 
     const handleResize = (clip: TextElement, target: HTMLElement, width: number) => {
-        const newPositionEnd = width / 100;
+        const newPositionEnd = width / timelineZoom;
 
         onUpdateText(clip.id, {
             positionEnd: clip.positionStart + newPositionEnd,
         })
     };
     const handleLeftResize = (clip: TextElement, target: HTMLElement, width: number) => {
-        const newPositionEnd = width / 100;
+        const newPositionEnd = width / timelineZoom;
         // Ensure we do not resize beyond the right edge of the clip
         const constrainedLeft = Math.max(clip.positionStart + ((clip.positionEnd - clip.positionStart) - newPositionEnd), 0);
 
@@ -78,6 +79,11 @@ export default function TextTimeline() {
             // startTime: constrainedLeft,
         })
     };
+
+    useEffect(() => {
+        moveableRef.current?.updateRect();
+    }, [timelineZoom]);
+
     return (
         <div >
             {textElements.map((clip, index) => (
@@ -93,8 +99,8 @@ export default function TextTimeline() {
                         className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'text' && textElements[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
                         style={{
                             // TODO: i increased each clip 60px to the right to make space for the logo this is not a good solution i will change it later
-                            left: `${clip.positionStart * 100 + 50}px`,
-                            width: `${(clip.positionEnd - clip.positionStart) * 100}px`,
+                            left: `${clip.positionStart * timelineZoom + 50}px`,
+                            width: `${(clip.positionEnd - clip.positionStart) * timelineZoom}px`,
                             zIndex: clip.zIndex,
                         }}
                     >
@@ -111,6 +117,7 @@ export default function TextTimeline() {
                     </div>
 
                     <Moveable
+                        ref={moveableRef}
                         target={targetRefs.current[clip.id] || null}
                         container={null}
                         renderDirections={activeElement === 'text' && textElements[activeElementIndex] && textElements[activeElementIndex].id === clip.id ? ['w', 'e'] : []}

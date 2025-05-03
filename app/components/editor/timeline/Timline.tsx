@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/app/store";
-import { setActiveElement, setActiveElementIndex } from "@/app/store/slices/projectSlice";
+import { setActiveElement, setActiveElementIndex, setTimelineZoom } from "@/app/store/slices/projectSlice";
 import { memo, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
@@ -10,10 +10,24 @@ import AudioTimeline from "./elements-timeline/AudioTimline";
 import TextTimeline from "./elements-timeline/TextTimeline";
 
 export const Timeline = () => {
-    const { currentTime } = useAppSelector((state) => state.projectState);
-
+    const { currentTime, timelineZoom } = useAppSelector((state) => state.projectState);
+    const dispatch = useDispatch();
     return (
         <div className="flex flex-col gap-2">
+            <div className="flex flex-row justify-between items-center gap-2 py-2 px-12 w-1/6">
+                <label className="block text-sm font-semibold text-white">Zoom</label>
+                <span className="text-white">-</span>
+                <input
+                    type="range"
+                    min={30}
+                    max={120}
+                    step="1"
+                    value={timelineZoom}
+                    onChange={(e) => dispatch(setTimelineZoom(Number(e.target.value)))}
+                    className="w-full bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
+                />
+                <span className="text-white">+</span>
+            </div>
             <div className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21]" >
                 {/* Header */}
                 <Header />
@@ -24,7 +38,7 @@ export const Timeline = () => {
                         className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-10"
                         style={{
                             // TODO: Arbitrary offset but it works for now
-                            left: `${currentTime * 100 + 50}px`,
+                            left: `${currentTime * timelineZoom + 50}px`,
                         }}
                     />
                     <div className="relative h-16 min-w-[800px]">

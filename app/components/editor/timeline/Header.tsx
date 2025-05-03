@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
-import { useAppSelector, useAppDispatch } from '../../../store';
+import { useAppSelector } from '../../../store';
 export const Header = () => {
-    const { duration, currentTime } = useAppSelector((state) => state.projectState);
+    const { duration, currentTime, timelineZoom } = useAppSelector((state) => state.projectState);
     const secondInterval = 0.2; // Every 0.2s
     const totalSeconds = Math.max(duration + 2, 61);
     const tickMarkers = Array.from({ length: totalSeconds / secondInterval }, (_, i) => i * secondInterval);
@@ -49,7 +49,7 @@ export const Header = () => {
                             key={marker}
                             className="absolute flex flex-col items-center"
                             style={{
-                                left: `${marker * 100}px`,
+                                left: `${marker * timelineZoom}px`,
                                 width: `1px`,
                                 height: '100%',
                             }}

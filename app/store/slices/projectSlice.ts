@@ -14,6 +14,7 @@ export const initialState: ProjectState = {
     isMuted: false,
     duration: 0,
     zoomLevel: 1,
+    timelineZoom: 100,
     activeSection: 'media',
     activeElement: null,
     activeElementIndex: 0,
@@ -103,6 +104,9 @@ const projectStateSlice = createSlice({
         setFps: (state, action: PayloadAction<number>) => {
             state.exportSettings.fps = action.payload;
         },
+        setTimelineZoom: (state, action: PayloadAction<number>) => {
+            state.timelineZoom = action.payload;
+        },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
@@ -129,6 +133,7 @@ export const {
     setActiveSection,
     setActiveElement,
     setActiveElementIndex,
+    setTimelineZoom,
     rehydrate,
     createNewProject,
 } = projectStateSlice.actions;

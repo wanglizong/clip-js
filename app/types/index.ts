@@ -93,6 +93,7 @@ export interface ProjectState {
     isMuted: boolean;
     duration: number;
     zoomLevel: number;
+    timelineZoom: number;
     projectName: string;
     createdAt: string;
     lastModified: string;
