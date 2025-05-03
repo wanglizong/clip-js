@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TextElement, MediaFile, ActiveElement } from '../../types';
+import { TextElement, MediaFile, ActiveElement, ExportConfig } from '../../types';
 import { ProjectState } from '../../types';
 
 export const initialState: ProjectState = {
@@ -23,13 +23,12 @@ export const initialState: ProjectState = {
     history: [],
     future: [],
     exportSettings: {
-        resolution: { width: 1920, height: 1080 },
+        resolution: '1080p',
+        quality: 'high',
+        speed: 'fastest',
         fps: 30,
         format: 'mp4',
-        quality: 100,
-        audioEnabled: true,
         includeSubtitles: false,
-        filename: '',
     },
 };
 
@@ -89,6 +88,21 @@ const projectStateSlice = createSlice({
         setFilesID: (state, action: PayloadAction<string[]>) => {
             state.filesID = action.payload;
         },
+        setExportSettings: (state, action: PayloadAction<ExportConfig>) => {
+            state.exportSettings = action.payload;
+        },
+        setResolution: (state, action: PayloadAction<string>) => {
+            state.exportSettings.resolution = action.payload;
+        },
+        setQuality: (state, action: PayloadAction<string>) => {
+            state.exportSettings.quality = action.payload;
+        },
+        setSpeed: (state, action: PayloadAction<string>) => {
+            state.exportSettings.speed = action.payload;
+        },
+        setFps: (state, action: PayloadAction<number>) => {
+            state.exportSettings.fps = action.payload;
+        },
         // Special reducer for rehydrating state from IndexedDB
         rehydrate: (state, action: PayloadAction<ProjectState>) => {
             return { ...state, ...action.payload };
@@ -106,6 +120,11 @@ export const {
     setProjectName,
     setIsPlaying,
     setFilesID,
+    setExportSettings,
+    setResolution,
+    setQuality,
+    setSpeed,
+    setFps,
     setIsMuted,
     setActiveSection,
     setActiveElement,

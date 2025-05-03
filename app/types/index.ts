@@ -72,17 +72,12 @@ export interface TextElement {
 export type ExportFormat = 'mp4' | 'webm' | 'gif' | 'mov';
 
 export interface ExportConfig {
-    resolution: {
-        width: number;
-        height: number;
-    };
-    fps: number;
-    format: ExportFormat;
-    quality: number;
-    bitrate?: number;
-    audioEnabled: boolean;
-    includeSubtitles: boolean;
-    filename: string;
+    resolution: string;
+    quality: string;
+    speed: string;
+    fps: number; // TODO: add this as an option
+    format: ExportFormat; // TODO: add this as an option
+    includeSubtitles: boolean; // TODO: add this as an option
 }
 
 export type ActiveElement = 'media' | 'text' | 'export';
@@ -112,3 +107,14 @@ export interface ProjectState {
     future: ProjectState[]; // stack for redo
     exportSettings: ExportConfig;
 }
+
+export const mimeToExt = {
+    'video/mp4': 'mp4',
+    'audio/mpeg': 'mp3',
+    'audio/wav': 'wav',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+    'video/webm': 'webm',
+    // TODO: Add more as needed
+};

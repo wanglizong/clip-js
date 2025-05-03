@@ -54,13 +54,12 @@ export default function Projects() {
             history: [],
             future: [],
             exportSettings: {
-                resolution: { width: 1920, height: 1080 },
+                resolution: '1080p',
+                quality: 'high',
+                speed: 'fastest',
                 fps: 30,
                 format: 'mp4',
-                quality: 100,
-                audioEnabled: true,
                 includeSubtitles: false,
-                filename: '',
             },
         };
 
