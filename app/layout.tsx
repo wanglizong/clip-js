@@ -4,6 +4,7 @@ import { Inter, Roboto_Mono } from "next/font/google";
 import { Providers } from './providers'
 import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
+import { Toaster } from 'react-hot-toast';
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -33,6 +34,15 @@ export default function RootLayout({
         <Providers>
           <Header />
           <main className="flex-grow">
+            <Toaster
+              toastOptions={{
+                style: {
+                  borderRadius: '10px',
+                  background: '#333',
+                  color: '#fff',
+                },
+              }}
+            />
             {children}
           </main>
           <Footer />

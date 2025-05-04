@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/app/store";
-import { setActiveElement, setActiveElementIndex, setMarkerTrack, setTimelineZoom } from "@/app/store/slices/projectSlice";
+import { setMarkerTrack, setTextElements, setMediaFiles, setTimelineZoom } from "@/app/store/slices/projectSlice";
 import { memo, useCallback, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
@@ -9,9 +9,10 @@ import ImageTimeline from "./elements-timeline/ImageTimeline";
 import AudioTimeline from "./elements-timeline/AudioTimline";
 import TextTimeline from "./elements-timeline/TextTimeline";
 import { throttle } from 'lodash';
-
+import { MediaFile } from "@/app/types";
+import toast from "react-hot-toast";
 export const Timeline = () => {
-    const { currentTime, timelineZoom, enableMarkerTracking } = useAppSelector((state) => state.projectState);
+    const { currentTime, timelineZoom, enableMarkerTracking, activeElement, activeElementIndex, mediaFiles, textElements } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
 
     const throttledZoom = useCallback(
@@ -22,37 +23,155 @@ export const Timeline = () => {
     );
 
     const handleSplit = () => {
-        console.log("Split", currentTime);
-    }
+        let element = null;
+        let elements = null;
+        let setElements = null;
+
+        if (activeElement === 'media') {
+            elements = [...mediaFiles];
+            element = elements[activeElementIndex];
+            setElements = setMediaFiles;
+
+            if (!element) {
+                toast.error('No element selected.');
+                return;
+            }
+
+            const { positionStart, positionEnd } = element;
+
+            if (currentTime <= positionStart || currentTime >= positionEnd) {
+                toast.error('Marker is outside the selected element bounds.');
+                return;
+            }
+
+            const positionDuration = positionEnd - positionStart;
+
+            // Media logic (uses startTime/endTime for trimming)
+            const { startTime, endTime } = element;
+            const sourceDuration = endTime - startTime;
+            const ratio = (currentTime - positionStart) / positionDuration;
+            const splitSourceOffset = startTime + ratio * sourceDuration;
+
+            const firstPart = {
+                ...element,
+                id: crypto.randomUUID(),
+                positionStart,
+                positionEnd: currentTime,
+                startTime,
+                endTime: splitSourceOffset
+            };
+
+            const secondPart = {
+                ...element,
+                id: crypto.randomUUID(),
+                positionStart: currentTime,
+                positionEnd,
+                startTime: splitSourceOffset,
+                endTime
+            };
+
+            elements.splice(activeElementIndex, 1, firstPart, secondPart);
+        } else if (activeElement === 'text') {
+            elements = [...textElements];
+            element = elements[activeElementIndex];
+            setElements = setTextElements;
+
+            if (!element) {
+                toast.error('No element selected.');
+                return;
+            }
+
+            const { positionStart, positionEnd } = element;
+
+            if (currentTime <= positionStart || currentTime >= positionEnd) {
+                toast.error('Marker is outside the selected element bounds.');
+                return;
+            }
+
+            const firstPart = {
+                ...element,
+                id: crypto.randomUUID(),
+                positionStart,
+                positionEnd: currentTime,
+            };
+
+            const secondPart = {
+                ...element,
+                id: crypto.randomUUID(),
+                positionStart: currentTime,
+                positionEnd,
+            };
+
+            elements.splice(activeElementIndex, 1, firstPart, secondPart);
+        }
+
+        if (elements && setElements) {
+            dispatch(setElements(elements as any));
+            toast.success('Element split successfully.');
+        }
+    };
+
+    const handleDuplicate = () => {
+        let element = null;
+        let elements = null;
+        let setElements = null;
+
+        if (activeElement === 'media') {
+            elements = [...mediaFiles];
+            element = elements[activeElementIndex];
+            setElements = setMediaFiles;
+        } else if (activeElement === 'text') {
+            elements = [...textElements];
+            element = elements[activeElementIndex];
+            setElements = setTextElements;
+        }
+
+        if (!element) {
+            toast.error('No element selected.');
+            return;
+        }
+
+        const duplicatedElement = {
+            ...element,
+            id: crypto.randomUUID(),
+        };
+
+        if (elements) {
+            elements.splice(activeElementIndex + 1, 0, duplicatedElement as any);
+        }
+
+        if (elements && setElements) {
+            dispatch(setElements(elements as any));
+            toast.success('Element duplicated successfully.');
+        }
+    };
+
 
     return (
         <div className="flex w-full flex-col gap-2">
-            <div className="flex flex-row items-center gap-12 px-16 w-3/6">
-                <div className="flex flex-row justify-between items-center gap-2 py-2">
-                    <label className="block text-sm mt-1 font-semibold text-white">Zoom</label>
-                    <span className="text-white text-lg">-</span>
-                    <input
-                        type="range"
-                        min={30}
-                        max={120}
-                        step="1"
-                        value={timelineZoom}
-                        onChange={(e) => throttledZoom(Number(e.target.value))}
-                        className="w-[100px] bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
-                    />
-                    <span className="text-white text-lg">+</span>
-                </div>
-
-                <div className="flex flex-row justify-between items-center gap-2 py-2">
-                    <input
-                        type="checkbox"
-                        checked={enableMarkerTracking}
-                        onChange={() => dispatch(setMarkerTrack(!enableMarkerTracking))}
-                    />
-                    <span className="block text-sm mt-1 font-semibold text-white">Track Marker</span>
-                </div>
-
+            <div className="flex flex-row items-center justify-between gap-12 px-2 w-full">
                 <div className="flex flex-row items-center gap-2">
+                    {/* Track Marker */}
+                    <button
+                        onClick={() => dispatch(setMarkerTrack(!enableMarkerTracking))}
+                        className="bg-white border rounded-md border-transparent transition-colors flex flex-row items-center justify-center text-gray-800 hover:bg-[#ccc] dark:hover:bg-[#ccc] mt-2 font-medium text-sm sm:text-base h-auto px-2 py-1 sm:w-auto"
+                    >
+                        {enableMarkerTracking ? <Image
+                            alt="cut"
+                            className="h-auto w-auto max-w-[20px] max-h-[20px]"
+                            height={30}
+                            width={30}
+                            src="https://www.svgrepo.com/show/447546/yes-alt.svg"
+                        /> : <Image
+                            alt="cut"
+                            className="h-auto w-auto max-w-[20px] max-h-[20px]"
+                            height={30}
+                            width={30}
+                            src="https://www.svgrepo.com/show/447315/dismiss.svg"
+                        />}
+                        <span className="ml-2">Track Marker</span>
+                    </button>
+                    {/* Split */}
                     <button
                         onClick={handleSplit}
                         className="bg-white border rounded-md border-transparent transition-colors flex flex-row items-center justify-center text-gray-800 hover:bg-[#ccc] dark:hover:bg-[#ccc] mt-2 font-medium text-sm sm:text-base h-auto px-2 py-1 sm:w-auto"
@@ -66,8 +185,37 @@ export const Timeline = () => {
                         />
                         <span className="ml-2">Split</span>
                     </button>
+                    {/* Duplicate */}
+                    <button
+                        onClick={handleDuplicate}
+                        className="bg-white border rounded-md border-transparent transition-colors flex flex-row items-center justify-center text-gray-800 hover:bg-[#ccc] dark:hover:bg-[#ccc] mt-2 font-medium text-sm sm:text-base h-auto px-2 py-1 sm:w-auto"
+                    >
+                        <Image
+                            alt="cut"
+                            className="h-auto w-auto max-w-[20px] max-h-[20px]"
+                            height={30}
+                            width={30}
+                            src="https://www.svgrepo.com/show/521623/duplicate.svg"
+                        />
+                        <span className="ml-2">Duplicate</span>
+                    </button>
                 </div>
 
+                {/* Timeline Zoom */}
+                <div className="flex flex-row justify-between items-center gap-2 mr-4">
+                    <label className="block text-sm mt-1 font-semibold text-white">Zoom</label>
+                    <span className="text-white text-lg">-</span>
+                    <input
+                        type="range"
+                        min={30}
+                        max={120}
+                        step="1"
+                        value={timelineZoom}
+                        onChange={(e) => throttledZoom(Number(e.target.value))}
+                        className="w-[100px] bg-darkSurfacePrimary border border-white border-opacity-10 shadow-md text-white rounded focus:outline-none focus:border-white-500"
+                    />
+                    <span className="text-white text-lg">+</span>
+                </div>
             </div>
 
             <div className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21]" >
