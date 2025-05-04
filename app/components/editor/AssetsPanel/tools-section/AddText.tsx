@@ -170,7 +170,6 @@ export default function AddTextButton() {
                                         <option value="Arial">Arial</option>
                                         <option value="Inter">Inter</option>
                                         <option value="Lato">Lato</option>
-                                        <option value="Montserrat">Montserrat</option>
                                     </select>
                                 </div>
                             </div>

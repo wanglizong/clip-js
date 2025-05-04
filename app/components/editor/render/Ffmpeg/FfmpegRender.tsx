@@ -140,7 +140,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                 // Apply text 
                 if (textElements.length > 0) {
                     // load fonts
-                    let fonts = ['Arial', 'Inter', 'Lato', 'Montserrat'];
+                    let fonts = ['Arial', 'Inter', 'Lato'];
                     for (let i = 0; i < fonts.length; i++) {
                         const font = fonts[i];
                         const res = await fetch(`/fonts/${font}.ttf`);
