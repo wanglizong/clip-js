@@ -13,7 +13,7 @@ export default function TextTimeline() {
     const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
     const { textElements, activeElement, activeElementIndex, timelineZoom } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
-    const moveableRef = useRef<Moveable>(null);
+    const moveableRef = useRef<Record<string, Moveable | null>>({});
 
 
     // this affect the performance cause of too much re-renders
@@ -80,7 +80,9 @@ export default function TextTimeline() {
     };
 
     useEffect(() => {
-        moveableRef.current?.updateRect();
+        for (const clip of textElements) {
+            moveableRef.current[clip.id]?.updateRect();
+        }
     }, [timelineZoom]);
 
     return (
@@ -105,17 +107,21 @@ export default function TextTimeline() {
                         {/* <MoveableTimeline /> */}
                         <Image
                             alt="Text"
-                            className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
+                            className="h-7 w-7 min-w-6 mr-2 flex-shrink-0"
                             height={30}
                             width={30}
                             src="https://www.svgrepo.com/show/535686/text.svg"
                         />
-                        <span className="text-x">{clip.text}</span>
+                        <span className="truncate text-x">{clip.text}</span>
 
                     </div>
 
                     <Moveable
-                        ref={moveableRef}
+                        ref={(el: Moveable | null) => {
+                            if (el) {
+                                moveableRef.current[clip.id] = el;
+                            }
+                        }}
                         target={targetRefs.current[clip.id] || null}
                         container={null}
                         renderDirections={activeElement === 'text' && textElements[activeElementIndex] && textElements[activeElementIndex].id === clip.id ? ['w', 'e'] : []}

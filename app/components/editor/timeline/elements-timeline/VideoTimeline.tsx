@@ -13,7 +13,7 @@ export default function VideoTimeline() {
     const targetRefs = useRef<Record<string, HTMLDivElement | null>>({});
     const { mediaFiles, activeElement, activeElementIndex, timelineZoom } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
-    const moveableRef = useRef<Moveable>(null);
+    const moveableRef = useRef<Record<string, Moveable | null>>({});
 
     // this affect the performance cause of too much re-renders
 
@@ -81,7 +81,9 @@ export default function VideoTimeline() {
     };
 
     useEffect(() => {
-        moveableRef.current?.updateRect();
+        for (const clip of mediaFiles) {
+            moveableRef.current[clip.id]?.updateRect();
+        }
     }, [timelineZoom]);
 
     return (
@@ -89,7 +91,7 @@ export default function VideoTimeline() {
             {mediaFiles
                 .filter((clip) => clip.type === 'video')
                 .map((clip) => (
-                    <div key={clip.id} className="bg-green-500">
+                    <div key={clip.id}>
                         <div
                             key={clip.id}
                             ref={(el: HTMLDivElement | null) => {
@@ -108,16 +110,20 @@ export default function VideoTimeline() {
                             {/* <MoveableTimeline /> */}
                             <Image
                                 alt="Video"
-                                className="h-auto mr-2 w-auto max-w-[30px] max-h-[30px]"
+                                className="h-7 w-7 min-w-6 mr-2 flex-shrink-0"
                                 height={30}
                                 width={30}
                                 src="https://www.svgrepo.com/show/532727/video.svg"
                             />
-                            <span className="text-x">{clip.fileName}</span>
+                            <span className="truncate text-x">{clip.fileName}</span>
 
                         </div>
                         <Moveable
-                            ref={moveableRef}
+                            ref={(el: Moveable | null) => {
+                                if (el) {
+                                    moveableRef.current[clip.id] = el;
+                                }
+                            }}
                             target={targetRefs.current[clip.id] || null}
                             container={null}
                             renderDirections={activeElement === 'media' && mediaFiles[activeElementIndex].id === clip.id ? ['w', 'e'] : []}

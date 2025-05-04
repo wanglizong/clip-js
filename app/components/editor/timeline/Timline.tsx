@@ -1,6 +1,6 @@
 import { useAppSelector } from "@/app/store";
 import { setMarkerTrack, setTextElements, setMediaFiles, setTimelineZoom } from "@/app/store/slices/projectSlice";
-import { memo, useCallback, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
 import Header from "./Header";
@@ -15,11 +15,11 @@ export const Timeline = () => {
     const { currentTime, timelineZoom, enableMarkerTracking, activeElement, activeElementIndex, mediaFiles, textElements } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
 
-    const throttledZoom = useCallback(
+    const throttledZoom = useMemo(() =>
         throttle((value: number) => {
             dispatch(setTimelineZoom(value));
         }, 100),
-        []
+        [dispatch]
     );
 
     const handleSplit = () => {
