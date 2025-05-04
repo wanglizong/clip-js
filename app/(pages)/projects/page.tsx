@@ -7,6 +7,7 @@ import { useAppDispatch, useAppSelector } from '../../store';
 import { addProject, deleteProject, rehydrateProjects, setCurrentProject } from '../../store/slices/projectsSlice';
 import { listProjects, storeProject, deleteProject as deleteProjectFromDB } from '../../store';
 import { ProjectState } from '../../types';
+import { toast } from 'react-hot-toast';
 export default function Projects() {
     const dispatch = useAppDispatch();
     const { projects, currentProjectId } = useAppSelector((state) => state.projects);
@@ -69,11 +70,15 @@ export default function Projects() {
         dispatch(addProject(newProject));
         setNewProjectName('');
         setIsCreating(false);
+        toast.success('Project created successfully');
     };
 
     const handleDeleteProject = async (projectId: string) => {
         await deleteProjectFromDB(projectId);
         dispatch(deleteProject(projectId));
+        const storedProjects = await listProjects();
+        dispatch(rehydrateProjects(storedProjects));
+        toast.success('Project deleted successfully');
     };
 
     return (
@@ -85,7 +90,7 @@ export default function Projects() {
                     <span className="inline-block">Projects</span>
                 </h2>
                 <div className="flex justify-center items-center py-12">
-                    <div className="grid lg:w-3/6 sm:w-6/6 py-4 px-40 grid-cols-1 gap-4 lg:grid-cols-1 lg:gap-5">
+                    <div className="grid py-4 w-2/3 sm:w-1/2 md:w-1/3 lg:w-1/4 grid-cols-1 gap-4 lg:grid-cols-1 lg:gap-5">
                         {/* Add Project Button */}
                         <button onClick={() => setIsCreating(true)} className="group">
                             <div
@@ -109,49 +114,57 @@ export default function Projects() {
                         </button>
 
                         {/* List Projects */}
-                        {projects.map(({ id, projectName, createdAt, lastModified }) => (
-                            <div key={id} >
-                                <Link href={`/projects/${id}`} onClick={() => dispatch(setCurrentProject(id))} key={id} className="group">
-                                    <div
-                                        key={id}
-                                        className="flex flex-col gap-4 rounded-lg border border-white border-opacity-10 shadow-md p-4 transition-transform transform group-hover:scale-105 group-hover:border-opacity-10 group-hover:shadow-lg [box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset] dark:[box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset]"
-                                    >
-                                        <figure className="flex items-center justify-between w-full rounded-full bg-surface-secondary p-2 dark:border-dark-border dark:bg-dark-surface-secondary">
-                                            {/*  Project Name */}
-                                            <div className="flex items-center space-x-4">
-                                                <div className="flex size-9 items-center justify-center rounded-full bg-surface-secondary">
-                                                    <Image
-                                                        alt={projectName}
-                                                        className="invert"
-                                                        height={18}
-                                                        src="https://www.svgrepo.com/show/522461/video.svg"
-                                                        width={18}
-                                                    />
+                        {[...projects]
+                            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                            .map(({ id, projectName, createdAt, lastModified }) => (
+                                <div key={id} className="">
+                                    <Link href={`/projects/${id}`} onClick={() => dispatch(setCurrentProject(id))} className="group block h-full">
+                                        <div
+                                            className="flex flex-col gap-4 rounded-lg border border-white border-opacity-10 shadow-md p-4 transition-transform transform group-hover:scale-105 group-hover:border-opacity-10 group-hover:shadow-lg [box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset] dark:[box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset]"
+                                        >
+                                            <figure className="flex items-center justify-between w-full rounded-full bg-surface-secondary p-2 dark:border-dark-border dark:bg-dark-surface-secondary">
+                                                {/*  Project Name */}
+                                                <div className="flex items-center space-x-3 flex-1 min-w-0">
+                                                    <div className="flex-shrink-0 flex size-9 items-center justify-center rounded-full bg-surface-secondary">
+                                                        <Image
+                                                            alt={projectName}
+                                                            className="invert"
+                                                            height={18}
+                                                            src="https://www.svgrepo.com/show/522461/video.svg"
+                                                            width={18}
+                                                        />
+                                                    </div>
+                                                    <h5 className="truncate font-medium text-base sm:text-lg" title={projectName}>
+                                                        {projectName}
+                                                    </h5>
                                                 </div>
-                                                <h5 className="text-lg font-medium">{projectName}</h5>
+                                                {/* Delete Button */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        e.preventDefault();
+                                                        handleDeleteProject(id);
+                                                    }}
+                                                    className="flex-shrink-0 ml-2 text-red-500 hover:text-red-600 transition-colors"
+                                                    aria-label="Delete project"
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                                                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
+                                                    </svg>
+                                                </button>
+                                            </figure>
+                                            <div className="flex flex-col items-start py-1 gap-1 text-sm">
+                                                <p className="text-pretty text-text-secondary dark:text-dark-text-secondary">
+                                                    <span className="font-medium">Created:</span> {new Date(createdAt).toLocaleDateString()}
+                                                </p>
+                                                <p className="text-pretty text-text-secondary dark:text-dark-text-secondary">
+                                                    <span className="font-medium">Last Modified:</span> {new Date(lastModified).toLocaleDateString()}
+                                                </p>
                                             </div>
-                                            {/* Delete Button */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    e.preventDefault();
-                                                    handleDeleteProject(id);
-                                                }}
-                                                className="text-white-500 hover:text-white-600"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" viewBox="0 0 20 20" fill="currentColor">
-                                                    <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                                                </svg>
-                                            </button>
-                                        </figure>
-                                        <div className="flex flex-col items-start py-2 gap-1 ">
-                                            <p className="text-pretty text-text-secondary dark:text-dark-text-secondary">Created: {new Date(createdAt).toLocaleDateString()}</p>
-                                            <p className="text-pretty text-text-secondary dark:text-dark-text-secondary">Last Modified: {new Date(lastModified).toLocaleDateString()}</p>
                                         </div>
-                                    </div>
-                                </Link>
-                            </div>
-                        ))}
+                                    </Link>
+                                </div>
+                            ))}
                     </div>
                 </div>
             </div>

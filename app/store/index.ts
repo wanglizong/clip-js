@@ -4,6 +4,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux';
 import { openDB } from 'idb';
 import projectStateReducer from './slices/projectSlice';
 import projectsReducer from './slices/projectsSlice';
+import toast from 'react-hot-toast';
 
 // Create IndexedDB database for files and projects
 const setupDB = async () => {
@@ -25,6 +26,7 @@ export const loadState = () => {
         if (serializedState === null) return undefined;
         return JSON.parse(serializedState);
     } catch (error) {
+        toast.error('Error loading state from localStorage');
         console.error('Error loading state from localStorage:', error);
         return undefined;
     }
@@ -56,6 +58,7 @@ export const storeFile = async (file: File, fileId: string) => {
         await db.put('files', fileData);
         return fileId;
     } catch (error) {
+        toast.error('Error storing file');
         console.error('Error storing file:', error);
         return null;
     }
@@ -72,6 +75,7 @@ export const getFile = async (fileId: string) => {
 
         return fileData.file;
     } catch (error) {
+        toast.error('Error retrieving file');
         console.error('Error retrieving file:', error);
         return null;
     }
@@ -84,6 +88,7 @@ export const deleteFile = async (fileId: string) => {
         if (!db) return;
         await db.delete('files', fileId);
     } catch (error) {
+        toast.error('Error deleting file');
         console.error('Error deleting file:', error);
     }
 };
@@ -95,6 +100,7 @@ export const listFiles = async () => {
         if (!db) return [];
         return await db.getAll('files');
     } catch (error) {
+        toast.error('Error listing files');
         console.error('Error listing files:', error);
         return [];
     }
@@ -115,6 +121,7 @@ export const storeProject = async (project: any) => {
 
         return project.id;
     } catch (error) {
+        toast.error('Error storing project');
         console.error('Error storing project:', error);
         return null;
     }
@@ -127,6 +134,7 @@ export const getProject = async (projectId: string) => {
         if (!db) return null;
         return await db.get('projects', projectId);
     } catch (error) {
+        toast.error('Error retrieving project');
         console.error('Error retrieving project:', error);
         return null;
     }
@@ -139,6 +147,7 @@ export const deleteProject = async (projectId: string) => {
         if (!db) return;
         await db.delete('projects', projectId);
     } catch (error) {
+        toast.error('Error deleting project');
         console.error('Error deleting project:', error);
     }
 };

@@ -69,7 +69,7 @@ export default function Project({ params }: { params: { id: string } }) {
     // save
     useEffect(() => {
         const saveProject = async () => {
-            if (!projectState) return;
+            if (!projectState || projectState.id != currentProjectId) return;
             await storeProject(projectState);
             dispatch(updateProject(projectState));
         };
