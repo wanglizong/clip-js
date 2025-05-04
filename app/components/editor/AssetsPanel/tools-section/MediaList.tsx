@@ -12,22 +12,37 @@ export default function MediaList() {
     const [files, setFiles] = useState<UploadedFile[]>([]);
 
     useEffect(() => {
-        const fetchFiles = async () => {
-            const storedFilesArray: UploadedFile[] = [];
+        let mounted = true;
 
-            for (const fileId of filesID || []) {
-                const file = await getFile(fileId);
-                if (file) {
-                    storedFilesArray.push({
-                        file: file,
-                        id: fileId,
-                    });
+        const fetchFiles = async () => {
+            try {
+                const storedFilesArray: UploadedFile[] = [];
+
+                for (const fileId of filesID || []) {
+                    const file = await getFile(fileId);
+                    if (file && mounted) {
+                        storedFilesArray.push({
+                            file: file,
+                            id: fileId,
+                        });
+                    }
                 }
+
+                if (mounted) {
+                    setFiles(storedFilesArray);
+                }
+            } catch (error) {
+                console.error("Error fetching files:", error);
             }
-            setFiles(storedFilesArray);
         };
+
         fetchFiles();
-    }, [dispatch, filesID]);
+
+        // Cleanup
+        return () => {
+            mounted = false;
+        };
+    }, [filesID]);
 
     const onDeleteMedia = async (id: string) => {
         const onUpdateMedia = mediaFiles.filter(f => f.fileId !== id);
