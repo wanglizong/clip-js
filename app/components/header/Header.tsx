@@ -15,7 +15,7 @@ export default function Header() {
     }, [pathname, projectState?.projectName]);
 
     return (
-        <header className="bg-black border-b border-gray-800 dark:bg-black shadow-sm dark:border-b dark:border-gray-800">
+        <header className="bg-black border-b border-gray-800 shadow-sm">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 <div className="flex items-center">
                     <span className="text-3xl dark:text-gray-100">{title}</span>
@@ -25,7 +25,7 @@ export default function Header() {
                         <li>
                             <Link
                                 href="/"
-                                className="text-md text-white-800 dark:text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="text-md text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
                             >
                                 Home
                             </Link>
@@ -33,7 +33,7 @@ export default function Header() {
                         <li>
                             <Link
                                 href="/projects"
-                                className="text-md text-white-800 dark:text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="text-md text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
                             >
                                 Projects
                             </Link>
@@ -41,7 +41,7 @@ export default function Header() {
                         <li>
                             <Link
                                 href="/about"
-                                className="text-md text-white-800 dark:text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                className="text-md text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
                             >
                                 About Me
                             </Link>
