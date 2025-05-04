@@ -149,7 +149,7 @@ export const Timeline = () => {
 
     return (
         <div className="flex w-full flex-col gap-2">
-            <div className="flex flex-row items-center justify-between gap-12 px-2 w-full">
+            <div className="flex flex-row items-center justify-between gap-12 w-full">
                 <div className="flex flex-row items-center gap-2">
                     {/* Track Marker */}
                     <button
@@ -218,38 +218,38 @@ export const Timeline = () => {
                 </div>
             </div>
 
-            <div className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21]" >
+            <div className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21] z-10" >
                 {/* Header */}
                 <Header />
                 {/* Video Files Timeline */}
                 <div className="bg-[#1E1D21]" >
                     {/* Timeline cursor */}
                     <div
-                        className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-10"
+                        className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-50"
                         style={{
                             left: `${currentTime * timelineZoom}px`,
                         }}
                     />
-                    <div className="relative h-16 min-w-[800px]">
+                    <div className="relative h-16 min-w-[800px] z-10">
                         <VideoTimeline />
                     </div>
 
                     {/* Audio Files Timeline */}
                     <div className="bg-[#1E1D21]" >
-                        <div className="relative h-16 min-w-[800px]">
+                        <div className="relative h-16 min-w-[800px] z-10">
                             <AudioTimeline />
                         </div>
                     </div>
 
                     {/* Image Files Timeline */}
                     <div className="bg-[#1E1D21]" >
-                        <div className="relative h-16 min-w-[800px]">
+                        <div className="relative h-16 min-w-[800px] z-10">
                             <ImageTimeline />
                         </div>
                     </div>
 
                     {/* Text Elements Timeline */}
-                    <div className="relative h-16 min-w-[800px]">
+                    <div className="relative h-16 min-w-[800px] z-10">
                         <TextTimeline />
                     </div>
 
