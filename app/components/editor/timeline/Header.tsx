@@ -35,9 +35,7 @@ export const Header = () => {
     }, [currentTime]);
 
     return (
-        <div className="flex items-center gap-2 p-2 w-full cursor-pointer" ref={containerRef}>
-            <div className="min-w-[50px]"></div>
-
+        <div className="flex items-center py-2 w-full cursor-pointer" ref={containerRef}>
             <div className="relative h-8 min-w-[800px]">
                 {tickMarkers.map((marker) => {
                     const isWholeSecond = Number.isInteger(marker);

@@ -20,7 +20,8 @@ import { Timeline } from "../../../components/editor/timeline/Timline";
 import { PreviewPlayer } from "../../../components/editor/player/remotion/Player";
 import { MediaFile } from "@/app/types";
 import ExportList from "../../../components/editor/AssetsPanel/tools-section/ExportList";
-
+import Image
+    from "next/image";
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
     const dispatch = useAppDispatch();
@@ -137,7 +138,57 @@ export default function Project({ params }: { params: { id: string } }) {
                 </div>
             </div>
             {/* Timeline at bottom */}
-            <div className="flex-[0.4] border-t border-gray-500">
+            <div className="flex flex-row border-t border-gray-500">
+                <div className=" bg-darkSurfacePrimary flex flex-col items-center justify-center mt-20">
+
+                    <div className="relative h-16">
+                        <div className="flex items-center gap-2 p-4">
+                            <Image
+                                alt="Video"
+                                className="invert h-auto w-auto max-w-[30px] max-h-[30px]"
+                                height={30}
+                                width={30}
+                                src="https://www.svgrepo.com/show/532727/video.svg"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="relative h-16">
+                        <div className="flex items-center gap-2 p-4">
+                            <Image
+                                alt="Video"
+                                className="invert h-auto w-auto max-w-[30px] max-h-[30px]"
+                                height={30}
+                                width={30}
+                                src="https://www.svgrepo.com/show/532708/music.svg"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="relative h-16">
+                        <div className="flex items-center gap-2 p-4">
+                            <Image
+                                alt="Video"
+                                className="invert h-auto w-auto max-w-[30px] max-h-[30px]"
+                                height={30}
+                                width={30}
+                                src="https://www.svgrepo.com/show/535454/image.svg"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="relative h-16">
+                        <div className="flex items-center gap-2 p-4">
+                            <Image
+                                alt="Video"
+                                className="invert h-auto w-auto max-w-[30px] max-h-[30px]"
+                                height={30}
+                                width={30}
+                                src="https://www.svgrepo.com/show/535686/text.svg"
+                            />
+                        </div>
+                    </div>
+                </div>
                 <Timeline />
             </div>
         </div>

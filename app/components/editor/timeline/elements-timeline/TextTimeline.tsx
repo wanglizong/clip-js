@@ -58,8 +58,7 @@ export default function TextTimeline() {
             positionEnd: (newPositionStart - clip.positionStart) + clip.positionEnd,
         })
 
-        // TODO: the same arbitrary offset
-        target.style.left = `${constrainedLeft + 50}px`;
+        target.style.left = `${constrainedLeft}px`;
     };
 
     const handleResize = (clip: TextElement, target: HTMLElement, width: number) => {
@@ -98,8 +97,7 @@ export default function TextTimeline() {
                         onClick={() => handleClick('text', clip.id)}
                         className={`absolute border border-gray-500 border-opacity-50 rounded-md top-2 h-12 rounded bg-[#27272A] text-white text-sm flex items-center justify-center cursor-pointer ${activeElement === 'text' && textElements[activeElementIndex].id === clip.id ? 'bg-[#3F3F46]' : ''}`}
                         style={{
-                            // TODO: i increased each clip 60px to the right to make space for the logo this is not a good solution i will change it later
-                            left: `${clip.positionStart * timelineZoom + 50}px`,
+                            left: `${clip.positionStart * timelineZoom}px`,
                             width: `${(clip.positionEnd - clip.positionStart) * timelineZoom}px`,
                             zIndex: clip.zIndex,
                         }}
