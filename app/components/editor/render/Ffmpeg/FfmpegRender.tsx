@@ -1,12 +1,14 @@
 'use client'
 import { FFmpeg } from "@ffmpeg/ffmpeg";
-import { MediaFile } from "@/app/types";
 import { useEffect, useRef, useState } from "react";
 import { getFile, useAppSelector } from "@/app/store";
 import { Coffee } from "lucide-react";
 import Image from "next/image";
 import { extractConfigs } from "@/app/utils/extractConfigs";
 import { mimeToExt } from "@/app/types";
+import { toast } from "react-hot-toast";
+import FfmpegProgressBar from "./ProgressBar";
+
 interface FileUploaderProps {
     loadFunction: () => Promise<void>;
     loadFfmpeg: boolean;
@@ -72,6 +74,23 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                     const buffer = await fileData.arrayBuffer();
                     const ext = mimeToExt[fileData.type as keyof typeof mimeToExt] || fileData.type.split('/')[1];
                     await ffmpeg.writeFile(`input${i}.${ext}`, new Uint8Array(buffer));
+
+                    // TODO: currently we have to write same file if it's used more than once in different clips the below approach is a good start to change this 
+                    // let wroteFiles = new Map<string, string>();
+                    // const { fileId, type } = sortedMediaFiles[i];
+                    // let inputFilename: string;
+
+                    // if (wroteFiles.has(fileId)) {
+                    //     inputFilename = wroteFiles.get(fileId)!;
+                    // } else {
+                    //     const fileData = await getFile(fileId);
+                    //     const buffer = await fileData.arrayBuffer();
+                    //     const ext = mimeToExt[fileData.type as keyof typeof mimeToExt] || fileData.type.split('/')[1];
+                    //     inputFilename = `input_${fileId}.${ext}`;
+                    //     await ffmpeg.writeFile(inputFilename, new Uint8Array(buffer));
+                    //     wroteFiles.set(fileId, inputFilename);
+                    // }
+
                     if (sortedMediaFiles[i].type === 'image') {
                         inputs.push('-loop', '1', '-t', duration.toFixed(3), '-i', `input${i}.${ext}`);
                     }
@@ -85,7 +104,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                     // Shift clip to correct place on timeline (video)
                     if (sortedMediaFiles[i].type === 'video') {
                         filters.push(
-                            `[${i}:v]trim=start=${startTime.toFixed(3)}:duration=${duration.toFixed(3)},scale=${sortedMediaFiles[i].width}:${sortedMediaFiles[i].height},setpts=PTS+${positionStart.toFixed(3)}/TB[${visualLabel}]`
+                            `[${i}:v]trim=start=${startTime.toFixed(3)}:duration=${duration.toFixed(3)},scale=${sortedMediaFiles[i].width}:${sortedMediaFiles[i].height},setpts=PTS-STARTPTS+${positionStart.toFixed(3)}/TB[${visualLabel}]`
                         );
                     }
                     if (sortedMediaFiles[i].type === 'image') {
@@ -207,7 +226,9 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
             setPreviewUrl(outputUrl);
             setLoaded(true);
             setIsRendering(false);
+            toast.success('Video rendered successfully');
         } catch (err) {
+            toast.error('Failed to render video');
             console.error("Failed to render video:", err);
         }
     };
@@ -256,7 +277,8 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                             <div>
                                 <div className="bg-black p-2 h-40 text-sm font-mono rounded">
                                     <div>{logMessages}</div>
-                                    <p className="text-xs text-gray-400 italic">Progress bar is currently in development.</p>
+                                    <p className="text-xs text-gray-400 italic">The progress bar is experimental in FFmpeg WASM, so it might appear slow or unresponsive even though the actual processing is not.</p>
+                                    <FfmpegProgressBar ffmpeg={ffmpeg} />
                                 </div>
                             </div>
                         ) : (
