@@ -16,7 +16,7 @@ export default function Error({ error, reset }: { error: Error, reset: () => voi
             <p className='text-3xl font-semibold text-center'>Something went wrong !</p>
             <br />
             <button
-                className='flex justiy-center items-center px-5 py-2 text-xl rounded-md text-black border border-indigo-500 hover:bg-indigo-500 hover:text-white'
+                className="rounded-full bg-white border border-solid border-transparent transition-colors flex items-center justify-center text-gray-800 gap-2 hover:bg-[#ccc] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
                 onClick={
                     () => Reload()
                 }
