@@ -18,7 +18,7 @@ const geistMono = Roboto_Mono({
 
 export const metadata: Metadata = {
   title: 'ClipJS',
-  description: 'Online Video Editor',
+  description: 'A free web-based video editor that enables you to edit videos directly from your web browser.',
 }
 
 export default function RootLayout({

@@ -1,7 +1,14 @@
+'use client';
 import { AiOutlineFacebook, AiOutlineX, AiOutlineGithub, AiOutlineLinkedin, AiOutlineInstagram } from "react-icons/ai";
+import { usePathname } from "next/navigation";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const pathname = usePathname();
+
+  if (pathname.startsWith("/projects/")) {
+    return null;
+  }
 
   return (
     <footer className="bg-black border-t border-gray-800 dark:bg-black shadow-sm text-gray-400 py-6 dark:border-t dark:border-gray-800">
