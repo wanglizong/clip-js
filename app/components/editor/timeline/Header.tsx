@@ -26,7 +26,7 @@ export const Header = () => {
         <div className="flex items-center py-2 w-full" ref={containerRef}>
             <div className="relative h-8">
                 {tickMarkers.map((marker) => {
-                    const isWholeSecond = Number.isInteger(marker);
+                    const isWholeSecond = Number.isInteger(marker) && marker !== 0;
                     return (
                         <div
                             ref={(el) => {
@@ -45,7 +45,7 @@ export const Header = () => {
 
                             {/* second labels */}
                             {isWholeSecond && (
-                                <span className="mt-1 text-[10px] text-gray-400">
+                                <span className="mt-1 text-[10px] text-gray-400 cursor-default">
                                     {marker}s
                                 </span>
                             )}

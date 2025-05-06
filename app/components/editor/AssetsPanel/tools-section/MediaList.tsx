@@ -6,6 +6,7 @@ import { MediaFile, UploadedFile } from '@/app/types';
 import { useAppDispatch } from '@/app/store';
 import AddMedia from '../AddButtons/AddMedia';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 export default function MediaList() {
     const { mediaFiles, filesID } = useAppSelector((state) => state.projectState);
     const dispatch = useAppDispatch();
@@ -32,6 +33,7 @@ export default function MediaList() {
                     setFiles(storedFilesArray);
                 }
             } catch (error) {
+                toast.error("Error fetching files");
                 console.error("Error fetching files:", error);
             }
         };

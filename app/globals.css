@@ -5,3 +5,6 @@
 .moveable-origin {
     display: none !important;
 }
+.moveable-line.moveable-direction  {
+    display: none !important;
+}

@@ -66,13 +66,13 @@ export default function Home() {
           <span className="inline-block">What Can it do?</span>
         </h2>
 
-        <div className="grid w-full py-4 px-40 grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-5">
+        <div className="grid w-full max-w-[1680px] mx-auto py-4 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
           {featuresGridList.items.map(({ id, title, description, icon }) => (
             <article
               key={id}
-              className="flex flex-col gap-4 rounded-lg border border-white border-opacity-10  shadow-md p-4 [box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset] dark:[box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset]"
+              className="flex flex-col gap-3 md:gap-4 rounded-lg border border-white border-opacity-10 shadow-md p-3 md:p-4 [box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset] dark:[box-shadow:_70px_-20px_130px_0px_rgba(255,255,255,0.05)_inset]"
             >
-              <figure className="flex size-9 items-center justify-start rounded-full bg-surface-secondary p-2 dark:border-dark-border dark:bg-dark-surface-secondary">
+              <figure className="flex size-8 md:size-9 items-center justify-start rounded-full bg-surface-secondary p-2 dark:border-dark-border dark:bg-dark-surface-secondary">
                 <Image
                   alt={icon.alt ?? title}
                   className="invert"
@@ -82,8 +82,8 @@ export default function Home() {
                 />
               </figure>
               <div className="flex flex-col items-start gap-1">
-                <h5 className="text-lg font-medium">{title}</h5>
-                <p className="text-pretty text-text-secondary dark:text-dark-text-secondary">
+                <h5 className="text-base md:text-lg font-medium">{title}</h5>
+                <p className="text-pretty text-sm md:text-base text-text-secondary dark:text-dark-text-secondary">
                   {description}
                 </p>
               </div>

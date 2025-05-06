@@ -20,20 +20,20 @@ export const featuresGridList = {
         },
         {
             id: "3",
-            title: "Add Audio",
-            description: "Add your own audio clips to any video.",
+            title: "No Registration",
+            description: "Start using the app instantly no sign-up, no account, just get to work.",
             icon: {
-                url: "https://www.svgrepo.com/show/532708/music.svg",
-                alt: "Add Audio",
+                url: "https://www.svgrepo.com/show/318470/login.svg",
+                alt: "No Registration",
             },
         },
         {
             id: "4",
-            title: "Mobile Support",
-            description: "Website is responsive to phones.",
+            title: "Speed",
+            description: "Everything runs in your browser so there's no need to upload files to third-party services or wait around.",
             icon: {
-                url: "https://www.svgrepo.com/show/311621/smart-phone.svg",
-                alt: "Mobile Support",
+                url: "https://www.svgrepo.com/show/441028/speed.svg",
+                alt: "Speed",
             },
         },
         {
@@ -48,7 +48,7 @@ export const featuresGridList = {
         {
             id: "6",
             title: "Combine",
-            description: "Combine multiple videos, images and audio into one.",
+            description: "Combine multiple videos, images, texts and audio into one.",
             icon: {
                 url: "https://www.svgrepo.com/show/413830/combine.svg",
                 alt: "Combine",

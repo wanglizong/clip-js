@@ -21,12 +21,6 @@ export default function Ffmpeg() {
             setLogMessages(message);
         });
 
-        // Listen to progress event instead of log.
-        ffmpeg.on('progress', ({ progress, time }) => {
-            // TODO: Add progress bar functionality
-            console.log("Progress:", progress);
-        });
-
         await ffmpeg.load({
             coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, "text/javascript"),
             wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, "application/wasm"),

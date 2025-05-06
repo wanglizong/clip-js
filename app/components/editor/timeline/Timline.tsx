@@ -28,6 +28,11 @@ export const Timeline = () => {
         let elements = null;
         let setElements = null;
 
+        if (!activeElement) {
+            toast.error('No element selected.');
+            return;
+        }
+
         if (activeElement === 'media') {
             elements = [...mediaFiles];
             element = elements[activeElementIndex];
@@ -85,7 +90,7 @@ export const Timeline = () => {
             const { positionStart, positionEnd } = element;
 
             if (currentTime <= positionStart || currentTime >= positionEnd) {
-                toast.error('Marker is outside the selected element bounds.');
+                toast.error('Marker is outside the selected element.');
                 return;
             }
 
@@ -144,6 +149,7 @@ export const Timeline = () => {
 
         if (elements && setElements) {
             dispatch(setElements(elements as any));
+            dispatch(setActiveElement(null));
             toast.success('Element duplicated successfully.');
         }
     };

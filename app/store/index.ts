@@ -175,6 +175,8 @@ export const store = configureStore({
         }),
 });
 
+// TODO: remove old state (localStorage we use indexedDB now) that is not used anymore 
+
 // Load persisted state from localStorage
 // const persistedState = loadState();
 // if (persistedState) {
