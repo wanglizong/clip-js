@@ -10,6 +10,7 @@ This is an online video editor built with nextjs, remotion for real-time preview
 - ✂️ Element Utilities: Easily split, duplicate, and manage individual media layers.
 - 🖼️ Flexible Media Support: Import and mix videos, audio tracks, images, and text elements seamlessly.
 - 🛠️ Advanced Element Controls: Adjust properties like position, opacity, z-index and volume per element.
+- ⌨️ Keyboard Shortcuts: Quickly play, mute, move in time with arrows, split, duplicate, etc .
 
 ![Alt Text](/images/image.png)
 
@@ -41,28 +42,26 @@ Prioritized tasks contributions are welcomed!
 - [x] change error and not found pages style
 - [x] add toasts **(ui)**
 - [x] Allow changing the playback time not only through the built-in Remotion player but also via the custom timeline.**(ui)**
-- [ ] add loading to each page 
-- [ ] enhance seo
+- [x] add loading to each page 
 - [ ] shortcuts
-	- [ ] space
+	- [x] space
+	- [x] mute
+	- [x] split with s
+	- [x] duplicate with d
+	- [x] delete with del
 	- [ ] ctrl + z
-	- [ ] ctrl + c
-	- [ ] ctrl + x
-	- [ ] del split duplicate
-	- [ ] etc 
 - [ ] handle left resize in timeline elements
+- [ ] add crop, positioning to elements with react-moveable
 - [ ] functionality to separate audio from vids
-- [ ] progress bar when rendering but ffmpeg on progress gave inconsistent results (need investigation)
 - [ ] add playback speed for vids and audio
 - [ ] add close option to each sidebars **(ui)**
 - [ ] responsive for phones **(ui)**
 - [ ] Refactor timeline components cause it has a lot of repetitive code.
 - [ ] add elements as shapes blur effects.
-- [ ] add crop feature to vids with react-moveable and make positioning with it too
 - [ ] more effects for text
 - [ ] PWA Mode: So users can edit offline.
 - [ ] insert elements in timeline with https://www.npmjs.com/package/react-moveable (already used in timelines) **(ui)**
 - [ ] thumbnail for listed vids and imgs **(ui)**
-- [ ] migrate to WebGL or WebGpu or a library that work on it like https://github.com/diffusionstudio/core
+- [ ] add option to use gpu with WebGL or WebGpu library like https://github.com/diffusionstudio/core
 
 There are also other various TODOS across the project (search with TODO)
