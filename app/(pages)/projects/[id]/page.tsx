@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getFile, storeProject, useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
 import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
@@ -21,12 +21,13 @@ import { PreviewPlayer } from "../../../components/editor/player/remotion/Player
 import { MediaFile } from "@/app/types";
 import ExportList from "../../../components/editor/AssetsPanel/tools-section/ExportList";
 import Image from "next/image";
-
+import ProjectName from "../../../components/editor/player/ProjectName";
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
     const dispatch = useAppDispatch();
     const projectState = useAppSelector((state) => state.projectState);
     const { currentProjectId } = useAppSelector((state) => state.projects);
+    const [isLoading, setIsLoading] = useState(true);
 
     const router = useRouter();
     const { activeSection, activeElement } = projectState;
@@ -34,9 +35,11 @@ export default function Project({ params }: { params: { id: string } }) {
     useEffect(() => {
         const loadProject = async () => {
             if (id) {
+                setIsLoading(true);
                 const project = await getProject(id);
                 if (project) {
                     dispatch(setCurrentProject(id));
+                    setIsLoading(false);
                 } else {
                     router.push('/404');
                 }
@@ -83,6 +86,15 @@ export default function Project({ params }: { params: { id: string } }) {
 
     return (
         <div className="flex flex-col h-screen">
+            {/* Loading screen */}
+            {isLoading ? (
+                <div className="fixed inset-0 flex items-center bg-black bg-opacity-50 justify-center z-50">
+                    <div className="bg-black bg-opacity-70 p-6 rounded-lg flex flex-col items-center">
+                        <div className="w-16 h-16 border-4 border-t-white border-r-white border-opacity-30 border-t-opacity-100 rounded-full animate-spin"></div>
+                        <p className="mt-4 text-white text-lg">Loading project...</p>
+                    </div>
+                </div>
+            ) : null}
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Sidebar - Buttons */}
                 <div className="flex-[0.1] min-w-[60px] max-w-[100px] border-r border-gray-700 overflow-y-auto p-4">
@@ -121,8 +133,7 @@ export default function Project({ params }: { params: { id: string } }) {
 
                 {/* Center - Video Preview */}
                 <div className="flex items-center justify-center flex-col flex-[1] overflow-hidden">
-                    {/* TODO: make project name editable */}
-                    <p className="text-2xl font-bold mt-4 capitalize tracking-wider">{projectState.projectName}</p>
+                    <ProjectName />
                     <PreviewPlayer />
                 </div>
 
