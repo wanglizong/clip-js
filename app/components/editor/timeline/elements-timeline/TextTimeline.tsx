@@ -160,9 +160,10 @@ export default function TextTimeline() {
 
                             }
                             else if (direction[0] === -1) {
-                                handleClick('text', clip.id)
-                                delta[0] && (target!.style.width = `${width}px`);
-                                handleLeftResize(clip, target as HTMLElement, width);
+                                // TODO: handle left resize
+                                // handleClick('text', clip.id)
+                                // delta[0] && (target!.style.width = `${width}px`);
+                                // handleLeftResize(clip, target as HTMLElement, width);
                             }
                         }}
                         onResizeEnd={({ target, isDrag, clientX, clientY }) => {

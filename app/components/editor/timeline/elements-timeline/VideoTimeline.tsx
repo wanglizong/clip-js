@@ -161,9 +161,10 @@ export default function VideoTimeline() {
                                     handleRightResize(clip, target as HTMLElement, width);
                                 }
                                 else if (direction[0] === -1) {
-                                    handleClick('media', clip.id)
-                                    delta[0] && (target!.style.width = `${width}px`);
-                                    handleLeftResize(clip, target as HTMLElement, width);
+                                    // TODO: handle left resize
+                                    // handleClick('media', clip.id)
+                                    // delta[0] && (target!.style.width = `${width}px`);
+                                    // handleLeftResize(clip, target as HTMLElement, width);
                                 }
                             }}
                             onResizeEnd={({ target, isDrag, clientX, clientY }) => {
