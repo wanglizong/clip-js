@@ -5,6 +5,7 @@ import { setMediaFiles } from "../../../../store/slices/projectSlice";
 import { storeFile } from "../../../../store";
 import { categorizeFile } from "../../../../utils/utils";
 import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 export default function AddMedia({ fileId }: { fileId: string }) {
     const { mediaFiles } = useAppSelector((state) => state.projectState);
@@ -17,7 +18,11 @@ export default function AddMedia({ fileId }: { fileId: string }) {
         const mediaId = crypto.randomUUID();
 
         if (fileId) {
-            const lastEnd = mediaFiles.length > 0 ? Math.max(...mediaFiles.map(f => f.positionEnd)) : 0;
+            const relevantClips = mediaFiles.filter(clip => clip.type === categorizeFile(file.type));
+            const lastEnd = relevantClips.length > 0
+                ? Math.max(...relevantClips.map(f => f.positionEnd))
+                : 0;
+
             updatedMedia.push({
                 id: mediaId,
                 fileName: file.name,
@@ -42,6 +47,7 @@ export default function AddMedia({ fileId }: { fileId: string }) {
             });
         }
         dispatch(setMediaFiles(updatedMedia));
+        toast.success('Media added successfully.');
     };
 
     return (

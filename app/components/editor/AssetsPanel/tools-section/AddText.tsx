@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { TextElement } from '../../../../types';
 import { useAppDispatch, useAppSelector } from '../../../../store';
 import { setResolution, setTextElements } from '../../../../store/slices/projectSlice';
-import Image from 'next/image';
+import toast from 'react-hot-toast';
 
 export default function AddTextButton() {
     const [textConfig, setTextConfig] = useState<Partial<TextElement>>({
@@ -30,11 +30,13 @@ export default function AddTextButton() {
     };
 
     const handleAddText = () => {
+        const lastEnd = textElements.length > 0 ? Math.max(...textElements.map(f => f.positionEnd)) : 0;
+
         const newTextElement: TextElement = {
             id: crypto.randomUUID(),
             text: textConfig.text || '',
-            positionStart: textConfig.positionStart || 0,
-            positionEnd: textConfig.positionEnd || 10,
+            positionStart: lastEnd || 0,
+            positionEnd: lastEnd + 10 || 10,
             x: textConfig.x || 0,
             y: textConfig.y || 0,
             width: textConfig.width,
@@ -56,8 +58,8 @@ export default function AddTextButton() {
         // Reset form
         setTextConfig({
             text: 'Example',
-            positionStart: 0,
-            positionEnd: 10,
+            positionStart: lastEnd,
+            positionEnd: lastEnd + 10,
             x: 500,
             y: 600,
             fontSize: 200,
@@ -69,6 +71,7 @@ export default function AddTextButton() {
             rotation: 0,
             animation: 'none'
         });
+        toast.success('Text added successfully.');
     };
 
     return (
