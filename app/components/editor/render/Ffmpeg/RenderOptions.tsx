@@ -23,8 +23,8 @@ export default function RenderOptions() {
                                     <option value="480p">480p</option>
                                     <option value="720p">720p</option>
                                     <option value="1080p">1080p (Full HD)</option>
-                                    <option value="2K">2K</option>
-                                    <option value="4K">4K (Ultra HD)</option>
+                                    {/* <option value="2K">2K</option> */}
+                                    {/* <option value="4K">4K (Ultra HD)</option> */}
                                 </select>
                             </div>
 
