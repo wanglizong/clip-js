@@ -3,9 +3,8 @@ import { useEffect, useRef } from "react";
 import { getFile, storeProject, useAppDispatch, useAppSelector } from "../../../store";
 import { getProject } from "../../../store";
 import { setCurrentProject, updateProject } from "../../../store/slices/projectsSlice";
-import { rehydrate, setActiveElement, setMediaFiles } from '../../../store/slices/projectSlice';
+import { rehydrate, setMediaFiles } from '../../../store/slices/projectSlice';
 import { setActiveSection } from "../../../store/slices/projectSlice";
-// import CanvasPreview from "../../../components/editor/player/CanvasPreview";
 import AddText from '../../../components/editor/AssetsPanel/tools-section/AddText';
 import AddMedia from '../../../components/editor/AssetsPanel/AddButtons/UploadMedia';
 import MediaList from '../../../components/editor/AssetsPanel/tools-section/MediaList';
@@ -14,15 +13,15 @@ import TextButton from "@/app/components/editor/AssetsPanel/SidebarButtons/TextB
 import LibraryButton from "@/app/components/editor/AssetsPanel/SidebarButtons/LibraryButton";
 import ExportButton from "@/app/components/editor/AssetsPanel/SidebarButtons/ExportButton";
 import HomeButton from "@/app/components/editor/AssetsPanel/SidebarButtons/HomeButton";
+import ShortcutsButton from "@/app/components/editor/AssetsPanel/SidebarButtons/ShortcutsButton";
 import MediaProperties from "../../../components/editor/PropertiesSection/MediaProperties";
 import TextProperties from "../../../components/editor/PropertiesSection/TextProperties";
 import { Timeline } from "../../../components/editor/timeline/Timline";
-// import RemotionPreview from "../../../components/editor/player/RemotionPreview";
 import { PreviewPlayer } from "../../../components/editor/player/remotion/Player";
 import { MediaFile } from "@/app/types";
 import ExportList from "../../../components/editor/AssetsPanel/tools-section/ExportList";
-import Image
-    from "next/image";
+import Image from "next/image";
+
 export default function Project({ params }: { params: { id: string } }) {
     const { id } = params;
     const dispatch = useAppDispatch();
@@ -87,11 +86,13 @@ export default function Project({ params }: { params: { id: string } }) {
             <div className="flex flex-1 overflow-hidden">
                 {/* Left Sidebar - Buttons */}
                 <div className="flex-[0.1] min-w-[60px] max-w-[100px] border-r border-gray-700 overflow-y-auto p-4">
-                    <div className="flex flex-col  space-y-2">
+                    <div className="flex flex-col space-y-2">
                         <HomeButton />
                         <TextButton onClick={() => handleFocus("text")} />
                         <LibraryButton onClick={() => handleFocus("media")} />
                         <ExportButton onClick={() => handleFocus("export")} />
+                        {/* TODO: add shortcuts guide but in a better way */}
+                        {/* <ShortcutsButton onClick={() => handleFocus("export")} /> */}
                     </div>
                 </div>
 

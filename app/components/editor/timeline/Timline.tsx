@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/app/store";
-import { setMarkerTrack, setTextElements, setMediaFiles, setTimelineZoom, setCurrentTime, setIsPlaying } from "@/app/store/slices/projectSlice";
+import { setMarkerTrack, setTextElements, setMediaFiles, setTimelineZoom, setCurrentTime, setIsPlaying, setActiveElement } from "@/app/store/slices/projectSlice";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
@@ -9,7 +9,7 @@ import ImageTimeline from "./elements-timeline/ImageTimeline";
 import AudioTimeline from "./elements-timeline/AudioTimline";
 import TextTimeline from "./elements-timeline/TextTimeline";
 import { throttle } from 'lodash';
-import { MediaFile } from "@/app/types";
+import GlobalKeyHandlerProps from "../../../components/editor/keys/GlobalKeyHandlerProps";
 import toast from "react-hot-toast";
 export const Timeline = () => {
     const { currentTime, timelineZoom, enableMarkerTracking, activeElement, activeElementIndex, mediaFiles, textElements, duration, isPlaying } = useAppSelector((state) => state.projectState);
@@ -108,6 +108,7 @@ export const Timeline = () => {
 
         if (elements && setElements) {
             dispatch(setElements(elements as any));
+            dispatch(setActiveElement(null));
             toast.success('Element split successfully.');
         }
     };
@@ -144,6 +145,37 @@ export const Timeline = () => {
         if (elements && setElements) {
             dispatch(setElements(elements as any));
             toast.success('Element duplicated successfully.');
+        }
+    };
+
+    const handleDelete = () => {
+        let element = null;
+        let elements = null;
+        let setElements = null;
+
+        if (activeElement === 'media') {
+            elements = [...mediaFiles];
+            element = elements[activeElementIndex];
+            setElements = setMediaFiles;
+        } else if (activeElement === 'text') {
+            elements = [...textElements];
+            element = elements[activeElementIndex];
+            setElements = setTextElements;
+        }
+
+        if (!element) {
+            toast.error('No element selected.');
+            return;
+        }
+
+        if (elements) {
+            elements = elements.filter(ele => ele.id !== element.id)
+        }
+
+        if (elements && setElements) {
+            dispatch(setElements(elements as any));
+            dispatch(setActiveElement(null));
+            toast.success('Element deleted successfully.');
         }
     };
 
@@ -185,7 +217,7 @@ export const Timeline = () => {
                             width={30}
                             src="https://www.svgrepo.com/show/447315/dismiss.svg"
                         />}
-                        <span className="ml-2">Track Marker</span>
+                        <span className="ml-2">Track Marker <span className="text-xs">(T)</span></span>
                     </button>
                     {/* Split */}
                     <button
@@ -199,7 +231,7 @@ export const Timeline = () => {
                             width={30}
                             src="https://www.svgrepo.com/show/509075/cut.svg"
                         />
-                        <span className="ml-2">Split</span>
+                        <span className="ml-2">Split <span className="text-xs">(S)</span></span>
                     </button>
                     {/* Duplicate */}
                     <button
@@ -213,7 +245,21 @@ export const Timeline = () => {
                             width={30}
                             src="https://www.svgrepo.com/show/521623/duplicate.svg"
                         />
-                        <span className="ml-2">Duplicate</span>
+                        <span className="ml-2">Duplicate <span className="text-xs">(D)</span></span>
+                    </button>
+                    {/* Delete */}
+                    <button
+                        onClick={handleDelete}
+                        className="bg-white border rounded-md border-transparent transition-colors flex flex-row items-center justify-center text-gray-800 hover:bg-[#ccc] dark:hover:bg-[#ccc] mt-2 font-medium text-sm sm:text-base h-auto px-2 py-1 sm:w-auto"
+                    >
+                        <Image
+                            alt="Delete"
+                            className="h-auto w-auto max-w-[20px] max-h-[20px]"
+                            height={30}
+                            width={30}
+                            src="https://www.svgrepo.com/show/511788/delete-1487.svg"
+                        />
+                        <span className="ml-2">Delete <span className="text-xs">(Del)</span></span>
                     </button>
                 </div>
 
@@ -277,6 +323,7 @@ export const Timeline = () => {
                     </div>
                 </div>
             </div >
+            <GlobalKeyHandlerProps handleDuplicate={handleDuplicate} handleSplit={handleSplit} handleDelete={handleDelete} />
         </div>
 
     );
