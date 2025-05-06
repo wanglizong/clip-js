@@ -634,7 +634,7 @@ export default function CanvasPreview() {
                 >
                     <img src={isMuted ? 'https://www.svgrepo.com/show/391332/sound-mute.svg' : 'https://www.svgrepo.com/show/391335/sound-up.svg'} alt="Mute" width={24} height={24} />
                 </button>
-                <GlobalKeyHandlerProps onSpace={togglePlay} onMute={toggleMute} />
+                {/* <GlobalKeyHandlerProps onSpace={togglePlay} onMute={toggleMute} /> */}
                 <button
                     onClick={togglePlay}
                     className="bg-white hover:bg-gray-200 text-black py-1 px-3 rounded"

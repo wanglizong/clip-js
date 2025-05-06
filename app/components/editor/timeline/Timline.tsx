@@ -155,6 +155,7 @@ export const Timeline = () => {
     };
 
     const handleDelete = () => {
+        // @ts-ignore
         let element = null;
         let elements = null;
         let setElements = null;
@@ -175,6 +176,7 @@ export const Timeline = () => {
         }
 
         if (elements) {
+            // @ts-ignore
             elements = elements.filter(ele => ele.id !== element.id)
         }
 
