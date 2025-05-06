@@ -1,5 +1,5 @@
 import { useAppSelector } from "@/app/store";
-import { setMarkerTrack, setTextElements, setMediaFiles, setTimelineZoom } from "@/app/store/slices/projectSlice";
+import { setMarkerTrack, setTextElements, setMediaFiles, setTimelineZoom, setCurrentTime, setIsPlaying } from "@/app/store/slices/projectSlice";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { useDispatch } from "react-redux";
 import Image from "next/image";
@@ -12,8 +12,9 @@ import { throttle } from 'lodash';
 import { MediaFile } from "@/app/types";
 import toast from "react-hot-toast";
 export const Timeline = () => {
-    const { currentTime, timelineZoom, enableMarkerTracking, activeElement, activeElementIndex, mediaFiles, textElements } = useAppSelector((state) => state.projectState);
+    const { currentTime, timelineZoom, enableMarkerTracking, activeElement, activeElementIndex, mediaFiles, textElements, duration, isPlaying } = useAppSelector((state) => state.projectState);
     const dispatch = useDispatch();
+    const timelineRef = useRef<HTMLDivElement>(null)
 
     const throttledZoom = useMemo(() =>
         throttle((value: number) => {
@@ -147,6 +148,21 @@ export const Timeline = () => {
     };
 
 
+    const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+        if (!timelineRef.current) return;
+
+        dispatch(setIsPlaying(false));
+        const rect = timelineRef.current.getBoundingClientRect();
+
+        const scrollOffset = timelineRef.current.scrollLeft;
+        const offsetX = e.clientX - rect.left + scrollOffset;
+
+        const seconds = offsetX / timelineZoom;
+        const clampedTime = Math.max(0, Math.min(duration, seconds));
+
+        dispatch(setCurrentTime(clampedTime));
+    };
+
     return (
         <div className="flex w-full flex-col gap-2">
             <div className="flex flex-row items-center justify-between gap-12 w-full">
@@ -218,11 +234,20 @@ export const Timeline = () => {
                 </div>
             </div>
 
-            <div className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21] z-10" >
-                {/* Header */}
+            <div
+                className="relative overflow-x-auto w-full border-t border-gray-800 bg-[#1E1D21] z-10"
+                ref={timelineRef}
+                onClick={handleClick}
+            >
+                {/* Timeline Header */}
                 <Header />
-                {/* Video Files Timeline */}
-                <div className="bg-[#1E1D21]" >
+
+                <div className="bg-[#1E1D21]"
+
+                    style={{
+                        width: "100%", /* or whatever width your timeline requires */
+                    }}
+                >
                     {/* Timeline cursor */}
                     <div
                         className="absolute top-0 bottom-0 w-[2px] bg-red-500 z-50"
@@ -230,29 +255,26 @@ export const Timeline = () => {
                             left: `${currentTime * timelineZoom}px`,
                         }}
                     />
-                    <div className="relative h-16 min-w-[800px] z-10">
-                        <VideoTimeline />
-                    </div>
+                    {/* Timeline elements */}
+                    <div className="w-full">
 
-                    {/* Audio Files Timeline */}
-                    <div className="bg-[#1E1D21]" >
-                        <div className="relative h-16 min-w-[800px] z-10">
+                        <div className="relative h-16 z-10">
+                            <VideoTimeline />
+                        </div>
+
+                        <div className="relative h-16 z-10">
                             <AudioTimeline />
                         </div>
-                    </div>
 
-                    {/* Image Files Timeline */}
-                    <div className="bg-[#1E1D21]" >
-                        <div className="relative h-16 min-w-[800px] z-10">
+                        <div className="relative h-16 z-10">
                             <ImageTimeline />
                         </div>
-                    </div>
 
-                    {/* Text Elements Timeline */}
-                    <div className="relative h-16 min-w-[800px] z-10">
-                        <TextTimeline />
-                    </div>
+                        <div className="relative h-16 z-10">
+                            <TextTimeline />
+                        </div>
 
+                    </div>
                 </div>
             </div >
         </div>

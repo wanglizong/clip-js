@@ -40,7 +40,7 @@ Prioritized tasks contributions are welcomed!
 - [x] font is bold in render bug
 - [x] change error and not found pages style
 - [x] add toasts **(ui)**
-- [ ] Allow changing the playback time not only through the built-in Remotion player but also via the custom timeline.**(ui)**
+- [x] Allow changing the playback time not only through the built-in Remotion player but also via the custom timeline.**(ui)**
 - [ ] add loading to each page 
 - [ ] enhance seo
 - [ ] shortcuts

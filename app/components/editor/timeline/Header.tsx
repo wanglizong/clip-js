@@ -6,18 +6,6 @@ export const Header = () => {
     const totalSeconds = Math.max(duration + 2, 61);
     const tickMarkers = Array.from({ length: totalSeconds / secondInterval }, (_, i) => i * secondInterval);
 
-    // TODO: this when clicking timeline header but is not used now
-
-    // const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    //     if (!timelineRef.current) return;
-    //     const rect = timelineRef.current.getBoundingClientRect();
-    //     // TODO: Arbitrary offset but it works for now
-    //     const offsetX = e.clientX - rect.left - 70;
-    //     const seconds = offsetX / 100;
-    //     const clampedTime = Math.max(0, Math.min(duration, seconds));
-    //     dispatch(setCurrentTime(clampedTime));
-    // };
-
     // to track the marker when time changes
     const markerRefs = useRef<HTMLDivElement[]>([]);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -35,8 +23,8 @@ export const Header = () => {
     }, [currentTime]);
 
     return (
-        <div className="flex items-center py-2 w-full cursor-pointer" ref={containerRef}>
-            <div className="relative h-8 min-w-[800px]">
+        <div className="flex items-center py-2 w-full" ref={containerRef}>
+            <div className="relative h-8">
                 {tickMarkers.map((marker) => {
                     const isWholeSecond = Number.isInteger(marker);
                     return (
