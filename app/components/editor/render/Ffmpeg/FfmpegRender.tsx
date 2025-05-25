@@ -150,7 +150,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                         const { label, start, end, x, y } = overlays[i];
                         const nextLabel = i === overlays.length - 1 ? 'outv' : `tmp${i}`;
                         filters.push(
-                            `[${lastLabel}][${label}]overlay=${y}:${x}:enable='between(t\\,${start}\\,${end})'[${nextLabel}]`
+                            `[${lastLabel}][${label}]overlay=${x}:${y}:enable='between(t\\,${start}\\,${end})'[${nextLabel}]`
                         );
                         lastLabel = nextLabel;
                     }
@@ -174,7 +174,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                         const alpha = Math.min(Math.max((text.opacity ?? 100) / 100, 0), 1);
                         const color = text.color?.includes('@') ? text.color : `${text.color || 'white'}@${alpha}`;
                         filters.push(
-                            `[${lastLabel}]drawtext=fontfile=font${text.font}.ttf:text='${escapedText}':x=${text.y}:y=${text.x}:fontsize=${text.fontSize || 24}:fontcolor=${color}:enable='between(t\\,${text.positionStart}\\,${text.positionEnd})'[${label}]`
+                            `[${lastLabel}]drawtext=fontfile=font${text.font}.ttf:text='${escapedText}':x=${text.x}:y=${text.y}:fontsize=${text.fontSize || 24}:fontcolor=${color}:enable='between(t\\,${text.positionStart}\\,${text.positionEnd})'[${label}]`
                         );
                         lastLabel = label;
                     }
