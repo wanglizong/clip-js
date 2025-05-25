@@ -44,7 +44,7 @@ export default function Home() {
             </Link>
           </div>
           <Link href="https://github.com/mohyware/clip.js" target="_blank"
-            className="rounded-full bg-black border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
+            className="rounded-full bg-black border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"

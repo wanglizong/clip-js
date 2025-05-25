@@ -56,7 +56,7 @@ Prioritized tasks contributions are welcomed!
 - [ ] handle left resize in timeline elements
 - [ ] add crop, positioning to elements with react-moveable
 - [ ] drag the marker play head
-- [ ] make most of the text on the page be select-none **(ui)**
+- [x] make most of the text on the page be select-none **(ui)**
 - [ ] Functionality to export and import the project in a specific format
 - [ ] containerize the project with docker, so it can be self-hosted easily.
 - [ ] functionality to separate audio from vids
