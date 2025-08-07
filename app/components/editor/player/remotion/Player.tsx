@@ -69,6 +69,7 @@ export const PreviewPlayer = () => {
             fps={fps}
             style={{ width: "100%", height: "100%" }}
             controls
+            clickToPlay={false}
         />
     )
 };
