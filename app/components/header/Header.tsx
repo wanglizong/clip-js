@@ -13,7 +13,7 @@ export default function Header() {
         <header className="bg-black border-b border-gray-800 shadow-sm">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
                 <div className="flex items-center">
-                    <Link href="/" className="text-3xl dark:text-gray-100">ClipJS</Link>
+                    <Link href="/" className="text-3xl dark:text-gray-100">Video Editor</Link>
                 </div>
                 <nav className="flex items-center">
                     <ul className="flex space-x-2 mr-2">
@@ -31,14 +31,6 @@ export default function Header() {
                                 className="text-md text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
                             >
                                 Projects
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                href="/about"
-                                className="text-md text-white hover:text-gray-800 px-4 py-2 rounded-md hover:bg-gray-100 transition-colors"
-                            >
-                                About Me
                             </Link>
                         </li>
                     </ul>

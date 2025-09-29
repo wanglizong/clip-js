@@ -301,7 +301,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                                         />
                                         <span className="ml-2">Save Video</span>
                                     </a>
-                                    <a
+                                    {/* <a
                                         href="https://github.com/sponsors/mohyware"
                                         target="_blank"
                                         rel="noopener noreferrer"
@@ -309,7 +309,7 @@ export default function FfmpegRender({ loadFunction, loadFfmpeg, ffmpeg, logMess
                                     >
                                         <Heart size={20} className="mr-2" />
                                         Sponsor on Github
-                                    </a>
+                                    </a> */}
                                 </div>
                             </div>
                         )}

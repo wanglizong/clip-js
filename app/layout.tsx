@@ -6,6 +6,7 @@ import Header from "./components/header/Header";
 import Footer from "./components/footer/Footer";
 import { Toaster } from 'react-hot-toast';
 import { Analytics } from "@vercel/analytics/next"
+import Script from 'next/script'   // ✅ 新增
 
 const geistSans = Inter({
   variable: "--font-geist-sans",
@@ -18,7 +19,7 @@ const geistMono = Roboto_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'ClipJS',
+  title: 'video editor online',
   description: 'A free online video editor that enables you to edit videos directly from your web browser.',
 }
 
@@ -32,6 +33,21 @@ export default function RootLayout({
       <body
         className={`min-h-screen flex flex-col bg-darkSurfacePrimary text-text-primary dark:bg-darkSurfacePrimary dark:text-dark-text-primary font-sans ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <head>
+          {/* ✅ Google Analytics 脚本 */}
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=G-9KT0REZT9Q`} // 替换成你的 GA4 ID
+            strategy="afterInteractive"
+          />
+          <Script id="google-analytics" strategy="afterInteractive">
+            {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-9KT0REZT9Q');
+          `}
+          </Script>
+        </head>
         <Providers>
           <Header />
           <main className="flex-grow">
@@ -47,7 +63,7 @@ export default function RootLayout({
             {children}
             <Analytics />
           </main>
-          <Footer />
+          {/* <Footer /> */}
         </Providers>
       </body>
     </html>
